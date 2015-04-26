@@ -2,6 +2,7 @@
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/noise.hpp>
 
 #include <glbinding/gl/enum.h>
 #include <glbinding/gl/bitfield.h>
@@ -10,6 +11,7 @@
 #include <globjects/logging.h>
 #include <globjects/DebugMessage.h>
 #include <globjects/Program.h>
+#include <globjects/Texture.h>
 
 #include <widgetzeug/make_unique.hpp>
 
@@ -63,16 +65,11 @@ void NoiseExample::onInitialize()
     debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
+    createAndSetupTexture();
 
-    m_program = new Program{};
-    m_program->attach(
-        Shader::fromFile(GL_VERTEX_SHADER, "data/NoiseExample/icosahedron.vert"),
-        Shader::fromFile(GL_FRAGMENT_SHADER, "data/NoiseExample/icosahedron.frag")
-    );
+    auto fragmentShader = Shader::fromFile(GL_FRAGMENT_SHADER, "data/NoiseExample/icosahedron.frag");
 
-    m_screenAlignedQuad = new gloperate::ScreenAlignedQuad{m_program};
-
-    m_transformLocation = m_program->getUniformLocation("transform");
+    m_screenAlignedQuad = new gloperate::ScreenAlignedQuad{fragmentShader, m_texture};
 
     glClearColor(0.85f, 0.87f, 0.91f, 1.0f);
 
@@ -109,4 +106,27 @@ void NoiseExample::onPaint()
     m_screenAlignedQuad->draw();
 
     Framebuffer::unbind(GL_FRAMEBUFFER);
+}
+
+void NoiseExample::createAndSetupTexture()
+{
+    static const int w(256);
+    static const int h(256);
+
+    unsigned char data[w * h * 4];
+
+    for (int y = 0; y < h; ++y)
+    {
+        for (int x = 0; x < w; ++x)
+        {
+            unsigned char val = glm::perlin(glm::vec2(x / 16.f, y / 16.f)) * 128.f + 128.f;
+            data[(y*w + x) * 4] = val;
+            data[(y*w + x) * 4 + 1] = val;
+            data[(y*w + x) * 4 + 2] = val;
+            data[(y*w + x) * 4 + 3] = 255;
+        }
+    }
+    m_texture = Texture::createDefault(GL_TEXTURE_2D);
+    m_texture->image2D(0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    
 }

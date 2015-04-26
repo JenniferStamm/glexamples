@@ -12,6 +12,7 @@
 namespace globjects
 {
     class Program;
+    class Texture;
 }
 
 namespace gloperate
@@ -35,6 +36,8 @@ protected:
     virtual void onInitialize() override;
     virtual void onPaint() override;
 
+    void createAndSetupTexture();
+
 protected:
     /* capabilities */
     gloperate::AbstractTargetFramebufferCapability * m_targetFramebufferCapability;
@@ -44,6 +47,6 @@ protected:
 
     /* members */
     globjects::ref_ptr<gloperate::ScreenAlignedQuad> m_screenAlignedQuad;
-    globjects::ref_ptr<globjects::Program> m_program;
+    globjects::ref_ptr<globjects::Texture> m_texture;
     gl::GLint m_transformLocation;
 };
