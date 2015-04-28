@@ -4,6 +4,8 @@
 
 #include <glbinding/gl/enum.h>
 
+#include <globjects/base/File.h>
+
 #include <gloperate/base/RenderTargetType.h>
 #include <gloperate/painter/Camera.h>
 #include <gloperate/painter/AbstractCameraCapability.h>
@@ -21,7 +23,7 @@
 
 #include <gloperate-qt/QtOpenGLWindow.h>
 
-
+using namespace globjects;
 using namespace gloperate;
 using namespace gloperate_qt;
 
@@ -124,6 +126,10 @@ void QtViewerMapping::mapKeyboardEvent(KeyboardEvent * event)
             break;
         case KeyRight:
             m_navigation->rotate(glm::radians(-10.0f), 0.0f);
+            break;
+        // Shader reloading
+        case KeyF5:
+            File::reloadAll();
             break;
         default:
             break;
