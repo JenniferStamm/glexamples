@@ -21,7 +21,6 @@
 #include <gloperate/painter/CameraCapability.h>
 #include <gloperate/painter/VirtualTimeCapability.h>
 
-#include <gloperate/primitives/AdaptiveGrid.h>
 #include <gloperate/primitives/Icosahedron.h>
 
 
@@ -49,8 +48,6 @@ void MarchingCubes::setupProjection()
     m_projectionCapability->setZNear(zNear);
     m_projectionCapability->setZFar(zFar);
     m_projectionCapability->setFovy(radians(fovy));
-
-    m_grid->setNearFar(zNear, zFar);
 }
 
 void MarchingCubes::onInitialize()
@@ -65,9 +62,6 @@ void MarchingCubes::onInitialize()
 
     debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
-
-    m_grid = new gloperate::AdaptiveGrid{};
-    m_grid->setColor({0.6f, 0.6f, 0.6f});
 
     m_icosahedron = new gloperate::Icosahedron{3};
 
@@ -111,8 +105,6 @@ void MarchingCubes::onPaint()
     const auto transform = m_projectionCapability->projection() * m_cameraCapability->view();
     const auto eye = m_cameraCapability->eye();
 
-    m_grid->update(eye, transform);
-    m_grid->draw();
 
     m_program->use();
     m_program->setUniform(m_transformLocation, transform);
