@@ -34,6 +34,7 @@ set(GLEXAMPLES_DEPENDENCY_LIBRARIES
 # Applications
 set(IDE_FOLDER "")
 add_subdirectory(emptyexample)
+add_subdirectory(marchingcubes)
 add_subdirectory(noiseexample)
 add_subdirectory(transparency)
 add_subdirectory(viewer)
