@@ -1,7 +1,10 @@
 #include "MarchingCubesPainter.h"
 
+#include <vector>
+
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec3.hpp>
 
 #include <glbinding/gl/enum.h>
 #include <glbinding/gl/bitfield.h>
@@ -10,6 +13,7 @@
 #include <globjects/logging.h>
 #include <globjects/DebugMessage.h>
 #include <globjects/Program.h>
+#include <globjects/VertexAttributeBinding.h>
 
 #include <widgetzeug/make_unique.hpp>
 
@@ -20,8 +24,6 @@
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
 #include <gloperate/painter/VirtualTimeCapability.h>
-
-#include <gloperate/primitives/Icosahedron.h>
 
 
 using namespace gl;
@@ -36,6 +38,8 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_viewportCapability{addCapability(make_unique<gloperate::ViewportCapability>())}
 ,   m_projectionCapability{addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
+, m_vao()
+, m_vertices()
 {
 }
 
@@ -63,12 +67,12 @@ void MarchingCubes::onInitialize()
     debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
-    m_icosahedron = new gloperate::Icosahedron{3};
-
+	m_vao = new VertexArray();
+	m_vertices = new Buffer();
     m_program = new Program{};
     m_program->attach(
-        Shader::fromFile(GL_VERTEX_SHADER, "data/emptyexample/icosahedron.vert"),
-        Shader::fromFile(GL_FRAGMENT_SHADER, "data/emptyexample/icosahedron.frag")
+        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/icosahedron.vert"),
+        Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/icosahedron.frag")
     );
 
     m_transformLocation = m_program->getUniformLocation("transform");
@@ -76,6 +80,22 @@ void MarchingCubes::onInitialize()
     glClearColor(0.85f, 0.87f, 0.91f, 1.0f);
 
     setupProjection();
+
+	std::vector<vec3> vertices;
+	vertices.push_back(vec3(0.f, 0.f, 0.f));
+	vertices.push_back(vec3(1.f, 0.f, 0.f));
+	vertices.push_back(vec3(1.f, 1.f, 0.f));
+	vertices.push_back(vec3(1.f, 1.f, 1.f));
+
+	m_size = vertices.size();
+
+	m_vertices->setData(vertices, gl::GL_STATIC_DRAW);
+
+	auto vertexBinding = m_vao->binding(0);
+	vertexBinding->setAttribute(0);
+	vertexBinding->setBuffer(m_vertices, 0, sizeof(vec3));
+	vertexBinding->setFormat(3, gl::GL_FLOAT, gl::GL_FALSE, 0);
+	m_vao->enable(0);
 }
 
 void MarchingCubes::onPaint()
@@ -109,7 +129,9 @@ void MarchingCubes::onPaint()
     m_program->use();
     m_program->setUniform(m_transformLocation, transform);
 
-    m_icosahedron->draw();
+	m_vao->bind();
+	m_vao->drawArrays(GL_POINTS, 0, m_size);
+	m_vao->unbind();
 
     m_program->release();
 

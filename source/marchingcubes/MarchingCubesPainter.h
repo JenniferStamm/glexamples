@@ -5,6 +5,7 @@
 #include <glbinding/gl/types.h>
 
 #include <globjects/base/ref_ptr.h>
+#include <globjects/VertexArray.h>
 
 #include <gloperate/painter/Painter.h>
 
@@ -12,11 +13,12 @@
 namespace globjects
 {
     class Program;
+	class VertexArray;
+	class Buffer;
 }
 
 namespace gloperate
 {
-    class Icosahedron;
     class AbstractTargetFramebufferCapability;
     class AbstractViewportCapability;
     class AbstractPerspectiveProjectionCapability;
@@ -43,7 +45,12 @@ protected:
     gloperate::AbstractCameraCapability * m_cameraCapability;
 
     /* members */
-    globjects::ref_ptr<gloperate::Icosahedron> m_icosahedron;
     globjects::ref_ptr<globjects::Program> m_program;
     gl::GLint m_transformLocation;
+
+	globjects::ref_ptr<globjects::VertexArray> m_vao;
+
+	globjects::ref_ptr<globjects::Buffer> m_vertices;
+
+	gl::GLsizei m_size;
 };
