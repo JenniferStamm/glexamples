@@ -19,6 +19,7 @@ namespace globjects
 
 namespace gloperate
 {
+    class AdaptiveGrid;
     class AbstractTargetFramebufferCapability;
     class AbstractViewportCapability;
     class AbstractPerspectiveProjectionCapability;
@@ -45,6 +46,7 @@ protected:
     gloperate::AbstractCameraCapability * m_cameraCapability;
 
     /* members */
+    globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
     globjects::ref_ptr<globjects::Program> m_program;
     gl::GLint m_transformLocation;
 

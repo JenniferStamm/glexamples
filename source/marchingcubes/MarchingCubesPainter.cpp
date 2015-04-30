@@ -25,6 +25,7 @@
 #include <gloperate/painter/CameraCapability.h>
 #include <gloperate/painter/VirtualTimeCapability.h>
 
+#include <gloperate/primitives/AdaptiveGrid.h>
 
 using namespace gl;
 using namespace glm;
@@ -52,6 +53,8 @@ void MarchingCubes::setupProjection()
     m_projectionCapability->setZNear(zNear);
     m_projectionCapability->setZFar(zFar);
     m_projectionCapability->setFovy(radians(fovy));
+
+    m_grid->setNearFar(zNear, zFar);
 }
 
 void MarchingCubes::onInitialize()
@@ -78,6 +81,9 @@ void MarchingCubes::onInitialize()
     m_transformLocation = m_program->getUniformLocation("transform");
 
     glClearColor(0.85f, 0.87f, 0.91f, 1.0f);
+
+    m_grid = new gloperate::AdaptiveGrid{};
+    m_grid->setColor({ 0.6f, 0.6f, 0.6f });
 
     setupProjection();
 
@@ -125,6 +131,8 @@ void MarchingCubes::onPaint()
     const auto transform = m_projectionCapability->projection() * m_cameraCapability->view();
     const auto eye = m_cameraCapability->eye();
 
+    m_grid->update(eye, transform);
+    m_grid->draw();
 
     m_program->use();
     m_program->setUniform(m_transformLocation, transform);
