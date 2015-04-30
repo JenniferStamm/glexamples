@@ -41,7 +41,9 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
 , m_vao()
 , m_vertices()
+, m_cubeColor(255, 0, 0)
 {
+    addProperty<reflectionzeug::Color>("cubeColor", this, &MarchingCubes::cubeColor, &MarchingCubes::setCubeColor);
 }
 
 MarchingCubes::~MarchingCubes() = default;
@@ -55,6 +57,16 @@ void MarchingCubes::setupProjection()
     m_projectionCapability->setFovy(radians(fovy));
 
     m_grid->setNearFar(zNear, zFar);
+}
+
+reflectionzeug::Color MarchingCubes::cubeColor() const
+{
+    return m_cubeColor;
+}
+
+void MarchingCubes::setCubeColor(reflectionzeug::Color cubeColor)
+{
+    m_cubeColor = cubeColor;
 }
 
 void MarchingCubes::onInitialize()
@@ -137,6 +149,7 @@ void MarchingCubes::onPaint()
 
     m_program->use();
     m_program->setUniform(m_transformLocation, transform);
+    m_program->setUniform("a_cubeColor", vec4(m_cubeColor.red() / 255.f, m_cubeColor.green() / 255.f, m_cubeColor.blue() / 255.f, m_cubeColor.alpha() / 255.f));
 
 	m_vao->bind();
 	m_vao->drawArrays(GL_POINTS, 0, m_size);
