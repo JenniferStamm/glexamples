@@ -75,6 +75,7 @@ void MarchingCubes::onInitialize()
     m_program = new Program{};
     m_program->attach(
         Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/icosahedron.vert"),
+        Shader::fromFile(GLenum::GL_GEOMETRY_SHADER, "data/marchingcubes/icosahedron.geom"),
         Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/icosahedron.frag")
     );
 
