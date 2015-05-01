@@ -9,6 +9,7 @@
 
 #include <gloperate/painter/Painter.h>
 
+#include <reflectionzeug/Color.h>
 
 namespace globjects
 {
@@ -20,6 +21,7 @@ namespace globjects
 
 namespace gloperate
 {
+    class AdaptiveGrid;
     class AbstractTargetFramebufferCapability;
     class AbstractViewportCapability;
     class AbstractPerspectiveProjectionCapability;
@@ -34,6 +36,9 @@ public:
 
     void setupProjection();
 
+    reflectionzeug::Color cubeColor() const;
+    void setCubeColor(reflectionzeug::Color cubeColor);
+
 protected:
     virtual void onInitialize() override;
     virtual void onPaint() override;
@@ -46,12 +51,15 @@ protected:
     gloperate::AbstractCameraCapability * m_cameraCapability;
 
     /* members */
+    globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
     globjects::ref_ptr<globjects::Program> m_program;
     gl::GLint m_transformLocation;
 
 	globjects::ref_ptr<globjects::VertexArray> m_vao;
 
 	globjects::ref_ptr<globjects::Buffer> m_vertices;
+
+    reflectionzeug::Color m_cubeColor;
 
 	gl::GLsizei m_size;
 

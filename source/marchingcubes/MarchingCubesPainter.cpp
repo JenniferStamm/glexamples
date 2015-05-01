@@ -26,6 +26,7 @@
 #include <gloperate/painter/CameraCapability.h>
 #include <gloperate/painter/VirtualTimeCapability.h>
 
+#include <gloperate/primitives/AdaptiveGrid.h>
 
 using namespace gl;
 using namespace glm;
@@ -39,10 +40,12 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_viewportCapability{addCapability(make_unique<gloperate::ViewportCapability>())}
 ,   m_projectionCapability{addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
-,	m_vao()
-,	m_vertices()
-,	m_densities()
+,   m_vao()
+,   m_cubeColor(255, 0, 0)
+,   m_vertices()
+,   m_densities()
 {
+    addProperty<reflectionzeug::Color>("cubeColor", this, &MarchingCubes::cubeColor, &MarchingCubes::setCubeColor);
 }
 
 MarchingCubes::~MarchingCubes() = default;
@@ -54,6 +57,18 @@ void MarchingCubes::setupProjection()
     m_projectionCapability->setZNear(zNear);
     m_projectionCapability->setZFar(zFar);
     m_projectionCapability->setFovy(radians(fovy));
+
+    m_grid->setNearFar(zNear, zFar);
+}
+
+reflectionzeug::Color MarchingCubes::cubeColor() const
+{
+    return m_cubeColor;
+}
+
+void MarchingCubes::setCubeColor(reflectionzeug::Color cubeColor)
+{
+    m_cubeColor = cubeColor;
 }
 
 void MarchingCubes::onInitialize()
@@ -74,12 +89,16 @@ void MarchingCubes::onInitialize()
     m_program = new Program{};
     m_program->attach(
         Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/icosahedron.vert"),
+        Shader::fromFile(GLenum::GL_GEOMETRY_SHADER, "data/marchingcubes/icosahedron.geom"),
         Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/icosahedron.frag")
     );
 
     m_transformLocation = m_program->getUniformLocation("transform");
 
     glClearColor(0.85f, 0.87f, 0.91f, 1.0f);
+
+    m_grid = new gloperate::AdaptiveGrid{};
+    m_grid->setColor({ 0.6f, 0.6f, 0.6f });
 
     setupProjection();
 
@@ -147,9 +166,12 @@ void MarchingCubes::onPaint()
     const auto transform = m_projectionCapability->projection() * m_cameraCapability->view();
     const auto eye = m_cameraCapability->eye();
 
+    m_grid->update(eye, transform);
+    m_grid->draw();
 
     m_program->use();
     m_program->setUniform(m_transformLocation, transform);
+    m_program->setUniform("a_cubeColor", vec4(m_cubeColor.red() / 255.f, m_cubeColor.green() / 255.f, m_cubeColor.blue() / 255.f, m_cubeColor.alpha() / 255.f));
 
 	m_vao->bind();
 	m_vao->drawArrays(GL_POINTS, 0, m_size);
