@@ -136,7 +136,7 @@ void MarchingCubes::onInitialize()
 		}
 	}
 
-	m_densities->image3D(0, GL_R32F, dim.x, dim.y, dim.z, 0, GL_R, GL_FLOAT, densities.data());
+	m_densities->image3D(0, GL_R32F, dim.x, dim.y, dim.z, 0, GL_RED, GL_FLOAT, densities.data());
 }
 
 void MarchingCubes::onPaint()
@@ -172,6 +172,8 @@ void MarchingCubes::onPaint()
     m_program->use();
     m_program->setUniform(m_transformLocation, transform);
     m_program->setUniform("a_cubeColor", vec4(m_cubeColor.red() / 255.f, m_cubeColor.green() / 255.f, m_cubeColor.blue() / 255.f, m_cubeColor.alpha() / 255.f));
+    m_densities->bindActive(GL_TEXTURE0);
+    m_program->setUniform("densities", 0);
 
 	m_vao->bind();
 	m_vao->drawArrays(GL_POINTS, 0, m_size);
