@@ -15,6 +15,7 @@ namespace globjects
     class Program;
 	class VertexArray;
 	class Buffer;
+	class Texture;
 }
 
 namespace gloperate
@@ -53,4 +54,6 @@ protected:
 	globjects::ref_ptr<globjects::Buffer> m_vertices;
 
 	gl::GLsizei m_size;
+
+	globjects::ref_ptr<globjects::Texture> m_densities;
 };

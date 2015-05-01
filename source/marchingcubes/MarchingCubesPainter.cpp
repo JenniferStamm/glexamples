@@ -13,6 +13,7 @@
 #include <globjects/logging.h>
 #include <globjects/DebugMessage.h>
 #include <globjects/Program.h>
+#include <globjects/Texture.h>
 #include <globjects/VertexAttributeBinding.h>
 
 #include <widgetzeug/make_unique.hpp>
@@ -38,8 +39,9 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_viewportCapability{addCapability(make_unique<gloperate::ViewportCapability>())}
 ,   m_projectionCapability{addCapability(make_unique<gloperate::PerspectiveProjectionCapability>(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(make_unique<gloperate::CameraCapability>())}
-, m_vao()
-, m_vertices()
+,	m_vao()
+,	m_vertices()
+,	m_densities()
 {
 }
 
@@ -96,6 +98,26 @@ void MarchingCubes::onInitialize()
 	vertexBinding->setBuffer(m_vertices, 0, sizeof(vec3));
 	vertexBinding->setFormat(3, gl::GL_FLOAT, gl::GL_FALSE, 0);
 	m_vao->enable(0);
+
+	// Calculate densities
+	m_densities = globjects::Texture::createDefault(GL_TEXTURE_3D);
+
+	static const ivec3 dim(32, 32, 32);
+
+	std::vector<float> densities;
+
+	for (int z = 0; z < dim.z; ++z)
+	{
+		for (int y = 0; y < dim.y; ++y)
+		{
+			for (int x = 0; x < dim.x; ++x)
+			{
+				densities.push_back(0.5f);
+			}
+		}
+	}
+
+	m_densities->image3D(0, GL_R32F, dim.x, dim.y, dim.z, 0, GL_R, GL_FLOAT, densities.data());
 }
 
 void MarchingCubes::onPaint()
