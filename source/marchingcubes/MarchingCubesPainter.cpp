@@ -52,7 +52,7 @@ MarchingCubes::~MarchingCubes() = default;
 
 void MarchingCubes::setupProjection()
 {
-    static const auto zNear = 0.3f, zFar = 15.f, fovy = 50.f;
+    static const auto zNear = 0.3f, zFar = 100.f, fovy = 50.f;
 
     m_projectionCapability->setZNear(zNear);
     m_projectionCapability->setZFar(zFar);
@@ -103,13 +103,30 @@ void MarchingCubes::onInitialize()
     setupProjection();
 
 	std::vector<vec3> vertices;
-	vertices.push_back(vec3(0.f, 0.f, 0.f));
-	vertices.push_back(vec3(1.f, 0.f, 0.f));
-	vertices.push_back(vec3(1.f, 1.f, 0.f));
-	vertices.push_back(vec3(1.f, 1.f, 1.f));
 
-	m_size = vertices.size();
+    // Calculate densities
+    m_densities = globjects::Texture::createDefault(GL_TEXTURE_3D);
 
+    static const ivec3 dim(32, 32, 32);
+
+    std::vector<float> densities;
+
+    for (int z = 0; z < dim.z; ++z)
+    {
+        for (int y = 0; y < dim.y; ++y)
+        {
+            for (int x = 0; x < dim.x; ++x)
+            {
+                vertices.push_back(vec3(x, y, z));
+
+                float density = ( (x + y + z) % 2 == 0) ? -1.f : 1.f;
+                densities.push_back(density);
+            }
+        }
+    }
+
+    m_densities->image3D(0, GL_R32F, dim.x, dim.y, dim.z, 0, GL_RED, GL_FLOAT, densities.data());
+	
 	m_vertices->setData(vertices, gl::GL_STATIC_DRAW);
 
 	auto vertexBinding = m_vao->binding(0);
@@ -117,26 +134,7 @@ void MarchingCubes::onInitialize()
 	vertexBinding->setBuffer(m_vertices, 0, sizeof(vec3));
 	vertexBinding->setFormat(3, gl::GL_FLOAT, gl::GL_FALSE, 0);
 	m_vao->enable(0);
-
-	// Calculate densities
-	m_densities = globjects::Texture::createDefault(GL_TEXTURE_3D);
-
-	static const ivec3 dim(32, 32, 32);
-
-	std::vector<float> densities;
-
-	for (int z = 0; z < dim.z; ++z)
-	{
-		for (int y = 0; y < dim.y; ++y)
-		{
-			for (int x = 0; x < dim.x; ++x)
-			{
-				densities.push_back(0.5f);
-			}
-		}
-	}
-
-	m_densities->image3D(0, GL_R32F, dim.x, dim.y, dim.z, 0, GL_RED, GL_FLOAT, densities.data());
+    m_size = vertices.size();
 }
 
 void MarchingCubes::onPaint()

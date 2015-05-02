@@ -1,5 +1,6 @@
 #version 150 core
 
+uniform sampler3D densities;
 
 uniform mat4 transform;
 
@@ -22,6 +23,11 @@ const vec4 h = x + y - z;
 
 void main() {
     vec4 old = gl_in[0].gl_Position;
+    
+    float density = texture(densities, old.xyz).r;
+    
+    if (density < 0)
+        return;
     
     gl_Position = transform * (old + h);
     EmitVertex();
