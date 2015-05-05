@@ -3,6 +3,7 @@
 uniform sampler3D densities;
 
 uniform mat4 transform;
+uniform ivec3 a_dim;
 
 layout(points) in;
 
@@ -23,8 +24,7 @@ const vec4 h = x + y - z;
 
 void main() {
     vec4 old = gl_in[0].gl_Position;
-    
-    float density = texture(densities, old.xyz).r;
+    float density = texture(densities, old.xyz / (a_dim - 1)).r;
     
     if (density < 0)
         return;

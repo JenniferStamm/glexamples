@@ -4,7 +4,6 @@
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/vec3.hpp>
 
 #include <glbinding/gl/enum.h>
 #include <glbinding/gl/bitfield.h>
@@ -44,6 +43,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_cubeColor(255, 0, 0)
 ,   m_vertices()
 ,   m_densities()
+, m_dimension(32, 32, 32)
 {
     addProperty<reflectionzeug::Color>("cubeColor", this, &MarchingCubes::cubeColor, &MarchingCubes::setCubeColor);
 }
@@ -107,15 +107,13 @@ void MarchingCubes::onInitialize()
     // Calculate densities
     m_densities = globjects::Texture::createDefault(GL_TEXTURE_3D);
 
-    static const ivec3 dim(32, 32, 32);
-
     std::vector<float> densities;
 
-    for (int z = 0; z < dim.z; ++z)
+    for (int z = 0; z < m_dimension.z; ++z)
     {
-        for (int y = 0; y < dim.y; ++y)
+        for (int y = 0; y < m_dimension.y; ++y)
         {
-            for (int x = 0; x < dim.x; ++x)
+            for (int x = 0; x < m_dimension.x; ++x)
             {
                 vertices.push_back(vec3(x, y, z));
 
@@ -124,8 +122,8 @@ void MarchingCubes::onInitialize()
             }
         }
     }
-
-    m_densities->image3D(0, GL_R32F, dim.x, dim.y, dim.z, 0, GL_RED, GL_FLOAT, densities.data());
+    
+    m_densities->image3D(0, GL_R32F, m_dimension.x, m_dimension.y, m_dimension.z, 0, GL_RED, GL_FLOAT, densities.data());
 	
 	m_vertices->setData(vertices, gl::GL_STATIC_DRAW);
 
@@ -170,6 +168,7 @@ void MarchingCubes::onPaint()
     m_program->use();
     m_program->setUniform(m_transformLocation, transform);
     m_program->setUniform("a_cubeColor", vec4(m_cubeColor.red() / 255.f, m_cubeColor.green() / 255.f, m_cubeColor.blue() / 255.f, m_cubeColor.alpha() / 255.f));
+    m_program->setUniform("a_dim", m_dimension);
     m_densities->bindActive(GL_TEXTURE0);
     m_program->setUniform("densities", 0);
 

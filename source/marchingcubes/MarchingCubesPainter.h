@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <glm/vec3.hpp>
+
 #include <glbinding/gl/types.h>
 
 #include <globjects/base/ref_ptr.h>
@@ -64,4 +66,5 @@ protected:
 	gl::GLsizei m_size;
 
 	globjects::ref_ptr<globjects::Texture> m_densities;
+    glm::ivec3 m_dimension;
 };
