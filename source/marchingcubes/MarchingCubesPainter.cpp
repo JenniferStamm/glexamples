@@ -88,9 +88,9 @@ void MarchingCubes::onInitialize()
 	m_vertices = new Buffer();
     m_program = new Program{};
     m_program->attach(
-        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/icosahedron.vert"),
-        Shader::fromFile(GLenum::GL_GEOMETRY_SHADER, "data/marchingcubes/icosahedron.geom"),
-        Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/icosahedron.frag")
+        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
+        Shader::fromFile(GLenum::GL_GEOMETRY_SHADER, "data/marchingcubes/marchingcubes.geom"),
+        Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/marchingcubes.frag")
     );
 
     m_transformLocation = m_program->getUniformLocation("transform");
