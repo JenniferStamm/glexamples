@@ -26,7 +26,7 @@ void main() {
     vec4 old = gl_in[0].gl_Position;
     float density = texture(densities, old.xyz / (a_dim - 1)).r;
     
-    if (density < 0)
+    if (density > 0)
         return;
     
     gl_Position = transform * (old + h);

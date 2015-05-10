@@ -107,6 +107,9 @@ void MarchingCubes::onInitialize()
     // Calculate densities
     m_densities = globjects::Texture::createDefault(GL_TEXTURE_3D);
 
+    static const vec3 sphereCenter(15, 15, 15);
+    static const float sphereRadius = 10.f;
+
     std::vector<float> densities;
 
     for (int z = 0; z < m_dimension.z; ++z)
@@ -117,7 +120,7 @@ void MarchingCubes::onInitialize()
             {
                 vertices.push_back(vec3(x, y, z));
 
-                float density = ( (x + y + z) % 2 == 0) ? -1.f : 1.f;
+                float density = (sphereCenter.x - x) * (sphereCenter.x - x) + (sphereCenter.y - y) * (sphereCenter.y - y) + (sphereCenter.z - z) * (sphereCenter.z - z) - sphereRadius * sphereRadius;
                 densities.push_back(density);
             }
         }
