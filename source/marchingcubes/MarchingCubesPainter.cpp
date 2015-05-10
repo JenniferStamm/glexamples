@@ -112,13 +112,16 @@ void MarchingCubes::onInitialize()
 
     std::vector<float> densities;
 
-    for (int z = 0; z < m_dimension.z; ++z)
+    for (int z = 0; z < m_dimension.z + 1; ++z)
     {
-        for (int y = 0; y < m_dimension.y; ++y)
+        for (int y = 0; y < m_dimension.y + 1; ++y)
         {
-            for (int x = 0; x < m_dimension.x; ++x)
+            for (int x = 0; x < m_dimension.x + 1; ++x)
             {
-                vertices.push_back(vec3(x, y, z));
+                if (x != m_dimension.x && y != m_dimension.y && z != m_dimension.z)
+                {
+                    vertices.push_back(vec3(x, y, z));
+                }
 
                 float density = (sphereCenter.x - x) * (sphereCenter.x - x) + (sphereCenter.y - y) * (sphereCenter.y - y) + (sphereCenter.z - z) * (sphereCenter.z - z) - sphereRadius * sphereRadius;
                 densities.push_back(density);
@@ -126,7 +129,7 @@ void MarchingCubes::onInitialize()
         }
     }
     
-    m_densities->image3D(0, GL_R32F, m_dimension.x, m_dimension.y, m_dimension.z, 0, GL_RED, GL_FLOAT, densities.data());
+    m_densities->image3D(0, GL_R32F, m_dimension.x + 1, m_dimension.y + 1, m_dimension.z +1, 0, GL_RED, GL_FLOAT, densities.data());
 	
 	m_vertices->setData(vertices, gl::GL_STATIC_DRAW);
 
