@@ -13,14 +13,14 @@ const vec4 x  = vec4(0.5,0,0,0);
 const vec4 y  = vec4(0,0.5,0,0);
 const vec4 z  = vec4(0,0,0.5,0);
 
-const vec4 a = -x - y + z;
-const vec4 b = x - y + z;
-const vec4 c = -x + y + z;
-const vec4 d = x + y + z;
-const vec4 e = -x - y - z;
-const vec4 f = x - y - z;
-const vec4 g = -x + y - z;
-const vec4 h = x + y - z;
+const vec4 v0 = -x - y + z;
+const vec4 v3 = x - y + z;
+const vec4 v1 = -x + y + z;
+const vec4 v2 = x + y + z;
+const vec4 v4 = -x - y - z;
+const vec4 v7 = x - y - z;
+const vec4 v5 = -x + y - z;
+const vec4 v6 = x + y - z;
 
 void main() {
     vec4 old = gl_in[0].gl_Position;
@@ -29,33 +29,33 @@ void main() {
     if (density > 0)
         return;
     
-    gl_Position = transform * (old + h);
+    gl_Position = transform * (old + v6);
     EmitVertex();
-    gl_Position = transform * (old + g);
+    gl_Position = transform * (old + v5);
     EmitVertex();
-    gl_Position = transform * (old + d);
+    gl_Position = transform * (old + v2);
     EmitVertex();
-    gl_Position = transform * (old + c);
+    gl_Position = transform * (old + v1);
     EmitVertex();
-    gl_Position = transform * (old + a);
+    gl_Position = transform * (old + v0);
     EmitVertex();
-    gl_Position = transform * (old + g);
+    gl_Position = transform * (old + v5);
     EmitVertex();
-    gl_Position = transform * (old + e);
+    gl_Position = transform * (old + v4);
     EmitVertex();
-    gl_Position = transform * (old + h);
+    gl_Position = transform * (old + v6);
     EmitVertex();
-    gl_Position = transform * (old + f);
+    gl_Position = transform * (old + v7);
     EmitVertex();
-    gl_Position = transform * (old + d);
+    gl_Position = transform * (old + v2);
     EmitVertex();
-    gl_Position = transform * (old + b);
+    gl_Position = transform * (old + v3);
     EmitVertex();
-    gl_Position = transform * (old + a);
+    gl_Position = transform * (old + v0);
     EmitVertex();
-    gl_Position = transform * (old + f);
+    gl_Position = transform * (old + v7);
     EmitVertex();
-    gl_Position = transform * (old + e);
+    gl_Position = transform * (old + v4);
     EmitVertex();
     
     EndPrimitive();
