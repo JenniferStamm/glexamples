@@ -123,7 +123,7 @@ void MarchingCubes::onInitialize()
                     vertices.push_back(vec3(x, y, z));
                 }
 
-                float density = (sphereCenter.x - x) * (sphereCenter.x - x) + (sphereCenter.y - y) * (sphereCenter.y - y) + (sphereCenter.z - z) * (sphereCenter.z - z) - sphereRadius * sphereRadius;
+                float density = - ((sphereCenter.x - x) * (sphereCenter.x - x) + (sphereCenter.y - y) * (sphereCenter.y - y) + (sphereCenter.z - z) * (sphereCenter.z - z) - sphereRadius * sphereRadius);
                 densities.push_back(density);
             }
         }
