@@ -89,6 +89,7 @@ void MarchingCubes::onInitialize()
 
 	m_vao = new VertexArray();
 	m_vertices = new Buffer();
+    m_edgeConnectList = new Buffer();
     m_program = new Program{};
     m_program->attach(
         Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
@@ -147,7 +148,7 @@ void MarchingCubes::onInitialize()
         ivec2(4, 5), ivec2(5, 6), ivec2(6, 7), ivec2(7, 4),
         ivec2(0, 4), ivec2(1, 5), ivec2(2, 6), ivec2(3, 7) };
 
-    m_edgeConnectList = { ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1),
+    auto edgeConnectList = { ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1),
         ivec3(0, 8, 3), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1),
         ivec3(0, 1, 9), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1),
         ivec3(1, 8, 3), ivec3(9, 8, 1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1),
@@ -405,6 +406,9 @@ void MarchingCubes::onInitialize()
         ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1), ivec3(-1, -1, -1) };
 
 
+    m_edgeConnectList->bind(GL_UNIFORM_BUFFER);
+    m_edgeConnectList->setData(sizeof(ivec3) * edgeConnectList.size(), &edgeConnectList, GL_STATIC_DRAW);
+
 	m_vertices->setData(vertices, gl::GL_STATIC_DRAW);
 
 	auto vertexBinding = m_vao->binding(0);
@@ -449,7 +453,13 @@ void MarchingCubes::onPaint()
     m_program->setUniform(m_transformLocation, transform);
     m_program->setUniform("a_cubeColor", vec4(m_cubeColor.red() / 255.f, m_cubeColor.green() / 255.f, m_cubeColor.blue() / 255.f, m_cubeColor.alpha() / 255.f));
     m_program->setUniform("a_dim", m_dimension);
-    m_program->setUniform("a_edgeConnectList", m_edgeConnectList);
+
+
+    auto ubo = m_program->uniformBlock("edgeConnectList");
+    m_edgeConnectList->bind(GL_UNIFORM_BUFFER);
+    m_edgeConnectList->bindBase(GL_UNIFORM_BUFFER, 1);
+    ubo->setBinding(1);
+
     m_program->setUniform("a_caseToNumPolys", m_caseToNumPolys);
     m_program->setUniform("a_edgeToVertices", m_edgeToVertices);
     m_densities->bindActive(GL_TEXTURE0);

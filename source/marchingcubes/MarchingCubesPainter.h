@@ -67,7 +67,7 @@ protected:
 
 	globjects::ref_ptr<globjects::Texture> m_densities;
     glm::ivec3 m_dimension;
-    std::vector<glm::ivec3> m_edgeConnectList;
+    globjects::ref_ptr<globjects::Buffer> m_edgeConnectList;
     std::vector<int> m_caseToNumPolys;
     std::vector<glm::ivec2> m_edgeToVertices;
 };
