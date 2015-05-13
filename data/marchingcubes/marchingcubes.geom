@@ -17,7 +17,7 @@ layout(points) in;
 
 layout(triangle_strip, max_vertices = 15) out;
 
-out vec4 cubeColor;
+out vec3 g_normal;
 
 const vec4 x  = vec4(0.5,0,0,0);
 const vec4 y  = vec4(0,0.5,0,0);
@@ -33,6 +33,17 @@ const vec4[8] vertices = vec4[8](
     x + y + z,
     x - y + z
     );
+  
+vec3 normalAtPosition(in vec3 position) {
+    float d = 1.0 / (a_dim - 1);
+    float diffX = texture(densities, position * d + vec3(d,0,0)).r - texture(densities, position * d + vec3(-d,0,0)).r;
+    
+    float diffY = texture(densities, position * d + vec3(0,d,0)).r - texture(densities, position * d + vec3(0,-d,0)).r;
+    
+    float diffZ = texture(densities, position * d + vec3(0,0,d)).r - texture(densities, position * d + vec3(0,0,-d)).r;
+    return normalize(-vec3(diffX,diffY,diffZ));
+    
+}
   
 void main() {
     vec4 old = gl_in[0].gl_Position;
@@ -67,7 +78,10 @@ void main() {
             float vertexADensity = vertexDensities[vertexA];
             float vertexBDensity = vertexDensities[vertexB];
             float mixing = vertexADensity / (vertexADensity - vertexBDensity);
-            cubeColor = cubeColor = vec4(vec3(float(edges.z) / 12), 1.0);
+            vec3 vertexANormal = normalAtPosition(center + vertexAPos.xyz);
+            vec3 vertexBNormal = normalAtPosition(center + vertexBPos.xyz);
+            vec3 mixedNormal = mix(vertexANormal,vertexBNormal,mixing);
+            g_normal = vec4(mixedNormal, 1.0);
             gl_Position = transform * (vec4(center,1.0) + mix(vertexAPos, vertexBPos, mixing));
             EmitVertex();
         }
