@@ -6,9 +6,10 @@ uniform mat4 transform;
 uniform ivec3 a_dim;
 
 layout (std140) uniform edgeConnectList {
-    ivec3 edgeConnectListEdges[1280];
+    ivec4 edgeConnectListEdges[1280];
 }
 ;
+
 uniform int[256] a_caseToNumPolys;
 uniform ivec2[12] a_edgeToVertices;
 
@@ -32,9 +33,6 @@ const vec4[8] vertices = vec4[8](
     x + y + z,
     x - y + z
     );
-    
-
-
   
 void main() {
     vec4 old = gl_in[0].gl_Position;
@@ -55,37 +53,24 @@ void main() {
     int v7present =  int(vertexDensities[7] > 0);
     
     int index = v0present * 1 + v1present * 2 + v2present * 4 + v3present * 8 + v4present * 16 + v5present * 32 + v6present * 64 + v7present * 128;
-    
     int polygonCount = a_caseToNumPolys[index];
     
     for (int i = 0; i < polygonCount; i++) {
         ivec3 edges = edgeConnectListEdges[index * 5 + i];
-        cubeColor = vec4(vec3(float(edges.x) / 12), 1.0);
-        /*gl_Position = transform * (old + vertices[0]);
-        EmitVertex();
-        gl_Position = transform * (old + vertices[1]);
-        EmitVertex();
-        gl_Position = transform * (old + vertices[2]);
-        EmitVertex();
-        EndPrimitive();*/
         
-        //for (int j = 0; j < 3; j++) {
-            int edge = edges.x;
-            vec4 vertexA = vertices[a_edgeToVertices[edge].x];
-            vec4 vertexB = vertices[a_edgeToVertices[edge].y];
-            gl_Position = transform * (vec4(center,1.0) + (vertexA + vertexB) / 2);
+        for (int j = 0; j < 3; j++) {
+            int edge = edges[j];
+            int vertexA = a_edgeToVertices[edge].x;
+            int vertexB = a_edgeToVertices[edge].y;
+            vec4 vertexAPos = vertices[vertexA];
+            vec4 vertexBPos = vertices[vertexB];
+            float vertexADensity = vertexDensities[vertexA];
+            float vertexBDensity = vertexDensities[vertexB];
+            float mixing = vertexADensity / (vertexADensity - vertexBDensity);
+            cubeColor = cubeColor = vec4(vec3(float(edges.z) / 12), 1.0);
+            gl_Position = transform * (vec4(center,1.0) + mix(vertexAPos, vertexBPos, mixing));
             EmitVertex();
-            edge = edges.y;
-            vertexA = vertices[a_edgeToVertices[edge].x];
-            vertexB = vertices[a_edgeToVertices[edge].y];
-            gl_Position = transform * (vec4(center,1.0) + (vertexA + vertexB) / 2);
-            EmitVertex();
-            edge = edges.z;
-            vertexA = vertices[a_edgeToVertices[edge].x];
-            vertexB = vertices[a_edgeToVertices[edge].y];
-            gl_Position = transform * (vec4(center,1.0) + (vertexA + vertexB) / 2);
-            EmitVertex();
-        //}
+        }
         EndPrimitive();
     }
 }
