@@ -56,7 +56,7 @@ void main() {
     int polygonCount = a_caseToNumPolys[index];
     
     for (int i = 0; i < polygonCount; i++) {
-        ivec3 edges = edgeConnectListEdges[index * 5 + i];
+        ivec4 edges = edgeConnectListEdges[index * 5 + i];
         
         for (int j = 0; j < 3; j++) {
             int edge = edges[j];
