@@ -2,11 +2,11 @@
 
 uniform vec4 a_cubeColor;
 
-in vec4 cubeColor;
+in vec3 g_normal;
 
 out vec4 fragColor;
 
 void main()
 {
-    fragColor = cubeColor;
+    fragColor = vec4(g_normal, 1.0);
 }
