@@ -24,6 +24,7 @@ include_directories(
     ${LIBZEUG_INCLUDES}
 )
 
+# Define common libraries for all examples
 set(GLEXAMPLES_DEPENDENCY_LIBRARIES
     ${GLBINDING_LIBRARIES}
     ${GLOBJECTS_LIBRARIES}
@@ -37,7 +38,7 @@ add_subdirectory(emptyexample)
 add_subdirectory(marchingcubes)
 add_subdirectory(noiseexample)
 add_subdirectory(transparency)
-add_subdirectory(viewer)
+add_subdirectory(glexamples-viewer)
 
 # Tests
 set(IDE_FOLDER "Tests")
