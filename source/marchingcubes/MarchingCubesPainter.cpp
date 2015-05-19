@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <glbinding/gl/enum.h>
@@ -17,13 +16,10 @@
 
 #include <widgetzeug/make_unique.hpp>
 
-#include <gloperate/base/RenderTargetType.h>
-
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/ViewportCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
-#include <gloperate/painter/VirtualTimeCapability.h>
 
 #include <gloperate/primitives/AdaptiveGrid.h>
 
