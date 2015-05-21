@@ -116,15 +116,7 @@ void MarchingCubes::onInitialize()
     m_transformFeedback = new TransformFeedback();
 	m_transformFeedback->setVaryings(m_transformFeedbackProgram, { { "out_density" } }, GL_INTERLEAVED_ATTRIBS);
 
-	m_positionVao = new VertexArray();
-	m_positionVao->bind();
-
-	auto positionsBinding = m_positionVao->binding(0);
-    positionsBinding->setAttribute(0);
-    positionsBinding->setFormat(3, GL_FLOAT);
-	m_positionVao->enable(0);
-
-	m_positionVao->unbind();
+	
 
     static const vec3 sphereCenter(15, 15, 15);
     static const float sphereRadius = 10.f;
@@ -153,13 +145,20 @@ void MarchingCubes::onInitialize()
 
     m_size = positions.size();
 
+    
     m_densities->setData(m_size * sizeof(float), nullptr, GL_STATIC_READ);
+    
+    m_positionVao = new VertexArray();
 
-	m_positionVao->bind();
+    auto positionsBinding = m_positionVao->binding(0);
+    positionsBinding->setAttribute(0);
+    positionsBinding->setBuffer(m_positions, 0, sizeof(vec3));
+    positionsBinding->setFormat(3, GL_FLOAT);
+    m_positionVao->enable(0);
 
-	m_positionVao->binding(0)->setBuffer(m_positions, 0, sizeof(vec3));
-	m_positionVao->binding(0)->setFormat(3, gl::GL_FLOAT, gl::GL_FALSE, 0);
+    m_positionVao->unbind();
 
+    m_positionVao->bind();
 	m_transformFeedback->bind();
     m_densities->bindBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
 
@@ -175,6 +174,14 @@ void MarchingCubes::onInitialize()
     glDisable(GL_RASTERIZER_DISCARD);
 
 	m_positionVao->unbind();
+
+    /*float feedback[32 * 32 * 32];
+    m_densities->getSubData(0, sizeof(feedback), feedback);
+
+    for (int i = 0; i < 10; ++i)
+    {
+        debug() << feedback[i];
+    }*/
 
     m_edgeConnectList->bind(GL_UNIFORM_BUFFER);
 	m_edgeConnectList->setData(sizeof(ivec4) * LookUpData::m_edgeConnectList.size(), LookUpData::m_edgeConnectList.data(), GL_STATIC_DRAW);
@@ -229,11 +236,16 @@ void MarchingCubes::onPaint()
     m_edgeConnectList->bindBase(GL_UNIFORM_BUFFER, 1);
     ubo->setBinding(1);
 
+
+    auto ubo2 = m_program->uniformBlock("densityUniform");
+    m_densities->bindBase(GL_UNIFORM_BUFFER, 2);
+    ubo2->setBinding(2);
+
     m_program->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
     m_program->setUniform("a_edgeToVertices", LookUpData::m_edgeToVertices);
-    m_program->setUniform("densities", 5);
+    //m_program->setUniform("densities", 5);
 
-    m_vao->binding(5)->setBuffer(m_densities, 0, sizeof(float));
+    //m_vao->binding(5)->setBuffer(m_densities, 0, sizeof(float));
     //m_vao->binding(5)->setFormat(1, gl::GL_FLOAT, gl::GL_FALSE, 0);
 
 	m_vao->bind();

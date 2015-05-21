@@ -10,5 +10,5 @@ out float out_density;
 
 void main()
 {
-	out_density = 1.0;
+	out_density = in_position.x  - 16.0;
 }
