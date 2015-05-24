@@ -39,8 +39,8 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_projectionCapability{addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
 ,   m_vao()
-,	m_positionVao()
 ,   m_cubeColor(255, 0, 0)
+,   m_densityPositions()
 ,   m_positions()
 ,   m_densities()
 ,   m_densitiesTexture()
@@ -87,6 +87,7 @@ void MarchingCubes::onInitialize()
 #endif
 
 	m_vao = new VertexArray();
+    m_densityPositions = new Buffer();
 	m_positions = new Buffer();
     m_edgeConnectList = new Buffer();
     m_program = new Program{};
@@ -124,9 +125,9 @@ void MarchingCubes::onInitialize()
     static const vec3 sphereCenter(15, 15, 15);
     static const float sphereRadius = 10.f;
 
-    //std::vector<float> densities;
-
     std::vector<vec3> positions;
+    std::vector<vec3> densityPositions;
+
     for (int z = 0; z < m_dimension.z + 1; ++z)
     {
         for (int y = 0; y < m_dimension.y + 1; ++y)
@@ -137,31 +138,30 @@ void MarchingCubes::onInitialize()
                 {
                     positions.push_back(vec3(x, y, z));
                 }
-
-                // float density = - ((sphereCenter.x - x) * (sphereCenter.x - x) + (sphereCenter.y - y) * (sphereCenter.y - y) + (sphereCenter.z - z) * (sphereCenter.z - z) - sphereRadius * sphereRadius);
-                // densities.push_back(density);
+                densityPositions.push_back(vec3(x, y, z));
             }
         }
     }
 
     m_positions->setData(positions, gl::GL_STATIC_DRAW);
+    m_densityPositions->setData(densityPositions, gl::GL_STATIC_DRAW);
 
     m_size = positions.size();
 
     
-    m_densities->setData(m_size * sizeof(float), nullptr, GL_STATIC_READ);
+    m_densities->setData(densityPositions.size() * sizeof(float), nullptr, GL_STATIC_READ);
     
-    m_positionVao = new VertexArray();
+    ref_ptr<VertexArray> densityPositionVao = new VertexArray();
 
-    auto positionsBinding = m_positionVao->binding(0);
-    positionsBinding->setAttribute(0);
-    positionsBinding->setBuffer(m_positions, 0, sizeof(vec3));
-    positionsBinding->setFormat(3, GL_FLOAT);
-    m_positionVao->enable(0);
+    auto densityPositionsBinding = densityPositionVao->binding(0);
+    densityPositionsBinding->setAttribute(0);
+    densityPositionsBinding->setBuffer(m_densityPositions, 0, sizeof(vec3));
+    densityPositionsBinding->setFormat(3, GL_FLOAT);
+    densityPositionVao->enable(0);
 
-    m_positionVao->unbind();
+    densityPositionVao->unbind();
 
-    m_positionVao->bind();
+    densityPositionVao->bind();
 	m_transformFeedback->bind();
     m_densities->bindBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
 
@@ -169,22 +169,14 @@ void MarchingCubes::onInitialize()
 
     m_transformFeedbackProgram->use();
     m_transformFeedback->begin(GL_POINTS);
-	m_positionVao->drawArrays(GL_POINTS, 0, m_size);
+	densityPositionVao->drawArrays(GL_POINTS, 0, densityPositions.size());
     m_transformFeedback->end();
     m_transformFeedback->unbind();
     m_transformFeedbackProgram->release();
 
     glDisable(GL_RASTERIZER_DISCARD);
 
-	m_positionVao->unbind();
-
-    /*float feedback[32 * 32 * 32];
-    m_densities->getSubData(0, sizeof(feedback), feedback);
-
-    for (int i = 0; i < 10; ++i)
-    {
-        debug() << feedback[i];
-    }*/
+	densityPositionVao->unbind();
 
     m_edgeConnectList->bind(GL_UNIFORM_BUFFER);
 	m_edgeConnectList->setData(sizeof(ivec4) * LookUpData::m_edgeConnectList.size(), LookUpData::m_edgeConnectList.data(), GL_STATIC_DRAW);

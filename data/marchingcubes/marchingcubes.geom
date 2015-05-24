@@ -39,7 +39,7 @@ float densityAt(in int index) {
 }
 
 int indexAtPosition(in ivec3 position) {
-    return position.z * a_dim.x * a_dim.y + position.y * a_dim.x + position.x;
+    return position.z * (a_dim.x + 1) * (a_dim.y + 1) + position.y * (a_dim.x + 1) + position.x;
 }
 
 float densityAtPosition(in ivec3 position) {

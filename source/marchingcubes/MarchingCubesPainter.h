@@ -60,8 +60,7 @@ protected:
 
 	globjects::ref_ptr<globjects::VertexArray> m_vao;
 
-	globjects::ref_ptr<globjects::VertexArray> m_positionVao;
-
+    globjects::ref_ptr<globjects::Buffer> m_densityPositions;
 	globjects::ref_ptr<globjects::Buffer> m_positions;
 
     reflectionzeug::Color m_cubeColor;
