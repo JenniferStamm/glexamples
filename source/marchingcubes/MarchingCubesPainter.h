@@ -69,6 +69,7 @@ protected:
 	gl::GLsizei m_size;
 
 	globjects::ref_ptr<globjects::Buffer> m_densities;
+    globjects::ref_ptr<globjects::Texture> m_densitiesTexture;
     glm::ivec3 m_dimension;
     globjects::ref_ptr<globjects::Buffer> m_edgeConnectList;
 

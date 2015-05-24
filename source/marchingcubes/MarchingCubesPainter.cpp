@@ -43,6 +43,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_cubeColor(255, 0, 0)
 ,   m_positions()
 ,   m_densities()
+,   m_densitiesTexture()
 ,   m_dimension(32, 32, 32)
 ,   m_edgeConnectList()
 {
@@ -107,6 +108,8 @@ void MarchingCubes::onInitialize()
 
     // Calculate densities
     m_densities = new Buffer();
+
+    m_densitiesTexture = Texture::createDefault(GL_TEXTURE_BUFFER);
 
     m_transformFeedbackProgram = new Program();
     m_transformFeedbackProgram->attach(Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/transformfeedback.vert"));
@@ -236,18 +239,15 @@ void MarchingCubes::onPaint()
     m_edgeConnectList->bindBase(GL_UNIFORM_BUFFER, 1);
     ubo->setBinding(1);
 
+    m_densitiesTexture->bindActive(GL_TEXTURE0);
 
-    auto ubo2 = m_program->uniformBlock("densityUniform");
-    m_densities->bindBase(GL_UNIFORM_BUFFER, 2);
-    ubo2->setBinding(2);
+    m_densitiesTexture->texBuffer(GL_R32F, m_densities);
+
+    m_program->setUniform("densities", 0);
 
     m_program->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
     m_program->setUniform("a_edgeToVertices", LookUpData::m_edgeToVertices);
-    //m_program->setUniform("densities", 5);
-
-    //m_vao->binding(5)->setBuffer(m_densities, 0, sizeof(float));
-    //m_vao->binding(5)->setFormat(1, gl::GL_FLOAT, gl::GL_FALSE, 0);
-
+    
 	m_vao->bind();
 	m_vao->drawArrays(GL_POINTS, 0, m_size);
 	m_vao->unbind();

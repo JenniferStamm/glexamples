@@ -8,9 +8,7 @@ layout (std140) uniform edgeConnectList {
     ivec4 edgeConnectListEdges[1280];
 };
 
-layout (std140) uniform densityUniform {
-    vec4 densities[32 * 32 * 8];
-};
+uniform samplerBuffer densities;
 
 uniform int[256] a_caseToNumPolys;
 uniform ivec2[12] a_edgeToVertices;
@@ -37,7 +35,7 @@ const vec4[8] vertices = vec4[8](
     );
   
 float densityAt(in int index) {
-    return densities[index / 4][index%4];
+    return texelFetch(densities, index).r;
 }
 
 int indexAtPosition(in ivec3 position) {
@@ -50,13 +48,11 @@ float densityAtPosition(in ivec3 position) {
 
 vec3 normalAtPosition(in ivec3 position) {
     int d = 1;
-    //float diffX = texelFetch(densities, position + ivec3(d,0,0), 0).r - texelFetch(densities, position + ivec3(-d,0,0), 0).r;
+    float diffX = densityAtPosition(position + ivec3(d,0,0)) - densityAtPosition(position + ivec3(-d,0,0));
+    float diffY = densityAtPosition(position + ivec3(0,d,0)) - densityAtPosition(position + ivec3(0,-d,0));
+    float diffZ = densityAtPosition(position + ivec3(0,0,d)) - densityAtPosition(position + ivec3(0,0,-d));
     
-    //float diffY = texelFetch(densities, position + ivec3(0,d,0), 0).r - texelFetch(densities, position + ivec3(0,-d,0), 0).r;
-    
-    //float diffZ = texelFetch(densities, position + ivec3(0,0,d), 0).r - texelFetch(densities, position + ivec3(0,0,-d), 0).r;
-    //return normalize(-vec3(diffX,diffY,diffZ));
-    return vec3(1,0,0);
+    return normalize(-vec3(diffX,diffY,diffZ));
 }
   
 void main() {
@@ -65,10 +61,8 @@ void main() {
     
     float[8] vertexDensities;
     for (int k = 0; k < vertices.length(); k++) {
-        //vertexDensities[k] = texelFetch(densities, ivec3(center + (vertices[k]).xyz), 0).r;
         ivec3 pos = ivec3(center + (vertices[k]).xyz);
-        vertexDensities[k] = densityAtPosition(pos);
-        
+        vertexDensities[k] = densityAtPosition(pos); 
     }
     
     int v0present =  int(vertexDensities[0] > 0);
@@ -82,20 +76,6 @@ void main() {
     
     int index = v0present * 1 + v1present * 2 + v2present * 4 + v3present * 8 + v4present * 16 + v5present * 32 + v6present * 64 + v7present * 128;
     int polygonCount = a_caseToNumPolys[index];
-    
-    
-    /*ivec3 pos = ivec3(center).xyz;
-    //int myIndex = pos.z * a_dim.x * a_dim.y + pos.y * a_dim.x + pos.x;
-    
-    g_normal = vec3(densityAtPosition(pos) / 32 + 0.5);
-    gl_Position = transform * (vec4(center,1.0) + vec4(0,0,0,0));
-    EmitVertex();
-    gl_Position = transform * (vec4(center,1.0) + vec4(1,0,0,0));
-    EmitVertex();
-    gl_Position = transform * (vec4(center,1.0) + vec4(0,1,0,0));
-    EmitVertex();
-    
-    EndPrimitive();*/
     
     for (int i = 0; i < polygonCount; i++) {
         ivec4 edges = edgeConnectListEdges[index * 5 + i];
