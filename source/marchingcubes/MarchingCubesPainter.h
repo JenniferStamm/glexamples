@@ -41,7 +41,11 @@ public:
 
     reflectionzeug::Color cubeColor() const;
     void setCubeColor(reflectionzeug::Color cubeColor);
-
+    void setupGrid();
+    void setupProgram();
+    void setupRendering();
+    void setupTransformFeedback();
+    void runTransformFeedback();
 protected:
     virtual void onInitialize() override;
     virtual void onPaint() override;
@@ -59,6 +63,7 @@ protected:
     gl::GLint m_transformLocation;
 
 	globjects::ref_ptr<globjects::VertexArray> m_vao;
+    globjects::ref_ptr<globjects::VertexArray> m_densityPositionVao;
 
     globjects::ref_ptr<globjects::Buffer> m_densityPositions;
 	globjects::ref_ptr<globjects::Buffer> m_positions;
@@ -66,6 +71,7 @@ protected:
     reflectionzeug::Color m_cubeColor;
 
 	gl::GLsizei m_size;
+    gl::GLsizei m_densityPositionsSize;
 
 	globjects::ref_ptr<globjects::Buffer> m_densities;
     globjects::ref_ptr<globjects::Texture> m_densitiesTexture;
