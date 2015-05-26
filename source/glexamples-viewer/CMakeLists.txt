@@ -68,6 +68,9 @@ add_executable(${target} ${headers} ${sources})
 add_dependencies(${target} transparency-painters)
 add_dependencies(${target} emptyexample-painters)
 
+add_dependencies(${target} noiseexample-painters)
+add_dependencies(${target} marchingcubes-painters)
+
 target_link_libraries(${target} ${libs})
 
 
