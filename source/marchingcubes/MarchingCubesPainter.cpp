@@ -95,7 +95,7 @@ void MarchingCubes::setupProgram()
 
 void MarchingCubes::setupRendering()
 {
-    m_densitiesTexture = Texture::createDefault(GL_TEXTURE_BUFFER);
+    m_densitiesTexture = new Texture(GL_TEXTURE_BUFFER);
 
     // Setup edge connect list
 
