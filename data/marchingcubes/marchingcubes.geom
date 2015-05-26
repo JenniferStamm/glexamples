@@ -1,14 +1,14 @@
 #version 150 core
 
-uniform sampler3D densities;
 
 uniform mat4 transform;
 uniform ivec3 a_dim;
 
 layout (std140) uniform edgeConnectList {
     ivec4 edgeConnectListEdges[1280];
-}
-;
+};
+
+uniform samplerBuffer densities;
 
 uniform int[256] a_caseToNumPolys;
 uniform ivec2[12] a_edgeToVertices;
@@ -34,15 +34,25 @@ const vec4[8] vertices = vec4[8](
     x - y + z
     );
   
+float densityAt(in int index) {
+    return texelFetch(densities, index).r;
+}
+
+int indexAtPosition(in ivec3 position) {
+    return position.z * (a_dim.x + 1) * (a_dim.y + 1) + position.y * (a_dim.x + 1) + position.x;
+}
+
+float densityAtPosition(in ivec3 position) {
+    return densityAt(indexAtPosition(position));
+}
+
 vec3 normalAtPosition(in ivec3 position) {
     int d = 1;
-    float diffX = texelFetch(densities, position + ivec3(d,0,0), 0).r - texelFetch(densities, position + ivec3(-d,0,0), 0).r;
+    float diffX = densityAtPosition(position + ivec3(d,0,0)) - densityAtPosition(position + ivec3(-d,0,0));
+    float diffY = densityAtPosition(position + ivec3(0,d,0)) - densityAtPosition(position + ivec3(0,-d,0));
+    float diffZ = densityAtPosition(position + ivec3(0,0,d)) - densityAtPosition(position + ivec3(0,0,-d));
     
-    float diffY = texelFetch(densities, position + ivec3(0,d,0), 0).r - texelFetch(densities, position + ivec3(0,-d,0), 0).r;
-    
-    float diffZ = texelFetch(densities, position + ivec3(0,0,d), 0).r - texelFetch(densities, position + ivec3(0,0,-d), 0).r;
     return normalize(-vec3(diffX,diffY,diffZ));
-    
 }
   
 void main() {
@@ -51,7 +61,8 @@ void main() {
     
     float[8] vertexDensities;
     for (int k = 0; k < vertices.length(); k++) {
-        vertexDensities[k] = texelFetch(densities, ivec3(center + (vertices[k]).xyz), 0).r;
+        ivec3 pos = ivec3(center + (vertices[k]).xyz);
+        vertexDensities[k] = densityAtPosition(pos); 
     }
     
     int v0present =  int(vertexDensities[0] > 0);

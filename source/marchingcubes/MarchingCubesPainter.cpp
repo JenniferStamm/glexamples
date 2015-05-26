@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <glbinding/gl/enum.h>
@@ -13,30 +12,25 @@
 #include <globjects/DebugMessage.h>
 #include <globjects/Program.h>
 #include <globjects/Texture.h>
+#include <globjects/TransformFeedback.h>
 #include <globjects/VertexAttributeBinding.h>
 
 #include <widgetzeug/make_unique.hpp>
-
-#include <gloperate/base/RenderTargetType.h>
 
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/ViewportCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
-#include <gloperate/painter/VirtualTimeCapability.h>
 
 #include <gloperate/primitives/AdaptiveGrid.h>
+
+#include "LookUpData.h"
 
 using namespace gl;
 using namespace glm;
 using namespace globjects;
 
 using widgetzeug::make_unique;
-
-struct EdgeConnects
-{
-    glm::ivec4 edgeConnects[1280];
-};
 
 MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 :   Painter(resourceManager)
@@ -46,12 +40,12 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
 ,   m_vao()
 ,   m_cubeColor(255, 0, 0)
-,   m_vertices()
+,   m_densityPositions()
+,   m_positions()
 ,   m_densities()
+,   m_densitiesTexture()
 ,   m_dimension(32, 32, 32)
 ,   m_edgeConnectList()
-,   m_caseToNumPolys()
-,   m_edgeToVertices()
 {
     addProperty<reflectionzeug::Color>("cubeColor", this, &MarchingCubes::cubeColor, &MarchingCubes::setCubeColor);
 }
@@ -79,6 +73,136 @@ void MarchingCubes::setCubeColor(reflectionzeug::Color cubeColor)
     m_cubeColor = cubeColor;
 }
 
+void MarchingCubes::setupGrid()
+{
+    m_grid = new gloperate::AdaptiveGrid{};
+    m_grid->setColor({ 0.6f, 0.6f, 0.6f });
+}
+
+void MarchingCubes::setupProgram()
+{
+    m_program = new Program{};
+    m_program->attach(
+        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
+        Shader::fromFile(GL_GEOMETRY_SHADER, "data/marchingcubes/marchingcubes.geom"),
+        Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/marchingcubes.frag")
+    );
+
+    m_transformLocation = m_program->getUniformLocation("transform");
+
+    glClearColor(0.85f, 0.87f, 0.91f, 1.0f);
+}
+
+void MarchingCubes::setupRendering()
+{
+    m_densitiesTexture = new Texture(GL_TEXTURE_BUFFER);
+
+    // Setup edge connect list
+
+    m_edgeConnectList = new Buffer();
+    m_edgeConnectList->bind(GL_UNIFORM_BUFFER);
+    m_edgeConnectList->setData(sizeof(ivec4) * LookUpData::m_edgeConnectList.size(), LookUpData::m_edgeConnectList.data(), GL_STATIC_DRAW);
+    m_edgeConnectList->unbind(GL_UNIFORM_BUFFER);
+
+    // Fill positions buffer
+
+    std::vector<vec3> positions;
+    for (int z = 0; z < m_dimension.z; ++z)
+    {
+        for (int y = 0; y < m_dimension.y; ++y)
+        {
+            for (int x = 0; x < m_dimension.x; ++x)
+            {
+                positions.push_back(vec3(x, y, z));
+            }
+        }
+    }
+
+    m_size = positions.size();
+
+    m_positions = new Buffer();
+    m_positions->setData(positions, GL_STATIC_DRAW);
+
+    // Setup positions binding
+
+    m_vao = new VertexArray();
+
+    auto positionsBinding = m_vao->binding(0);
+    positionsBinding->setAttribute(0);
+    positionsBinding->setBuffer(m_positions, 0, sizeof(vec3));
+    positionsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
+    m_vao->enable(0);
+}
+
+void MarchingCubes::setupTransformFeedback()
+{
+    // Setup the program
+
+    m_transformFeedbackProgram = new Program();
+    m_transformFeedbackProgram->attach(Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/transformfeedback.vert"));
+
+    m_transformFeedbackProgram->link();
+
+    // Setup the transform feedback itself
+
+    m_transformFeedback = new TransformFeedback();
+    m_transformFeedback->setVaryings(m_transformFeedbackProgram, { "out_density" }, GL_INTERLEAVED_ATTRIBS);
+
+    // Fill positions buffer (with border!)
+
+    std::vector<vec3> densityPositions;
+    for (int z = 0; z < m_dimension.z + 1; ++z)
+    {
+        for (int y = 0; y < m_dimension.y + 1; ++y)
+        {
+            for (int x = 0; x < m_dimension.x + 1; ++x)
+            {
+                densityPositions.push_back(vec3(x, y, z));
+            }
+        }
+    }
+
+    m_densityPositionsSize = densityPositions.size();
+
+    m_densityPositions = new Buffer();
+    m_densityPositions->setData(densityPositions, GL_STATIC_DRAW);
+
+    // Setup result buffer
+
+    m_densities = new Buffer();
+    m_densities->setData(densityPositions.size() * sizeof(float), nullptr, GL_STATIC_READ);
+    
+    // Setup positions binding
+
+    m_densityPositionVao = new VertexArray();
+
+    auto densityPositionsBinding = m_densityPositionVao->binding(0);
+    densityPositionsBinding->setAttribute(0);
+    densityPositionsBinding->setBuffer(m_densityPositions, 0, sizeof(vec3));
+    densityPositionsBinding->setFormat(3, GL_FLOAT);
+    m_densityPositionVao->enable(0);
+}
+
+void MarchingCubes::runTransformFeedback()
+{
+    m_densityPositionVao->bind();
+    m_transformFeedback->bind();
+    m_densities->bindBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
+
+    glEnable(GL_RASTERIZER_DISCARD);
+
+    m_transformFeedbackProgram->use();
+    m_transformFeedback->begin(GL_POINTS);
+    m_densityPositionVao->drawArrays(GL_POINTS, 0, m_densityPositionsSize);
+    m_transformFeedback->end();
+    m_transformFeedback->unbind();
+    m_transformFeedbackProgram->release();
+
+    glDisable(GL_RASTERIZER_DISCARD);
+
+    m_densityPositionVao->unbind();
+}
+
 void MarchingCubes::onInitialize()
 {
     // create program
@@ -92,338 +216,14 @@ void MarchingCubes::onInitialize()
     debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
-	m_vao = new VertexArray();
-	m_vertices = new Buffer();
-    m_edgeConnectList = new Buffer();
-    m_program = new Program{};
-    m_program->attach(
-        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
-        Shader::fromFile(GLenum::GL_GEOMETRY_SHADER, "data/marchingcubes/marchingcubes.geom"),
-        Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/marchingcubes.frag")
-    );
-
-    m_transformLocation = m_program->getUniformLocation("transform");
-
-    glClearColor(0.85f, 0.87f, 0.91f, 1.0f);
-
-    m_grid = new gloperate::AdaptiveGrid{};
-    m_grid->setColor({ 0.6f, 0.6f, 0.6f });
-
+    setupProgram();
+    setupGrid();
     setupProjection();
+    setupTransformFeedback();
 
-	std::vector<vec3> vertices;
+    runTransformFeedback();
 
-    // Calculate densities
-    m_densities = globjects::Texture::createDefault(GL_TEXTURE_3D);
-
-    static const vec3 sphereCenter(15, 15, 15);
-    static const float sphereRadius = 10.f;
-
-    std::vector<float> densities;
-
-    for (int z = 0; z < m_dimension.z + 1; ++z)
-    {
-        for (int y = 0; y < m_dimension.y + 1; ++y)
-        {
-            for (int x = 0; x < m_dimension.x + 1; ++x)
-            {
-                if (x != m_dimension.x && y != m_dimension.y && z != m_dimension.z)
-                {
-                    vertices.push_back(vec3(x, y, z));
-                }
-
-                float density = - ((sphereCenter.x - x) * (sphereCenter.x - x) + (sphereCenter.y - y) * (sphereCenter.y - y) + (sphereCenter.z - z) * (sphereCenter.z - z) - sphereRadius * sphereRadius);
-                densities.push_back(density);
-            }
-        }
-    }
-    
-    m_densities->image3D(0, GL_R32F, m_dimension.x + 1, m_dimension.y + 1, m_dimension.z +1, 0, GL_RED, GL_FLOAT, densities.data());
-	
-    m_caseToNumPolys = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 2, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 3,
-        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 3, 2, 3, 3, 2, 3, 4, 4, 3, 3, 4, 4, 3, 4, 5, 5, 2,
-        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 3, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 4,
-        2, 3, 3, 4, 3, 4, 2, 3, 3, 4, 4, 5, 4, 5, 3, 2, 3, 4, 4, 3, 4, 5, 3, 2, 4, 5, 5, 4, 5, 2, 4, 1,
-        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 3, 2, 3, 3, 4, 3, 4, 4, 5, 3, 2, 4, 3, 4, 3, 5, 2,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 4, 3, 4, 4, 3, 4, 5, 5, 4, 4, 3, 5, 2, 5, 4, 2, 1,
-        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 2, 3, 3, 2, 3, 4, 4, 5, 4, 5, 5, 2, 4, 3, 5, 4, 3, 2, 4, 1,
-        3, 4, 4, 5, 4, 5, 3, 4, 4, 5, 5, 2, 3, 4, 2, 1, 2, 3, 3, 2, 3, 4, 2, 1, 3, 2, 4, 1, 2, 1, 1, 0 };
-
-    m_edgeToVertices = { ivec2(0, 1), ivec2(1, 2), ivec2(2, 3), ivec2(3, 0),
-        ivec2(4, 5), ivec2(5, 6), ivec2(6, 7), ivec2(7, 4),
-        ivec2(0, 4), ivec2(1, 5), ivec2(2, 6), ivec2(3, 7) };
-
-    EdgeConnects edgeConnectList = { ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 1, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 8, 3, -1), ivec4(9, 8, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 3, -1), ivec4(1, 2, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 2, 10, -1), ivec4(0, 2, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 8, 3, -1), ivec4(2, 10, 8, -1), ivec4(10, 9, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 11, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 11, 2, -1), ivec4(8, 11, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 9, 0, -1), ivec4(2, 3, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 11, 2, -1), ivec4(1, 9, 11, -1), ivec4(9, 8, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 10, 1, -1), ivec4(11, 10, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 10, 1, -1), ivec4(0, 8, 10, -1), ivec4(8, 11, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 9, 0, -1), ivec4(3, 11, 9, -1), ivec4(11, 10, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 8, 10, -1), ivec4(10, 8, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 7, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 3, 0, -1), ivec4(7, 3, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 1, 9, -1), ivec4(8, 4, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 1, 9, -1), ivec4(4, 7, 1, -1), ivec4(7, 3, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 10, -1), ivec4(8, 4, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 4, 7, -1), ivec4(3, 0, 4, -1), ivec4(1, 2, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 2, 10, -1), ivec4(9, 0, 2, -1), ivec4(8, 4, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 10, 9, -1), ivec4(2, 9, 7, -1), ivec4(2, 7, 3, -1), ivec4(7, 9, 4, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 4, 7, -1), ivec4(3, 11, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 4, 7, -1), ivec4(11, 2, 4, -1), ivec4(2, 0, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 0, 1, -1), ivec4(8, 4, 7, -1), ivec4(2, 3, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 7, 11, -1), ivec4(9, 4, 11, -1), ivec4(9, 11, 2, -1), ivec4(9, 2, 1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 10, 1, -1), ivec4(3, 11, 10, -1), ivec4(7, 8, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 11, 10, -1), ivec4(1, 4, 11, -1), ivec4(1, 0, 4, -1), ivec4(7, 11, 4, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 7, 8, -1), ivec4(9, 0, 11, -1), ivec4(9, 11, 10, -1), ivec4(11, 0, 3, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 7, 11, -1), ivec4(4, 11, 9, -1), ivec4(9, 11, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 4, -1), ivec4(0, 8, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 5, 4, -1), ivec4(1, 5, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 5, 4, -1), ivec4(8, 3, 5, -1), ivec4(3, 1, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 10, -1), ivec4(9, 5, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 0, 8, -1), ivec4(1, 2, 10, -1), ivec4(4, 9, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 2, 10, -1), ivec4(5, 4, 2, -1), ivec4(4, 0, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 10, 5, -1), ivec4(3, 2, 5, -1), ivec4(3, 5, 4, -1), ivec4(3, 4, 8, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 4, -1), ivec4(2, 3, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 11, 2, -1), ivec4(0, 8, 11, -1), ivec4(4, 9, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 5, 4, -1), ivec4(0, 1, 5, -1), ivec4(2, 3, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 1, 5, -1), ivec4(2, 5, 8, -1), ivec4(2, 8, 11, -1), ivec4(4, 8, 5, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 3, 11, -1), ivec4(10, 1, 3, -1), ivec4(9, 5, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 9, 5, -1), ivec4(0, 8, 1, -1), ivec4(8, 10, 1, -1), ivec4(8, 11, 10, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 4, 0, -1), ivec4(5, 0, 11, -1), ivec4(5, 11, 10, -1), ivec4(11, 0, 3, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 4, 8, -1), ivec4(5, 8, 10, -1), ivec4(10, 8, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 7, 8, -1), ivec4(5, 7, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 3, 0, -1), ivec4(9, 5, 3, -1), ivec4(5, 7, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 7, 8, -1), ivec4(0, 1, 7, -1), ivec4(1, 5, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 5, 3, -1), ivec4(3, 5, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 7, 8, -1), ivec4(9, 5, 7, -1), ivec4(10, 1, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 1, 2, -1), ivec4(9, 5, 0, -1), ivec4(5, 3, 0, -1), ivec4(5, 7, 3, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 0, 2, -1), ivec4(8, 2, 5, -1), ivec4(8, 5, 7, -1), ivec4(10, 5, 2, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 10, 5, -1), ivec4(2, 5, 3, -1), ivec4(3, 5, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 9, 5, -1), ivec4(7, 8, 9, -1), ivec4(3, 11, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 7, -1), ivec4(9, 7, 2, -1), ivec4(9, 2, 0, -1), ivec4(2, 7, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 3, 11, -1), ivec4(0, 1, 8, -1), ivec4(1, 7, 8, -1), ivec4(1, 5, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 2, 1, -1), ivec4(11, 1, 7, -1), ivec4(7, 1, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 8, -1), ivec4(8, 5, 7, -1), ivec4(10, 1, 3, -1), ivec4(10, 3, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 7, 0, -1), ivec4(5, 0, 9, -1), ivec4(7, 11, 0, -1), ivec4(1, 0, 10, -1), ivec4(11, 10, 0, -1),
-        ivec4(11, 10, 0, -1), ivec4(11, 0, 3, -1), ivec4(10, 5, 0, -1), ivec4(8, 0, 7, -1), ivec4(5, 7, 0, -1),
-        ivec4(11, 10, 5, -1), ivec4(7, 11, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 6, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 3, -1), ivec4(5, 10, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 0, 1, -1), ivec4(5, 10, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 8, 3, -1), ivec4(1, 9, 8, -1), ivec4(5, 10, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 6, 5, -1), ivec4(2, 6, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 6, 5, -1), ivec4(1, 2, 6, -1), ivec4(3, 0, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 6, 5, -1), ivec4(9, 0, 6, -1), ivec4(0, 2, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 9, 8, -1), ivec4(5, 8, 2, -1), ivec4(5, 2, 6, -1), ivec4(3, 2, 8, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 3, 11, -1), ivec4(10, 6, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 0, 8, -1), ivec4(11, 2, 0, -1), ivec4(10, 6, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 1, 9, -1), ivec4(2, 3, 11, -1), ivec4(5, 10, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 10, 6, -1), ivec4(1, 9, 2, -1), ivec4(9, 11, 2, -1), ivec4(9, 8, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 3, 11, -1), ivec4(6, 5, 3, -1), ivec4(5, 1, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 11, -1), ivec4(0, 11, 5, -1), ivec4(0, 5, 1, -1), ivec4(5, 11, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 11, 6, -1), ivec4(0, 3, 6, -1), ivec4(0, 6, 5, -1), ivec4(0, 5, 9, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 5, 9, -1), ivec4(6, 9, 11, -1), ivec4(11, 9, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 10, 6, -1), ivec4(4, 7, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 3, 0, -1), ivec4(4, 7, 3, -1), ivec4(6, 5, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 9, 0, -1), ivec4(5, 10, 6, -1), ivec4(8, 4, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 6, 5, -1), ivec4(1, 9, 7, -1), ivec4(1, 7, 3, -1), ivec4(7, 9, 4, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 1, 2, -1), ivec4(6, 5, 1, -1), ivec4(4, 7, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 5, -1), ivec4(5, 2, 6, -1), ivec4(3, 0, 4, -1), ivec4(3, 4, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 4, 7, -1), ivec4(9, 0, 5, -1), ivec4(0, 6, 5, -1), ivec4(0, 2, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 3, 9, -1), ivec4(7, 9, 4, -1), ivec4(3, 2, 9, -1), ivec4(5, 9, 6, -1), ivec4(2, 6, 9, -1),
-        ivec4(3, 11, 2, -1), ivec4(7, 8, 4, -1), ivec4(10, 6, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 10, 6, -1), ivec4(4, 7, 2, -1), ivec4(4, 2, 0, -1), ivec4(2, 7, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 1, 9, -1), ivec4(4, 7, 8, -1), ivec4(2, 3, 11, -1), ivec4(5, 10, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 2, 1, -1), ivec4(9, 11, 2, -1), ivec4(9, 4, 11, -1), ivec4(7, 11, 4, -1), ivec4(5, 10, 6, -1),
-        ivec4(8, 4, 7, -1), ivec4(3, 11, 5, -1), ivec4(3, 5, 1, -1), ivec4(5, 11, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 1, 11, -1), ivec4(5, 11, 6, -1), ivec4(1, 0, 11, -1), ivec4(7, 11, 4, -1), ivec4(0, 4, 11, -1),
-        ivec4(0, 5, 9, -1), ivec4(0, 6, 5, -1), ivec4(0, 3, 6, -1), ivec4(11, 6, 3, -1), ivec4(8, 4, 7, -1),
-        ivec4(6, 5, 9, -1), ivec4(6, 9, 11, -1), ivec4(4, 7, 9, -1), ivec4(7, 11, 9, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 4, 9, -1), ivec4(6, 4, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 10, 6, -1), ivec4(4, 9, 10, -1), ivec4(0, 8, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 0, 1, -1), ivec4(10, 6, 0, -1), ivec4(6, 4, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 3, 1, -1), ivec4(8, 1, 6, -1), ivec4(8, 6, 4, -1), ivec4(6, 1, 10, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 4, 9, -1), ivec4(1, 2, 4, -1), ivec4(2, 6, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 0, 8, -1), ivec4(1, 2, 9, -1), ivec4(2, 4, 9, -1), ivec4(2, 6, 4, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 2, 4, -1), ivec4(4, 2, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 3, 2, -1), ivec4(8, 2, 4, -1), ivec4(4, 2, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 4, 9, -1), ivec4(10, 6, 4, -1), ivec4(11, 2, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 2, -1), ivec4(2, 8, 11, -1), ivec4(4, 9, 10, -1), ivec4(4, 10, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 11, 2, -1), ivec4(0, 1, 6, -1), ivec4(0, 6, 4, -1), ivec4(6, 1, 10, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 4, 1, -1), ivec4(6, 1, 10, -1), ivec4(4, 8, 1, -1), ivec4(2, 1, 11, -1), ivec4(8, 11, 1, -1),
-        ivec4(9, 6, 4, -1), ivec4(9, 3, 6, -1), ivec4(9, 1, 3, -1), ivec4(11, 6, 3, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 11, 1, -1), ivec4(8, 1, 0, -1), ivec4(11, 6, 1, -1), ivec4(9, 1, 4, -1), ivec4(6, 4, 1, -1),
-        ivec4(3, 11, 6, -1), ivec4(3, 6, 0, -1), ivec4(0, 6, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 4, 8, -1), ivec4(11, 6, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 10, 6, -1), ivec4(7, 8, 10, -1), ivec4(8, 9, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 7, 3, -1), ivec4(0, 10, 7, -1), ivec4(0, 9, 10, -1), ivec4(6, 7, 10, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 6, 7, -1), ivec4(1, 10, 7, -1), ivec4(1, 7, 8, -1), ivec4(1, 8, 0, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 6, 7, -1), ivec4(10, 7, 1, -1), ivec4(1, 7, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 6, -1), ivec4(1, 6, 8, -1), ivec4(1, 8, 9, -1), ivec4(8, 6, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 6, 9, -1), ivec4(2, 9, 1, -1), ivec4(6, 7, 9, -1), ivec4(0, 9, 3, -1), ivec4(7, 3, 9, -1),
-        ivec4(7, 8, 0, -1), ivec4(7, 0, 6, -1), ivec4(6, 0, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 3, 2, -1), ivec4(6, 7, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 3, 11, -1), ivec4(10, 6, 8, -1), ivec4(10, 8, 9, -1), ivec4(8, 6, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 0, 7, -1), ivec4(2, 7, 11, -1), ivec4(0, 9, 7, -1), ivec4(6, 7, 10, -1), ivec4(9, 10, 7, -1),
-        ivec4(1, 8, 0, -1), ivec4(1, 7, 8, -1), ivec4(1, 10, 7, -1), ivec4(6, 7, 10, -1), ivec4(2, 3, 11, -1),
-        ivec4(11, 2, 1, -1), ivec4(11, 1, 7, -1), ivec4(10, 6, 1, -1), ivec4(6, 7, 1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 9, 6, -1), ivec4(8, 6, 7, -1), ivec4(9, 1, 6, -1), ivec4(11, 6, 3, -1), ivec4(1, 3, 6, -1),
-        ivec4(0, 9, 1, -1), ivec4(11, 6, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 8, 0, -1), ivec4(7, 0, 6, -1), ivec4(3, 11, 0, -1), ivec4(11, 6, 0, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 11, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 6, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 0, 8, -1), ivec4(11, 7, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 1, 9, -1), ivec4(11, 7, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 1, 9, -1), ivec4(8, 3, 1, -1), ivec4(11, 7, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 1, 2, -1), ivec4(6, 11, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 10, -1), ivec4(3, 0, 8, -1), ivec4(6, 11, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 9, 0, -1), ivec4(2, 10, 9, -1), ivec4(6, 11, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 11, 7, -1), ivec4(2, 10, 3, -1), ivec4(10, 8, 3, -1), ivec4(10, 9, 8, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 2, 3, -1), ivec4(6, 2, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 0, 8, -1), ivec4(7, 6, 0, -1), ivec4(6, 2, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 7, 6, -1), ivec4(2, 3, 7, -1), ivec4(0, 1, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 6, 2, -1), ivec4(1, 8, 6, -1), ivec4(1, 9, 8, -1), ivec4(8, 7, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 7, 6, -1), ivec4(10, 1, 7, -1), ivec4(1, 3, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 7, 6, -1), ivec4(1, 7, 10, -1), ivec4(1, 8, 7, -1), ivec4(1, 0, 8, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 3, 7, -1), ivec4(0, 7, 10, -1), ivec4(0, 10, 9, -1), ivec4(6, 10, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 6, 10, -1), ivec4(7, 10, 8, -1), ivec4(8, 10, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 8, 4, -1), ivec4(11, 8, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 6, 11, -1), ivec4(3, 0, 6, -1), ivec4(0, 4, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 6, 11, -1), ivec4(8, 4, 6, -1), ivec4(9, 0, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 4, 6, -1), ivec4(9, 6, 3, -1), ivec4(9, 3, 1, -1), ivec4(11, 3, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 8, 4, -1), ivec4(6, 11, 8, -1), ivec4(2, 10, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 10, -1), ivec4(3, 0, 11, -1), ivec4(0, 6, 11, -1), ivec4(0, 4, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 11, 8, -1), ivec4(4, 6, 11, -1), ivec4(0, 2, 9, -1), ivec4(2, 10, 9, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 9, 3, -1), ivec4(10, 3, 2, -1), ivec4(9, 4, 3, -1), ivec4(11, 3, 6, -1), ivec4(4, 6, 3, -1),
-        ivec4(8, 2, 3, -1), ivec4(8, 4, 2, -1), ivec4(4, 6, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 4, 2, -1), ivec4(4, 6, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 9, 0, -1), ivec4(2, 3, 4, -1), ivec4(2, 4, 6, -1), ivec4(4, 3, 8, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 9, 4, -1), ivec4(1, 4, 2, -1), ivec4(2, 4, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 1, 3, -1), ivec4(8, 6, 1, -1), ivec4(8, 4, 6, -1), ivec4(6, 10, 1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 1, 0, -1), ivec4(10, 0, 6, -1), ivec4(6, 0, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 6, 3, -1), ivec4(4, 3, 8, -1), ivec4(6, 10, 3, -1), ivec4(0, 3, 9, -1), ivec4(10, 9, 3, -1),
-        ivec4(10, 9, 4, -1), ivec4(6, 10, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 9, 5, -1), ivec4(7, 6, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 3, -1), ivec4(4, 9, 5, -1), ivec4(11, 7, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 0, 1, -1), ivec4(5, 4, 0, -1), ivec4(7, 6, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 7, 6, -1), ivec4(8, 3, 4, -1), ivec4(3, 5, 4, -1), ivec4(3, 1, 5, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 4, -1), ivec4(10, 1, 2, -1), ivec4(7, 6, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 11, 7, -1), ivec4(1, 2, 10, -1), ivec4(0, 8, 3, -1), ivec4(4, 9, 5, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 6, 11, -1), ivec4(5, 4, 10, -1), ivec4(4, 2, 10, -1), ivec4(4, 0, 2, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 4, 8, -1), ivec4(3, 5, 4, -1), ivec4(3, 2, 5, -1), ivec4(10, 5, 2, -1), ivec4(11, 7, 6, -1),
-        ivec4(7, 2, 3, -1), ivec4(7, 6, 2, -1), ivec4(5, 4, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 4, -1), ivec4(0, 8, 6, -1), ivec4(0, 6, 2, -1), ivec4(6, 8, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 6, 2, -1), ivec4(3, 7, 6, -1), ivec4(1, 5, 0, -1), ivec4(5, 4, 0, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 2, 8, -1), ivec4(6, 8, 7, -1), ivec4(2, 1, 8, -1), ivec4(4, 8, 5, -1), ivec4(1, 5, 8, -1),
-        ivec4(9, 5, 4, -1), ivec4(10, 1, 6, -1), ivec4(1, 7, 6, -1), ivec4(1, 3, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 6, 10, -1), ivec4(1, 7, 6, -1), ivec4(1, 0, 7, -1), ivec4(8, 7, 0, -1), ivec4(9, 5, 4, -1),
-        ivec4(4, 0, 10, -1), ivec4(4, 10, 5, -1), ivec4(0, 3, 10, -1), ivec4(6, 10, 7, -1), ivec4(3, 7, 10, -1),
-        ivec4(7, 6, 10, -1), ivec4(7, 10, 8, -1), ivec4(5, 4, 10, -1), ivec4(4, 8, 10, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 9, 5, -1), ivec4(6, 11, 9, -1), ivec4(11, 8, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 6, 11, -1), ivec4(0, 6, 3, -1), ivec4(0, 5, 6, -1), ivec4(0, 9, 5, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 11, 8, -1), ivec4(0, 5, 11, -1), ivec4(0, 1, 5, -1), ivec4(5, 6, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(6, 11, 3, -1), ivec4(6, 3, 5, -1), ivec4(5, 3, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 10, -1), ivec4(9, 5, 11, -1), ivec4(9, 11, 8, -1), ivec4(11, 5, 6, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 11, 3, -1), ivec4(0, 6, 11, -1), ivec4(0, 9, 6, -1), ivec4(5, 6, 9, -1), ivec4(1, 2, 10, -1),
-        ivec4(11, 8, 5, -1), ivec4(11, 5, 6, -1), ivec4(8, 0, 5, -1), ivec4(10, 5, 2, -1), ivec4(0, 2, 5, -1),
-        ivec4(6, 11, 3, -1), ivec4(6, 3, 5, -1), ivec4(2, 10, 3, -1), ivec4(10, 5, 3, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 8, 9, -1), ivec4(5, 2, 8, -1), ivec4(5, 6, 2, -1), ivec4(3, 8, 2, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 5, 6, -1), ivec4(9, 6, 0, -1), ivec4(0, 6, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 5, 8, -1), ivec4(1, 8, 0, -1), ivec4(5, 6, 8, -1), ivec4(3, 8, 2, -1), ivec4(6, 2, 8, -1),
-        ivec4(1, 5, 6, -1), ivec4(2, 1, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 3, 6, -1), ivec4(1, 6, 10, -1), ivec4(3, 8, 6, -1), ivec4(5, 6, 9, -1), ivec4(8, 9, 6, -1),
-        ivec4(10, 1, 0, -1), ivec4(10, 0, 6, -1), ivec4(9, 5, 0, -1), ivec4(5, 6, 0, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 3, 8, -1), ivec4(5, 6, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 5, 6, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 5, 10, -1), ivec4(7, 5, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 5, 10, -1), ivec4(11, 7, 5, -1), ivec4(8, 3, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 11, 7, -1), ivec4(5, 10, 11, -1), ivec4(1, 9, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 7, 5, -1), ivec4(10, 11, 7, -1), ivec4(9, 8, 1, -1), ivec4(8, 3, 1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 1, 2, -1), ivec4(11, 7, 1, -1), ivec4(7, 5, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 3, -1), ivec4(1, 2, 7, -1), ivec4(1, 7, 5, -1), ivec4(7, 2, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 7, 5, -1), ivec4(9, 2, 7, -1), ivec4(9, 0, 2, -1), ivec4(2, 11, 7, -1), ivec4(-1, -1, -1, -1),
-        ivec4(7, 5, 2, -1), ivec4(7, 2, 11, -1), ivec4(5, 9, 2, -1), ivec4(3, 2, 8, -1), ivec4(9, 8, 2, -1),
-        ivec4(2, 5, 10, -1), ivec4(2, 3, 5, -1), ivec4(3, 7, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 2, 0, -1), ivec4(8, 5, 2, -1), ivec4(8, 7, 5, -1), ivec4(10, 2, 5, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 0, 1, -1), ivec4(5, 10, 3, -1), ivec4(5, 3, 7, -1), ivec4(3, 10, 2, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 8, 2, -1), ivec4(9, 2, 1, -1), ivec4(8, 7, 2, -1), ivec4(10, 2, 5, -1), ivec4(7, 5, 2, -1),
-        ivec4(1, 3, 5, -1), ivec4(3, 7, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 7, -1), ivec4(0, 7, 1, -1), ivec4(1, 7, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 0, 3, -1), ivec4(9, 3, 5, -1), ivec4(5, 3, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 8, 7, -1), ivec4(5, 9, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 8, 4, -1), ivec4(5, 10, 8, -1), ivec4(10, 11, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 0, 4, -1), ivec4(5, 11, 0, -1), ivec4(5, 10, 11, -1), ivec4(11, 3, 0, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 1, 9, -1), ivec4(8, 4, 10, -1), ivec4(8, 10, 11, -1), ivec4(10, 4, 5, -1), ivec4(-1, -1, -1, -1),
-        ivec4(10, 11, 4, -1), ivec4(10, 4, 5, -1), ivec4(11, 3, 4, -1), ivec4(9, 4, 1, -1), ivec4(3, 1, 4, -1),
-        ivec4(2, 5, 1, -1), ivec4(2, 8, 5, -1), ivec4(2, 11, 8, -1), ivec4(4, 5, 8, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 4, 11, -1), ivec4(0, 11, 3, -1), ivec4(4, 5, 11, -1), ivec4(2, 11, 1, -1), ivec4(5, 1, 11, -1),
-        ivec4(0, 2, 5, -1), ivec4(0, 5, 9, -1), ivec4(2, 11, 5, -1), ivec4(4, 5, 8, -1), ivec4(11, 8, 5, -1),
-        ivec4(9, 4, 5, -1), ivec4(2, 11, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 5, 10, -1), ivec4(3, 5, 2, -1), ivec4(3, 4, 5, -1), ivec4(3, 8, 4, -1), ivec4(-1, -1, -1, -1),
-        ivec4(5, 10, 2, -1), ivec4(5, 2, 4, -1), ivec4(4, 2, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 10, 2, -1), ivec4(3, 5, 10, -1), ivec4(3, 8, 5, -1), ivec4(4, 5, 8, -1), ivec4(0, 1, 9, -1),
-        ivec4(5, 10, 2, -1), ivec4(5, 2, 4, -1), ivec4(1, 9, 2, -1), ivec4(9, 4, 2, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 4, 5, -1), ivec4(8, 5, 3, -1), ivec4(3, 5, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 4, 5, -1), ivec4(1, 0, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(8, 4, 5, -1), ivec4(8, 5, 3, -1), ivec4(9, 0, 5, -1), ivec4(0, 3, 5, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 4, 5, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 11, 7, -1), ivec4(4, 9, 11, -1), ivec4(9, 10, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 8, 3, -1), ivec4(4, 9, 7, -1), ivec4(9, 11, 7, -1), ivec4(9, 10, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 10, 11, -1), ivec4(1, 11, 4, -1), ivec4(1, 4, 0, -1), ivec4(7, 4, 11, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 1, 4, -1), ivec4(3, 4, 8, -1), ivec4(1, 10, 4, -1), ivec4(7, 4, 11, -1), ivec4(10, 11, 4, -1),
-        ivec4(4, 11, 7, -1), ivec4(9, 11, 4, -1), ivec4(9, 2, 11, -1), ivec4(9, 1, 2, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 7, 4, -1), ivec4(9, 11, 7, -1), ivec4(9, 1, 11, -1), ivec4(2, 11, 1, -1), ivec4(0, 8, 3, -1),
-        ivec4(11, 7, 4, -1), ivec4(11, 4, 2, -1), ivec4(2, 4, 0, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(11, 7, 4, -1), ivec4(11, 4, 2, -1), ivec4(8, 3, 4, -1), ivec4(3, 2, 4, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 9, 10, -1), ivec4(2, 7, 9, -1), ivec4(2, 3, 7, -1), ivec4(7, 4, 9, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 10, 7, -1), ivec4(9, 7, 4, -1), ivec4(10, 2, 7, -1), ivec4(8, 7, 0, -1), ivec4(2, 0, 7, -1),
-        ivec4(3, 7, 10, -1), ivec4(3, 10, 2, -1), ivec4(7, 4, 10, -1), ivec4(1, 10, 0, -1), ivec4(4, 0, 10, -1),
-        ivec4(1, 10, 2, -1), ivec4(8, 7, 4, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 9, 1, -1), ivec4(4, 1, 7, -1), ivec4(7, 1, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 9, 1, -1), ivec4(4, 1, 7, -1), ivec4(0, 8, 1, -1), ivec4(8, 7, 1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 0, 3, -1), ivec4(7, 4, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(4, 8, 7, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 10, 8, -1), ivec4(10, 11, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 0, 9, -1), ivec4(3, 9, 11, -1), ivec4(11, 9, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 1, 10, -1), ivec4(0, 10, 8, -1), ivec4(8, 10, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 1, 10, -1), ivec4(11, 3, 10, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 2, 11, -1), ivec4(1, 11, 9, -1), ivec4(9, 11, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 0, 9, -1), ivec4(3, 9, 11, -1), ivec4(1, 2, 9, -1), ivec4(2, 11, 9, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 2, 11, -1), ivec4(8, 0, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(3, 2, 11, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 3, 8, -1), ivec4(2, 8, 10, -1), ivec4(10, 8, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(9, 10, 2, -1), ivec4(0, 9, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(2, 3, 8, -1), ivec4(2, 8, 10, -1), ivec4(0, 1, 8, -1), ivec4(1, 10, 8, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 10, 2, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(1, 3, 8, -1), ivec4(9, 1, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 9, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(0, 3, 8, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
-        ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1) };
-
-
-    m_edgeConnectList->bind(GL_UNIFORM_BUFFER);
-    m_edgeConnectList->setData(sizeof(edgeConnectList), &edgeConnectList, GL_STATIC_DRAW);
-    m_edgeConnectList->unbind(GL_UNIFORM_BUFFER);
-
-
-	m_vertices->setData(vertices, gl::GL_STATIC_DRAW);
-
-	auto vertexBinding = m_vao->binding(0);
-	vertexBinding->setAttribute(0);
-	vertexBinding->setBuffer(m_vertices, 0, sizeof(vec3));
-	vertexBinding->setFormat(3, gl::GL_FLOAT, gl::GL_FALSE, 0);
-	m_vao->enable(0);
-    m_size = vertices.size();
+    setupRendering();
 }
 
 void MarchingCubes::onPaint()
@@ -448,8 +248,6 @@ void MarchingCubes::onPaint()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glEnable(GL_DEPTH_TEST);
-
     const auto transform = m_projectionCapability->projection() * m_cameraCapability->view();
     const auto eye = m_cameraCapability->eye();
 
@@ -460,17 +258,22 @@ void MarchingCubes::onPaint()
     m_program->setUniform(m_transformLocation, transform);
     m_program->setUniform("a_cubeColor", vec4(m_cubeColor.red() / 255.f, m_cubeColor.green() / 255.f, m_cubeColor.blue() / 255.f, m_cubeColor.alpha() / 255.f));
     m_program->setUniform("a_dim", m_dimension);
+    m_program->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
+    m_program->setUniform("a_edgeToVertices", LookUpData::m_edgeToVertices);
 
+    // Setup uniform block for edge connect list
 
     auto ubo = m_program->uniformBlock("edgeConnectList");
     m_edgeConnectList->bindBase(GL_UNIFORM_BUFFER, 1);
     ubo->setBinding(1);
 
-    m_program->setUniform("a_caseToNumPolys", m_caseToNumPolys);
-    m_program->setUniform("a_edgeToVertices", m_edgeToVertices);
-    m_densities->bindActive(GL_TEXTURE0);
+    // Setup density buffer texture
+
+    m_densitiesTexture->bindActive(GL_TEXTURE0);
+    m_densitiesTexture->texBuffer(GL_R32F, m_densities);
     m_program->setUniform("densities", 0);
 
+    
 	m_vao->bind();
 	m_vao->drawArrays(GL_POINTS, 0, m_size);
 	m_vao->unbind();
