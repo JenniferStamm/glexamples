@@ -13,6 +13,8 @@
 
 #include <reflectionzeug/Color.h>
 
+class Chunk;
+
 namespace globjects
 {
     class Program;
@@ -36,17 +38,12 @@ class MarchingCubes : public gloperate::Painter
 public:
 	MarchingCubes(gloperate::ResourceManager & resourceManager);
 	virtual ~MarchingCubes();
-
-    void setupProjection();
-
-    reflectionzeug::Color cubeColor() const;
-    void setCubeColor(reflectionzeug::Color cubeColor);
-    void setupGrid();
-    void setupProgram();
-    void setupRendering();
-    void setupTransformFeedback();
-    void runTransformFeedback();
+    
 protected:
+    void setupGrid();
+    void setupProjection();
+    void setupOpenGLState();
+
     virtual void onInitialize() override;
     virtual void onPaint() override;
 
@@ -59,25 +56,6 @@ protected:
 
     /* members */
     globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
-    globjects::ref_ptr<globjects::Program> m_program;
-    gl::GLint m_transformLocation;
 
-	globjects::ref_ptr<globjects::VertexArray> m_vao;
-    globjects::ref_ptr<globjects::VertexArray> m_densityPositionVao;
-
-    globjects::ref_ptr<globjects::Buffer> m_densityPositions;
-	globjects::ref_ptr<globjects::Buffer> m_positions;
-
-    reflectionzeug::Color m_cubeColor;
-
-	gl::GLsizei m_size;
-    gl::GLsizei m_densityPositionsSize;
-
-	globjects::ref_ptr<globjects::Buffer> m_densities;
-    globjects::ref_ptr<globjects::Texture> m_densitiesTexture;
-    glm::ivec3 m_dimension;
-    globjects::ref_ptr<globjects::Buffer> m_edgeConnectList;
-
-    globjects::ref_ptr<globjects::TransformFeedback> m_transformFeedback;
-    globjects::ref_ptr<globjects::Program> m_transformFeedbackProgram;
+    globjects::ref_ptr<Chunk> m_chunk;
 };
