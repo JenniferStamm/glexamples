@@ -3,6 +3,7 @@
 
 uniform mat4 transform;
 uniform ivec3 a_dim;
+uniform vec3 a_offset;
 
 layout (std140) uniform edgeConnectList {
     ivec4 edgeConnectListEdges[1280];
@@ -93,7 +94,7 @@ void main() {
             vec3 vertexBNormal = normalAtPosition(ivec3(center + vertexBPos.xyz));
             vec3 mixedNormal = mix(vertexANormal,vertexBNormal,mixing);
             g_normal = mixedNormal;
-            gl_Position = transform * (vec4(center,1.0) + mix(vertexAPos, vertexBPos, mixing));
+            gl_Position = transform * (vec4(center + a_offset,1.0) + mix(vertexAPos, vertexBPos, mixing));
             EmitVertex();
         }
         EndPrimitive();

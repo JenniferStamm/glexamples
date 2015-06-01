@@ -57,5 +57,5 @@ protected:
     /* members */
     globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
 
-    globjects::ref_ptr<Chunk> m_chunk;
+    std::vector<globjects::ref_ptr<Chunk>> m_chunks;
 };

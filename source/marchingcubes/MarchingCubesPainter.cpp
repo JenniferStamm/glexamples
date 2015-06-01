@@ -34,7 +34,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_viewportCapability{addCapability(new gloperate::ViewportCapability())}
 ,   m_projectionCapability{addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
-,   m_chunk()
+,   m_chunks()
 {
 }
 
@@ -79,7 +79,18 @@ void MarchingCubes::onInitialize()
     setupProjection();
     setupOpenGLState();
 
-    m_chunk = new Chunk();
+    m_chunks = {};
+    int size = 3;
+    for (int z = 0; z < size; ++z)
+    {
+        for (int y = 0; y < size; ++y)
+        {
+            for (int x = 0; x < size; ++x)
+            {
+                m_chunks.push_back(new Chunk(vec3(x * 32, y * 32, z * 32)));
+            }
+        }
+    }
 }
 
 void MarchingCubes::onPaint()
@@ -110,8 +121,11 @@ void MarchingCubes::onPaint()
     m_grid->update(eye, transform);
     m_grid->draw();
 
-    m_chunk->setTransform(transform);
-    m_chunk->draw();
+    for (auto chunk : m_chunks)
+    {
+        chunk->setTransform(transform);
+        chunk->draw();
+    }
 
     Framebuffer::unbind(GL_FRAMEBUFFER);
 }

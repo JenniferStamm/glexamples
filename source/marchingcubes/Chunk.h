@@ -20,7 +20,7 @@ namespace globjects
 class Chunk : public gloperate::AbstractDrawable, public globjects::Referenced
 {
 public:
-    Chunk();
+    Chunk(glm::vec3 offset);
     ~Chunk();
 
     virtual void draw() override;
@@ -54,4 +54,6 @@ protected:
     gl::GLsizei m_size;
 
     glm::mat4x4 m_transform;
+
+    glm::vec3 m_offset;
 };

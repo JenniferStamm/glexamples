@@ -23,7 +23,7 @@ using namespace globjects;
 
 const ivec3 dimensions(32, 32, 32);
 
-Chunk::Chunk()
+Chunk::Chunk(glm::vec3 offset)
     : AbstractDrawable()
     , m_densityPositions()
     , m_densities()
@@ -31,6 +31,7 @@ Chunk::Chunk()
     , m_edgeConnectList()
     , m_positions()
     , m_transform()
+    , m_offset(offset)
 {
     m_vao = new VertexArray;
 
@@ -49,6 +50,7 @@ void Chunk::draw()
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, m_transform);
     m_renderProgram->setUniform("a_dim", dimensions);
+    m_renderProgram->setUniform("a_offset", m_offset);
     m_renderProgram->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
     m_renderProgram->setUniform("a_edgeToVertices", LookUpData::m_edgeToVertices);
 
@@ -132,8 +134,8 @@ void Chunk::setupTransformFeedback()
 
     m_transformFeedbackProgram = new Program();
     m_transformFeedbackProgram->attach(Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/transformfeedback.vert"));
-
     m_transformFeedbackProgram->link();
+    m_transformFeedbackProgram->setUniform("a_offset", m_offset);
 
     // Setup the transform feedback itself
 
