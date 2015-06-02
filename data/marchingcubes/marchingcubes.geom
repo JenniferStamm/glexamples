@@ -20,11 +20,11 @@ layout(triangle_strip, max_vertices = 15) out;
 
 out vec3 g_normal;
 
-const vec4 x  = vec4(0.5,0,0,0);
-const vec4 y  = vec4(0,0.5,0,0);
-const vec4 z  = vec4(0,0,0.5,0);
+const vec3 x  = vec3(0.5,0,0);
+const vec3 y  = vec3(0,0.5,0);
+const vec3 z  = vec3(0,0,0.5);
 
-const vec4[8] vertices = vec4[8](
+const vec3[8] vertices = vec3[8](
     -x - y - z,
     -x + y - z,
     x + y - z,
@@ -58,11 +58,11 @@ vec3 normalAtPosition(in ivec3 position) {
   
 void main() {
     vec4 old = gl_in[0].gl_Position;
-    vec3 center = old.xyz + 0.5;
+    vec3 center = old.xyz * a_dim + 0.5;
     
     float[8] vertexDensities;
     for (int k = 0; k < vertices.length(); k++) {
-        ivec3 pos = ivec3(center + (vertices[k]).xyz);
+        ivec3 pos = ivec3(center + vertices[k]);
         vertexDensities[k] = densityAtPosition(pos); 
     }
     
@@ -85,16 +85,16 @@ void main() {
             int edge = edges[j];
             int vertexA = a_edgeToVertices[edge].x;
             int vertexB = a_edgeToVertices[edge].y;
-            vec4 vertexAPos = vertices[vertexA];
-            vec4 vertexBPos = vertices[vertexB];
+            vec3 vertexAPos = vertices[vertexA];
+            vec3 vertexBPos = vertices[vertexB];
             float vertexADensity = vertexDensities[vertexA];
             float vertexBDensity = vertexDensities[vertexB];
             float mixing = vertexADensity / (vertexADensity - vertexBDensity);
-            vec3 vertexANormal = normalAtPosition(ivec3(center + vertexAPos.xyz));
-            vec3 vertexBNormal = normalAtPosition(ivec3(center + vertexBPos.xyz));
+            vec3 vertexANormal = normalAtPosition(ivec3(center + vertexAPos));
+            vec3 vertexBNormal = normalAtPosition(ivec3(center + vertexBPos));
             vec3 mixedNormal = mix(vertexANormal,vertexBNormal,mixing);
             g_normal = mixedNormal;
-            gl_Position = transform * (vec4(center + a_offset,1.0) + mix(vertexAPos, vertexBPos, mixing));
+            gl_Position = transform * (vec4((center + mix(vertexAPos, vertexBPos, mixing)) / a_dim + a_offset,1.0));
             EmitVertex();
         }
         EndPrimitive();

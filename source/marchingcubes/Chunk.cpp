@@ -109,7 +109,7 @@ void Chunk::setupRendering()
         {
             for (int x = 0; x < dimensions.x; ++x)
             {
-                positions.push_back(vec3(x, y, z));
+                positions.push_back(vec3(x, y, z) / vec3(dimensions));
             }
         }
     }
@@ -151,7 +151,7 @@ void Chunk::setupTransformFeedback()
         {
             for (int x = 0; x < dimensions.x + 1; ++x)
             {
-                densityPositions.push_back(vec3(x, y, z));
+                densityPositions.push_back(vec3(x, y, z) / vec3(dimensions));
             }
         }
     }

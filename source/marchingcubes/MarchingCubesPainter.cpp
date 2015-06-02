@@ -87,7 +87,7 @@ void MarchingCubes::onInitialize()
         {
             for (int x = 0; x < size; ++x)
             {
-                m_chunks.push_back(new Chunk(vec3(x * 32, y * 32, z * 32)));
+                m_chunks.push_back(new Chunk(vec3(x, y, z)));
             }
         }
     }
