@@ -12,5 +12,5 @@ out float out_density;
 void main()
 {
     vec3 realPosition = in_position + a_offset;
-	out_density = sin(realPosition.x * 3) / 3  - realPosition.y + 0.4;
+	out_density = cos(realPosition.z * 5) / 2 + sin(realPosition.x * 8) / 3  - realPosition.y  + realPosition.x / 4 + 0.7;
 }

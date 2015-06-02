@@ -3,6 +3,7 @@
 
 uniform mat4 transform;
 uniform ivec3 a_dim;
+uniform int a_margin;
 uniform vec3 a_offset;
 
 layout (std140) uniform edgeConnectList {
@@ -40,7 +41,7 @@ float densityAt(in int index) {
 }
 
 int indexAtPosition(in ivec3 position) {
-    return position.z * (a_dim.x + 1) * (a_dim.y + 1) + position.y * (a_dim.x + 1) + position.x;
+    return (position.z + a_margin) * (a_dim.x + 2 * a_margin + 1) * (a_dim.y + 2 * a_margin + 1) + (position.y + a_margin) * (a_dim.x + 2 * a_margin + 1) + (position.x + a_margin);
 }
 
 float densityAtPosition(in ivec3 position) {

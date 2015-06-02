@@ -22,6 +22,7 @@ using namespace glm;
 using namespace globjects;
 
 const ivec3 dimensions(32, 32, 32);
+const int margin(1);
 
 Chunk::Chunk(glm::vec3 offset)
     : AbstractDrawable()
@@ -50,6 +51,7 @@ void Chunk::draw()
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, m_transform);
     m_renderProgram->setUniform("a_dim", dimensions);
+    m_renderProgram->setUniform("a_margin", margin);
     m_renderProgram->setUniform("a_offset", m_offset);
     m_renderProgram->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
     m_renderProgram->setUniform("a_edgeToVertices", LookUpData::m_edgeToVertices);
@@ -145,11 +147,11 @@ void Chunk::setupTransformFeedback()
     // Fill positions buffer (with border!)
 
     std::vector<vec3> densityPositions;
-    for (int z = 0; z < dimensions.z + 1; ++z)
+    for (int z = -margin; z < dimensions.z + margin + 1; ++z)
     {
-        for (int y = 0; y < dimensions.y + 1; ++y)
+        for (int y = -margin; y < dimensions.y + margin + 1; ++y)
         {
-            for (int x = 0; x < dimensions.x + 1; ++x)
+            for (int x = -margin; x < dimensions.x + margin + 1; ++x)
             {
                 densityPositions.push_back(vec3(x, y, z) / vec3(dimensions));
             }
