@@ -10,6 +10,7 @@
 #include <globjects/globjects.h>
 #include <globjects/logging.h>
 #include <globjects/DebugMessage.h>
+#include <globjects/Texture.h>
 
 #include <widgetzeug/make_unique.hpp>
 
@@ -17,6 +18,7 @@
 #include <gloperate/painter/ViewportCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
+#include <gloperate/resources/ResourceManager.h>
 
 #include <gloperate/primitives/AdaptiveGrid.h>
 
@@ -81,10 +83,13 @@ void MarchingCubes::onInitialize()
     setupProjection();
     setupOpenGLState();
 
-    m_chunkRenderer = new ChunkRenderer();
+	auto groundTexture = m_resourceManager.load<Texture>("data/marchingcubes/ground.png");
+	groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    m_chunkRenderer = new ChunkRenderer(groundTexture);
 
     m_chunks = {};
-    int size = 5;
+    int size = 3;
     for (int z = 0; z < size; ++z)
     {
         for (int y = 0; y < size; ++y)

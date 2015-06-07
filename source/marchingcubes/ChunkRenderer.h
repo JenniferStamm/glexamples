@@ -25,7 +25,7 @@ class ChunkRenderer : public globjects::Referenced
 {
 
 public:
-    ChunkRenderer();
+	ChunkRenderer(globjects::ref_ptr<globjects::Texture> groundTexture);
     ~ChunkRenderer();
 
     virtual void render(std::vector<globjects::ref_ptr<Chunk>> chunks);
@@ -59,4 +59,6 @@ protected:
     gl::GLsizei m_positionsSize;
 
     glm::mat4x4 m_transform;
+
+	globjects::ref_ptr<globjects::Texture> m_groundTexture;
 };

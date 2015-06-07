@@ -23,12 +23,15 @@ using namespace globjects;
 const ivec3 dimensions(32, 32, 32);
 const int margin(1);
 
-ChunkRenderer::ChunkRenderer()
+ChunkRenderer::ChunkRenderer(globjects::ref_ptr<globjects::Texture> groundTexture)
     : m_densityPositions()
     , m_edgeConnectList()
     , m_positions()
     , m_transform()
+	, m_groundTexture(groundTexture)
 {
+	m_groundTexture->setName("Ground Texture");
+
     setupTransformFeedback();
 
     setupProgram();
@@ -40,6 +43,8 @@ ChunkRenderer::~ChunkRenderer() = default;
 
 void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
 {
+	m_groundTexture->bindActive(GL_TEXTURE0);
+
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, m_transform);
     m_renderProgram->setUniform("a_dim", dimensions);
@@ -65,6 +70,7 @@ void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
     }
     m_renderingVao->unbind();
     m_renderProgram->release();
+	m_groundTexture->unbind();
 }
 
 void ChunkRenderer::setTransform(mat4x4 transform)

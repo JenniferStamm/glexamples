@@ -20,6 +20,7 @@ layout(points) in;
 layout(triangle_strip, max_vertices = 15) out;
 
 out vec3 g_normal;
+out vec3 g_position;
 
 const vec3 x  = vec3(0.5,0,0);
 const vec3 y  = vec3(0,0.5,0);
@@ -95,8 +96,8 @@ void main() {
             vec3 vertexBNormal = normalAtPosition(ivec3(center + vertexBPos));
             vec3 mixedNormal = mix(vertexANormal,vertexBNormal,mixing);
             g_normal = mixedNormal;
-            vec3 position = (center + mix(vertexAPos, vertexBPos, mixing)) / a_dim + a_offset;
-            gl_Position = transform * vec4(position, 1.0);
+            g_position = (center + mix(vertexAPos, vertexBPos, mixing)) / a_dim + a_offset;
+            gl_Position = transform * vec4(g_position, 1.0);
             EmitVertex();
         }
         EndPrimitive();
