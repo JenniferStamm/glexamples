@@ -53,7 +53,7 @@ void Chunk::setupTransformFeedback(unsigned int densitySize)
     // Setup result buffer
 
     m_densities = new Buffer();
-    m_densities->setData(densitySize * sizeof(float), nullptr, GL_STATIC_READ);
+    m_densities->setData(densitySize * sizeof(float), nullptr, GL_STATIC_COPY);
     
 }
 
