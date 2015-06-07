@@ -1,6 +1,7 @@
 #include "ChunkRenderer.h"
 
 #include <glm/vec3.hpp>
+#include <glm/gtc/noise.hpp>
 
 #include <glbinding/gl/enum.h>
 
@@ -33,6 +34,7 @@ ChunkRenderer::ChunkRenderer()
 
     setupProgram();
     setupRendering();
+    setupNoiseTextures();
 
 }
 
@@ -164,12 +166,55 @@ void ChunkRenderer::setupTransformFeedback()
     m_densityPositionVao->enable(0);
 }
 
+void ChunkRenderer::setupNoiseTextures()
+{
+    // Random values as offsets
+    m_noiseTexture1 = setupNoiseTexture(vec3(0, 0, 0));
+    m_noiseTexture2 = setupNoiseTexture(vec3(42, 1, 5));
+    m_noiseTexture3 = setupNoiseTexture(vec3(2, 3, 4));
+    m_noiseTexture4 = setupNoiseTexture(vec3(1, 33, 7));
+}
+
+globjects::ref_ptr<globjects::Texture> ChunkRenderer::setupNoiseTexture(vec3 offset)
+{
+    static const int size(32);
+
+    float data[size * size * size];
+
+    int i = 0;
+    for (int z = 0; z < size; ++z)
+    {
+        for (int y = 0; y < size; ++y)
+        {
+            for (int x = 0; x < size; ++x, ++i)
+            {
+                float val = perlin(vec3(x, y, z) / float(size) + offset);
+                data[i] = val;
+            }
+        }
+    }
+    auto texture = Texture::createDefault(GL_TEXTURE_3D);
+    texture->setParameter(GLenum::GL_TEXTURE_WRAP_S, GL_REPEAT);
+    texture->setParameter(GLenum::GL_TEXTURE_WRAP_T, GL_REPEAT);
+    texture->setParameter(GLenum::GL_TEXTURE_WRAP_R, GL_REPEAT);
+    texture->image3D(0, GL_R32F, size, size, size, 0, GL_RED, GL_FLOAT, data);
+    return texture;
+}
+
 void ChunkRenderer::runTransformFeedback(Chunk * chunk)
 {
     chunk->setupTransformFeedback(m_densityPositionsSize);
     m_densityPositionVao->bind();
+    m_noiseTexture1->bindActive(GL_TEXTURE1);
+    m_noiseTexture2->bindActive(GL_TEXTURE2);
+    m_noiseTexture3->bindActive(GL_TEXTURE3);
+    m_noiseTexture4->bindActive(GL_TEXTURE4);
     m_transformFeedback->bind();
     m_transformFeedbackProgram->setUniform("a_offset", chunk->offset());
+    m_transformFeedbackProgram->setUniform("noiseTexture1", 1);
+    m_transformFeedbackProgram->setUniform("noiseTexture2", 2);
+    m_transformFeedbackProgram->setUniform("noiseTexture3", 3);
+    m_transformFeedbackProgram->setUniform("noiseTexture4", 4);
     chunk->densities()->bindBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
 
     glEnable(GL_RASTERIZER_DISCARD);
@@ -183,5 +228,10 @@ void ChunkRenderer::runTransformFeedback(Chunk * chunk)
 
     glDisable(GL_RASTERIZER_DISCARD);
 
+    m_noiseTexture1->unbind();
+    m_noiseTexture2->unbind();
+    m_noiseTexture3->unbind();
+    m_noiseTexture4->unbind();
     m_densityPositionVao->unbind();
+
 }

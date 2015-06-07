@@ -38,6 +38,8 @@ protected:
     void setupProgram();
     void setupRendering();
     void setupTransformFeedback();
+    void setupNoiseTextures();
+    globjects::ref_ptr<globjects::Texture> setupNoiseTexture(glm::vec3 offset);
 
 protected:
     globjects::ref_ptr<globjects::Buffer> m_positions;
@@ -59,4 +61,9 @@ protected:
     gl::GLsizei m_positionsSize;
 
     glm::mat4x4 m_transform;
+
+    globjects::ref_ptr<globjects::Texture> m_noiseTexture1;
+    globjects::ref_ptr<globjects::Texture> m_noiseTexture2;
+    globjects::ref_ptr<globjects::Texture> m_noiseTexture3;
+    globjects::ref_ptr<globjects::Texture> m_noiseTexture4;
 };
