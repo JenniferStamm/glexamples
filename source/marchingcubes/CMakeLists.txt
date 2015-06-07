@@ -37,6 +37,7 @@ set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 set(sources
     ${source_path}/Chunk.cpp
+    ${source_path}/ChunkRenderer.cpp
     ${source_path}/LookUpData.cpp
     ${source_path}/MarchingCubesPainter.cpp
     ${source_path}/plugin.cpp
@@ -44,6 +45,7 @@ set(sources
 
 set(api_includes
     ${include_path}/Chunk.h
+    ${include_path}/ChunkRenderer.h
     ${include_path}/LookUpData.h
     ${include_path}/MarchingCubesPainter.h
 )

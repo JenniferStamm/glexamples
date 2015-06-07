@@ -21,6 +21,7 @@
 #include <gloperate/primitives/AdaptiveGrid.h>
 
 #include "Chunk.h"
+#include "ChunkRenderer.h"
 
 using namespace gl;
 using namespace glm;
@@ -35,6 +36,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_projectionCapability{addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
 ,   m_chunks()
+,   m_chunkRenderer()
 {
 }
 
@@ -79,15 +81,19 @@ void MarchingCubes::onInitialize()
     setupProjection();
     setupOpenGLState();
 
+    m_chunkRenderer = new ChunkRenderer();
+
     m_chunks = {};
-    int size = 3;
+    int size = 5;
     for (int z = 0; z < size; ++z)
     {
         for (int y = 0; y < size; ++y)
         {
             for (int x = 0; x < size; ++x)
             {
-                m_chunks.push_back(new Chunk(vec3(x, y, z)));
+                auto newChunk = new Chunk(vec3(x, y, z));
+                m_chunkRenderer->runTransformFeedback(newChunk);
+                m_chunks.push_back(newChunk);
             }
         }
     }
@@ -120,12 +126,9 @@ void MarchingCubes::onPaint()
 
     m_grid->update(eye, transform);
     m_grid->draw();
+    m_chunkRenderer->setTransform(transform);
 
-    for (auto chunk : m_chunks)
-    {
-        chunk->setTransform(transform);
-        chunk->draw();
-    }
+    m_chunkRenderer->render(m_chunks);
 
     Framebuffer::unbind(GL_FRAMEBUFFER);
 }

@@ -14,6 +14,7 @@
 #include <reflectionzeug/Color.h>
 
 class Chunk;
+class ChunkRenderer;
 
 namespace globjects
 {
@@ -58,4 +59,5 @@ protected:
     globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
 
     std::vector<globjects::ref_ptr<Chunk>> m_chunks;
+    globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
 };
