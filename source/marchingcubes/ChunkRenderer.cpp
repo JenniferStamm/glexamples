@@ -194,9 +194,9 @@ globjects::ref_ptr<globjects::Texture> ChunkRenderer::setupNoiseTexture(vec3 off
         }
     }
     auto texture = Texture::createDefault(GL_TEXTURE_3D);
-    texture->setParameter(GLenum::GL_TEXTURE_WRAP_S, GL_REPEAT);
-    texture->setParameter(GLenum::GL_TEXTURE_WRAP_T, GL_REPEAT);
-    texture->setParameter(GLenum::GL_TEXTURE_WRAP_R, GL_REPEAT);
+    texture->setParameter(GLenum::GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    texture->setParameter(GLenum::GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    texture->setParameter(GLenum::GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
     texture->image3D(0, GL_R32F, size, size, size, 0, GL_RED, GL_FLOAT, data);
     return texture;
 }
