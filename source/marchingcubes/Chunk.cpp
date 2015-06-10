@@ -25,29 +25,68 @@ const ivec3 dimensions(32, 32, 32);
 const int margin(1);
 
 Chunk::Chunk(glm::vec3 offset)
-    : m_densities()
+    : AbstractDrawable()
+    , m_densities()
+    , m_vertexPositions()
+    , m_vertexNormals()
     , m_densitiesTexture()
     , m_offset(offset)
+    , m_triangleCount(0)
+    , m_isEmpty(false)
 {
     setupRendering();
 }
 
 Chunk::~Chunk() = default;
 
-void Chunk::draw(VertexArray * vao, gl::GLsizei positionsSize)
+void Chunk::draw()
 {
-    m_densitiesTexture->bindActive(GL_TEXTURE0);
-    m_densitiesTexture->texBuffer(GL_R32F, m_densities);
-
-    vao->drawArrays(GL_POINTS, 0, positionsSize);
+    // Don't draw if the cunk is empty
+    if (isEmpty())
+    {
+        return;
+    }
+    m_vao->bind();
+    m_vao->drawArrays(GL_TRIANGLES, 0, m_triangleCount);
+    
+    m_vao->unbind();
 }
 
 void Chunk::setupRendering()
 {
-    m_densitiesTexture = new Texture(GL_TEXTURE_BUFFER);
+    m_vao = new VertexArray;
+
+    // Setup positions binding
+
+    auto positionsBinding = m_vao->binding(0);
+    positionsBinding->setAttribute(0);
+    positionsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
+    m_vao->enable(0);
+
+    // Setup normals binding
+
+    auto normalsBinding = m_vao->binding(1);
+    normalsBinding->setAttribute(1);
+    normalsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
+    m_vao->enable(1);
 }
 
-void Chunk::setupTransformFeedback(unsigned int densitySize)
+void Chunk::setTriangleCount(unsigned triangleCount)
+{
+    m_triangleCount = triangleCount;
+
+    // Vertices buffer can be freed if chunk is empty
+    if (m_triangleCount == 0)
+    {
+        m_isEmpty = true;
+        m_vertexPositions = nullptr;
+        m_vertexNormals = nullptr;
+        return;
+    }
+
+}
+
+void Chunk::setupDensityGeneration(unsigned int densitySize)
 {
 
     // Setup result buffer
@@ -57,3 +96,31 @@ void Chunk::setupTransformFeedback(unsigned int densitySize)
     
 }
 
+void Chunk::teardownDensityGeneration()
+{
+}
+
+void Chunk::setupMeshGeneration(unsigned int verticesSize)
+{
+    m_vertexPositions = new Buffer();
+    //TODO Use proper size?
+    m_vertexPositions->setData(verticesSize * 15 * sizeof(vec3), nullptr, GL_STATIC_COPY);
+
+    m_vertexNormals = new Buffer();
+    //TODO Use proper size?
+    m_vertexNormals->setData(verticesSize * 15 * sizeof(vec3), nullptr, GL_STATIC_COPY);
+
+    m_densitiesTexture = new Texture(GL_TEXTURE_BUFFER);
+    m_densitiesTexture->bindActive(GL_TEXTURE0);
+    m_densitiesTexture->texBuffer(GL_R32F, m_densities);
+}
+
+void Chunk::teardownMeshGeneration()
+{
+    m_vao->binding(0)->setBuffer(m_vertexPositions, 0, sizeof(vec3));
+    m_vao->binding(1)->setBuffer(m_vertexNormals, 0, sizeof(vec3));
+    // Density is not needed anymore
+
+    m_densities = nullptr;
+    m_densitiesTexture = nullptr;
+}

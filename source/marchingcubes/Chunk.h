@@ -17,17 +17,25 @@ namespace globjects
     class VertexArray;
 }
 
-class Chunk : public globjects::Referenced
+class Chunk : public gloperate::AbstractDrawable, public globjects::Referenced
 {
 public:
     Chunk(glm::vec3 offset);
     ~Chunk();
 
-    virtual void draw(globjects::VertexArray * vao, gl::GLsizei positionsSize);
+    virtual void draw() override;
 
     glm::vec3 offset() const { return m_offset; }
     globjects::ref_ptr<globjects::Buffer> densities() const { return m_densities; }
-    void setupTransformFeedback(unsigned int densitySize);
+    globjects::ref_ptr<globjects::Buffer> vertexPositions() const { return m_vertexPositions; }
+    globjects::ref_ptr<globjects::Buffer> vertexNormals() const { return m_vertexNormals; }
+    unsigned int triangleCount() const { return m_triangleCount; }
+    void setTriangleCount(unsigned int triangleCount);
+    bool isEmpty() const { return m_isEmpty; }
+    void setupDensityGeneration(unsigned int densitySize);
+    void teardownDensityGeneration();
+    void setupMeshGeneration(unsigned int verticesSize);
+    void teardownMeshGeneration();
 
 protected:
     void setupRendering();
@@ -35,5 +43,12 @@ protected:
     globjects::ref_ptr<globjects::Buffer> m_densities;
     globjects::ref_ptr<globjects::Texture> m_densitiesTexture;
 
+    globjects::ref_ptr<globjects::Buffer> m_vertexPositions;
+    globjects::ref_ptr<globjects::Buffer> m_vertexNormals;
+
     glm::vec3 m_offset;
+
+    unsigned int m_triangleCount;
+
+    bool m_isEmpty;
 };

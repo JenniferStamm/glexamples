@@ -84,7 +84,7 @@ void MarchingCubes::onInitialize()
     m_chunkRenderer = new ChunkRenderer();
 
     m_chunks = {};
-    int size = 5;
+    int size = 7;
     for (int z = 0; z < size; ++z)
     {
         for (int y = 0; y < size; ++y)
@@ -92,7 +92,8 @@ void MarchingCubes::onInitialize()
             for (int x = 0; x < size; ++x)
             {
                 auto newChunk = new Chunk(vec3(x, y, z));
-                m_chunkRenderer->runTransformFeedback(newChunk);
+                m_chunkRenderer->generateDensities(newChunk);
+                m_chunkRenderer->generateMesh(newChunk);
                 m_chunks.push_back(newChunk);
             }
         }

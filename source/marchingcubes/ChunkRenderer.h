@@ -32,12 +32,14 @@ public:
 
     void setTransform(glm::mat4x4 transform);
 
-    void runTransformFeedback(Chunk * chunk);
+    void generateDensities(Chunk * chunk);
+    void generateMesh(Chunk * chunk);
 
 protected:
     void setupProgram();
     void setupRendering();
-    void setupTransformFeedback();
+    void setupDensityGeneration();
+    void setupMeshGeneration();
     void setupNoiseTextures();
     globjects::ref_ptr<globjects::Texture> setupNoiseTexture(glm::vec3 offset);
 
@@ -46,15 +48,18 @@ protected:
     gl::GLint m_transformLocation;
 
     globjects::ref_ptr<globjects::VertexArray> m_densityPositionVao;
-    globjects::ref_ptr<globjects::VertexArray> m_renderingVao;
+    globjects::ref_ptr<globjects::VertexArray> m_meshVao;
 
     globjects::ref_ptr<globjects::Buffer> m_densityPositions;
     gl::GLsizei m_densityPositionsSize;
 
     globjects::ref_ptr<globjects::Buffer> m_edgeConnectList;
 
-    globjects::ref_ptr<globjects::TransformFeedback> m_transformFeedback;
-    globjects::ref_ptr<globjects::Program> m_transformFeedbackProgram;
+    globjects::ref_ptr<globjects::TransformFeedback> m_densityGenerationTransformFeedback;
+    globjects::ref_ptr<globjects::Program> m_densityGenerationProgram;
+
+    globjects::ref_ptr<globjects::TransformFeedback> m_meshGenerationTransformFeedback;
+    globjects::ref_ptr<globjects::Program> m_meshGenerationProgram;
 
     globjects::ref_ptr<globjects::Program> m_renderProgram;
 
