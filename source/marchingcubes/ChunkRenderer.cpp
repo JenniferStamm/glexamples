@@ -250,7 +250,6 @@ void ChunkRenderer::generateMesh(Chunk* chunk)
     chunk->setupMeshGeneration(m_positionsSize);
 
     m_meshGenerationProgram->use();
-    m_meshGenerationProgram->setUniform(m_transformLocation, m_transform);
     m_meshGenerationProgram->setUniform("a_dim", dimensions);
     m_meshGenerationProgram->setUniform("a_margin", margin);
     m_meshGenerationProgram->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
