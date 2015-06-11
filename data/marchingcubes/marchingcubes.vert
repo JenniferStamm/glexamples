@@ -8,10 +8,12 @@ uniform vec3 a_offset;
 layout(location = 0) in vec3 a_vertex;
 layout(location = 1) in vec3 a_normal;
 
+out vec3 v_position;
 out vec3 v_normal;
 
 void main()
 {
-	gl_Position = transform * vec4(a_vertex + a_offset, 1.0);
+	v_position = a_vertex + a_offset;
     v_normal = a_normal;
+    gl_Position = transform * vec4(v_position, 1.0);
 }

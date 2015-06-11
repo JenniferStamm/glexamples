@@ -96,7 +96,6 @@ void main() {
             vec3 vertexBNormal = normalAtPosition(ivec3(center + vertexBPos));
             vec3 mixedNormal = mix(vertexANormal,vertexBNormal,mixing);
             out_normal = mixedNormal;
-            //gl_Position = transform * (vec4((center + mix(vertexAPos, vertexBPos, mixing)) / a_dim + a_offset,1.0));
             out_position = (center + mix(vertexAPos, vertexBPos, mixing)) / a_dim;
             EmitVertex();
             EndPrimitive();
