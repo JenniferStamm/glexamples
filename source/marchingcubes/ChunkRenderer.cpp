@@ -51,7 +51,7 @@ void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
 
     for (auto chunk : chunks)
     {
-        m_renderProgram->setUniform("a_offset", chunk->offset());    
+        m_renderProgram->setUniform(m_offsetLocation, chunk->offset());    
         chunk->draw();
     }
 
@@ -73,6 +73,7 @@ void ChunkRenderer::setupProgram()
     );
 
     m_transformLocation = m_renderProgram->getUniformLocation("transform");
+    m_offsetLocation = m_renderProgram->getUniformLocation("a_offset");
 }
 
 void ChunkRenderer::setupRendering()
@@ -167,7 +168,7 @@ void ChunkRenderer::setupMeshGeneration()
 
     // Setup positions binding
 
-    auto positionsBinding = m_meshVao->binding(0);
+    ref_ptr<VertexAttributeBinding> positionsBinding = m_meshVao->binding(0);
     positionsBinding->setAttribute(0);
     positionsBinding->setBuffer(m_positions, 0, sizeof(vec3));
     positionsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);

@@ -58,14 +58,14 @@ void Chunk::setupRendering()
 
     // Setup positions binding
 
-    auto positionsBinding = m_vao->binding(0);
+    ref_ptr<VertexAttributeBinding> positionsBinding = m_vao->binding(0);
     positionsBinding->setAttribute(0);
     positionsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
     m_vao->enable(0);
 
     // Setup normals binding
 
-    auto normalsBinding = m_vao->binding(1);
+    ref_ptr<VertexAttributeBinding> normalsBinding = m_vao->binding(1);
     normalsBinding->setAttribute(1);
     normalsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
     m_vao->enable(1);

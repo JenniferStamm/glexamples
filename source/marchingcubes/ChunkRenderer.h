@@ -46,6 +46,7 @@ protected:
 protected:
     globjects::ref_ptr<globjects::Buffer> m_positions;
     gl::GLint m_transformLocation;
+    gl::GLint m_offsetLocation;
 
     globjects::ref_ptr<globjects::VertexArray> m_densityPositionVao;
     globjects::ref_ptr<globjects::VertexArray> m_meshVao;
