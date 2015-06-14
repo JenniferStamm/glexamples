@@ -17,10 +17,10 @@ uniform ivec2[12] a_edgeToVertices;
 
 layout(points) in;
 
-layout(triangle_strip, max_vertices = 15) out;
+layout(points, max_vertices = 15) out;
 
-out vec3 g_normal;
-out vec3 g_position;
+out vec3 out_position;
+out vec3 out_normal;
 
 const vec3 x  = vec3(0.5,0,0);
 const vec3 y  = vec3(0,0.5,0);
@@ -95,11 +95,10 @@ void main() {
             vec3 vertexANormal = normalAtPosition(ivec3(center + vertexAPos));
             vec3 vertexBNormal = normalAtPosition(ivec3(center + vertexBPos));
             vec3 mixedNormal = mix(vertexANormal,vertexBNormal,mixing);
-            g_normal = mixedNormal;
-            g_position = (center + mix(vertexAPos, vertexBPos, mixing)) / a_dim + a_offset;
-            gl_Position = transform * vec4(g_position, 1.0);
+            out_normal = mixedNormal;
+            out_position = (center + mix(vertexAPos, vertexBPos, mixing)) / a_dim;
             EmitVertex();
+            EndPrimitive();
         }
-        EndPrimitive();
     }
 }

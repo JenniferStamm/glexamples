@@ -4,8 +4,8 @@ uniform sampler2D ground;
 
 uniform vec4 a_cubeColor;
 
-in vec3 g_normal;
-in vec3 g_position;
+in vec3 v_normal;
+in vec3 v_position;
 
 out vec4 fragColor;
 
@@ -13,7 +13,7 @@ const float tex_scale = 1.0;
 
 void main()
 {
-    vec3 blend_weights = abs(g_normal);
+    vec3 blend_weights = abs(v_normal);
     
     // Tighten up the blending zone:  
     blend_weights = (blend_weights - 0.2) * 7;   
@@ -24,9 +24,9 @@ void main()
     
     // Compute the UV coords for each of the 3 planar projections.  
     // tex_scale (default ~ 1.0) determines how big the textures appear.  
-    vec2 coord1 = g_position.yz * tex_scale;  
-    vec2 coord2 = g_position.zx * tex_scale;  
-    vec2 coord3 = g_position.xy * tex_scale;
+    vec2 coord1 = v_position.yz * tex_scale;  
+    vec2 coord2 = v_position.zx * tex_scale;  
+    vec2 coord3 = v_position.xy * tex_scale;
     coord1.x = mod(coord1.x, 0.25);
     coord2.x = mod(coord2.x, 0.25);
     coord3.x = mod(coord3.x, 0.25);
