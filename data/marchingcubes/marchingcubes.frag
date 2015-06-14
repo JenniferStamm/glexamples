@@ -9,6 +9,8 @@ in vec3 v_position;
 
 out vec4 fragColor;
 
+const vec3 lightDirection = vec3(0.0, 1.0, 0.0);
+
 const float tex_scale = 1.0;
 
 void main()
@@ -41,6 +43,8 @@ void main()
         yColor * vec4(blend_weights.y) +  
         zColor * vec4(blend_weights.z);
         
-    fragColor = blended_color;
+    float shadow = dot(v_normal, lightDirection);
+    
+    fragColor = vec4(blended_color.xyz * smoothstep(-0.3, 0.3, shadow), 1.0);
     //fragColor = vec4(coord1, 0.0, 1.0);
 }
