@@ -84,12 +84,15 @@ void MarchingCubes::onInitialize()
     setupOpenGLState();
 
 	auto groundTexture = m_resourceManager.load<Texture>("data/marchingcubes/ground.png");
+	groundTexture->generateMipmap();
 	groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
 	groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+	groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     m_chunkRenderer = new ChunkRenderer(groundTexture);
 
     m_chunks = {};
-    int size = 7;
+    int size = 3;
     for (int z = 0; z < size; ++z)
     {
         for (int y = 0; y < size; ++y)
