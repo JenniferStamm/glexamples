@@ -39,7 +39,11 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
 ,   m_chunks()
 ,   m_chunkRenderer()
+,   m_useMipMap(true)
+,   m_useMipMapChanged(false)
 {
+	addProperty<bool>("useMipMap", this,
+		&MarchingCubes::useMipMap, &MarchingCubes::setUseMipMap);
 }
 
 MarchingCubes::~MarchingCubes() = default;
@@ -53,6 +57,17 @@ void MarchingCubes::setupProjection()
     m_projectionCapability->setFovy(radians(fovy));
 
     m_grid->setNearFar(zNear, zFar);
+}
+
+bool MarchingCubes::useMipMap() const
+{
+	return m_useMipMap;
+}
+
+void MarchingCubes::setUseMipMap(bool useMipMap)
+{
+	m_useMipMapChanged = m_useMipMap != useMipMap;
+	m_useMipMap = useMipMap;
 }
 
 void MarchingCubes::setupGrid()
@@ -84,11 +99,14 @@ void MarchingCubes::onInitialize()
     setupOpenGLState();
 
 	auto groundTexture = m_resourceManager.load<Texture>("data/marchingcubes/ground.png");
-	groundTexture->generateMipmap();
 	groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
 	groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-	groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	if (m_useMipMap)
+	{
+		groundTexture->generateMipmap();
+		groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	}
     m_chunkRenderer = new ChunkRenderer(groundTexture);
 
     m_chunks = {};
@@ -120,6 +138,11 @@ void MarchingCubes::onPaint()
 
         m_viewportCapability->setChanged(false);
     }
+
+	if (m_useMipMapChanged)
+	{
+		m_chunkRenderer->updateTexture(m_useMipMap);
+	}
 
     auto fbo = m_targetFramebufferCapability->framebuffer();
 

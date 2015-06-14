@@ -35,6 +35,8 @@ public:
     void generateDensities(Chunk * chunk);
     void generateMesh(Chunk * chunk);
 
+	void updateTexture(bool useMipMap);
+
 protected:
     void setupProgram();
     void setupRendering();

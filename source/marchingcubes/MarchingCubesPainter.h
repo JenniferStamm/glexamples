@@ -39,6 +39,9 @@ class MarchingCubes : public gloperate::Painter
 public:
 	MarchingCubes(gloperate::ResourceManager & resourceManager);
 	virtual ~MarchingCubes();
+
+	bool useMipMap() const;
+	void setUseMipMap(bool useMipMap);
     
 protected:
     void setupGrid();
@@ -60,4 +63,8 @@ protected:
 
     std::vector<globjects::ref_ptr<Chunk>> m_chunks;
     globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
+
+	/* parameters */
+	bool m_useMipMap;
+	bool m_useMipMapChanged;
 };
