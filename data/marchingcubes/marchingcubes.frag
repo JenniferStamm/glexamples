@@ -30,13 +30,10 @@ void main()
     vec2 coord1 = v_position.yz * tex_scale;  
     vec2 coord2 = v_position.zx * tex_scale;  
     vec2 coord3 = v_position.xy * tex_scale;
-    coord1.x = mod(coord1.x, 0.25);
-    coord2.x = mod(coord2.x, 0.25);
-    coord3.x = mod(coord3.x, 0.25);
     
-    vec4 xColor = mix(texture(ground, coord1), texture(ground, coord1 + 0.75), 0.5);
-    vec4 yColor = mix(texture(ground, coord2), texture(ground, coord2 + 0.75), 0.5);
-    vec4 zColor = mix(texture(ground, coord2), texture(ground, coord2 + 0.75), 0.5);
+    vec4 xColor = texture(ground, coord1);
+    vec4 yColor = texture(ground, coord2);
+    vec4 zColor = texture(ground, coord2);
     
      // Finally, blend the results of the 3 planar projections.  
     vec4 blended_color = 
@@ -52,5 +49,4 @@ void main()
     float shadow = dot(v_normal, lightDirection);
     
     fragColor = vec4(blended_color.xyz * smoothstep(-0.2, 0.6, shadow), 1.0);
-    //fragColor = vec4(coord1, 0.0, 1.0);
 }
