@@ -1,6 +1,7 @@
 #version 150 core
 
 uniform sampler2D ground;
+uniform sampler2D colorTex;
 
 uniform vec4 a_cubeColor;
 
@@ -42,6 +43,11 @@ void main()
         xColor * vec4(blend_weights.x) +  
         yColor * vec4(blend_weights.y) +  
         zColor * vec4(blend_weights.z);
+        
+    // Add color from colorTex mainly dependent on height
+    vec2 colorCoord = vec2(mod(v_position.y, 0.25) * 4 + 0.5, v_position.x) * 2.0;
+    vec3 colorAddition = texture(colorTex, colorCoord).xyz;
+    blended_color.xyz = mix(blended_color.xyz, colorAddition, 0.2);
         
     float shadow = dot(v_normal, lightDirection);
     

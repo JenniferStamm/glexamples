@@ -54,6 +54,7 @@ void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
 	}
 
 	m_groundTexture->bindActive(GL_TEXTURE0);
+	m_colorTexture->bindActive(GL_TEXTURE1);
 
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, m_transform);
@@ -66,6 +67,7 @@ void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
 
     m_renderProgram->release();
 	m_groundTexture->unbind();
+	m_colorTexture->unbind();
 }
 
 void ChunkRenderer::setColorTexture(globjects::ref_ptr<globjects::Texture> colorTexture)
@@ -96,6 +98,8 @@ void ChunkRenderer::setupProgram()
 
 void ChunkRenderer::setupRendering()
 {
+	m_renderProgram->setUniform("ground", 0);
+	m_renderProgram->setUniform("colorTex", 1);
 }
 
 void ChunkRenderer::setupDensityGeneration()
@@ -322,9 +326,13 @@ void ChunkRenderer::updateTexture(bool useMipMap)
 		m_groundTexture->generateMipmap();
 		m_groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		m_colorTexture->generateMipmap();
+		m_colorTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		m_colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	} 
 	else
 	{
 		m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		m_colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 }
