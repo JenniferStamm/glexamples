@@ -99,6 +99,7 @@ void MarchingCubes::onInitialize()
     setupOpenGLState();
 
 	auto groundTexture = m_resourceManager.load<Texture>("data/marchingcubes/ground.png");
+	groundTexture->setName("GroundTexture");
 	groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
 	groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 	if (m_useMipMap)
@@ -107,7 +108,21 @@ void MarchingCubes::onInitialize()
 		groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	}
-    m_chunkRenderer = new ChunkRenderer(groundTexture);
+
+	auto colorTexture = m_resourceManager.load<Texture>("data/marchingcubes/terrain_color.jpg");
+	colorTexture->setName("ColorTexture");
+	colorTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+	colorTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+	if (m_useMipMap)
+	{
+		colorTexture->generateMipmap();
+		colorTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	}
+
+    m_chunkRenderer = new ChunkRenderer();
+	m_chunkRenderer->setGroundTexture(groundTexture);
+	m_chunkRenderer->setColorTexture(colorTexture);
 
     m_chunks = {};
     int size = 3;
