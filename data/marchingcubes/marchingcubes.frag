@@ -6,6 +6,7 @@ uniform sampler2D colorTex;
 uniform vec4 a_cubeColor;
 
 in vec3 v_normal;
+in float v_occlusion;
 in vec3 v_position;
 
 out vec4 fragColor;
@@ -48,5 +49,5 @@ void main()
         
     float shadow = dot(v_normal, lightDirection);
     
-    fragColor = vec4(blended_color.xyz * smoothstep(-0.2, 0.6, shadow), 1.0);
+    fragColor = vec4(blended_color.xyz * smoothstep(-0.2, 0.6, shadow) * v_occlusion, 1.0);
 }

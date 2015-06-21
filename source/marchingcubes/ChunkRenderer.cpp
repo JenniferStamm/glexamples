@@ -25,7 +25,7 @@ using namespace glm;
 using namespace globjects;
 
 const ivec3 dimensions(32, 32, 32);
-const int margin(1);
+const int margin(5);
 
 ChunkRenderer::ChunkRenderer()
     : m_densityPositions()
@@ -192,7 +192,7 @@ void ChunkRenderer::setupMeshGeneration()
     auto positionsBinding = m_meshVao->binding(0);
     positionsBinding->setAttribute(0);
     positionsBinding->setBuffer(m_positions, 0, sizeof(vec3));
-    positionsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
+    positionsBinding->setFormat(4, GL_FLOAT, GL_FALSE, 0);
     m_meshVao->enable(0);
 }
 

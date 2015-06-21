@@ -22,7 +22,6 @@ using namespace glm;
 using namespace globjects;
 
 const ivec3 dimensions(32, 32, 32);
-const int margin(1);
 
 Chunk::Chunk(glm::vec3 offset)
     : AbstractDrawable()
@@ -60,7 +59,7 @@ void Chunk::setupRendering()
 
     auto positionsBinding = m_vao->binding(0);
     positionsBinding->setAttribute(0);
-    positionsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
+    positionsBinding->setFormat(4, GL_FLOAT, GL_FALSE, 0);
     m_vao->enable(0);
 
     // Setup normals binding
@@ -104,7 +103,7 @@ void Chunk::setupMeshGeneration(unsigned int verticesSize)
 {
     m_vertexPositions = new Buffer();
     //TODO Use proper size?
-    m_vertexPositions->setData(verticesSize * 15 * sizeof(vec3), nullptr, GL_STATIC_COPY);
+    m_vertexPositions->setData(verticesSize * 15 * sizeof(vec4), nullptr, GL_STATIC_COPY);
 
     m_vertexNormals = new Buffer();
     //TODO Use proper size?
@@ -117,7 +116,7 @@ void Chunk::setupMeshGeneration(unsigned int verticesSize)
 
 void Chunk::teardownMeshGeneration()
 {
-    m_vao->binding(0)->setBuffer(m_vertexPositions, 0, sizeof(vec3));
+    m_vao->binding(0)->setBuffer(m_vertexPositions, 0, sizeof(vec4));
     m_vao->binding(1)->setBuffer(m_vertexNormals, 0, sizeof(vec3));
     // Density is not needed anymore
 
