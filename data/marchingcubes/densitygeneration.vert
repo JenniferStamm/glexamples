@@ -17,6 +17,12 @@ out float out_density;
 void main()
 {
     vec3 realPosition = in_position + a_offset;
+    float xWarp = texture(noiseTexture1, realPosition * 0.04).r;
+    float yWarp = texture(noiseTexture2, realPosition * 0.04).r;
+    float zWarp = texture(noiseTexture3, realPosition * 0.04).r;
+    
+    realPosition += vec3(xWarp, yWarp, zWarp) * 4;
+    
     out_density = -realPosition.y + 1;
     out_density += texture(noiseTexture1, realPosition * 4.03).r * 0.1;
     out_density += texture(noiseTexture2, realPosition * 1.96).r * 0.2;

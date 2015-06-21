@@ -1,13 +1,17 @@
 #version 150 core
 
 uniform sampler2D ground;
+uniform sampler2D colorTex;
 
 uniform vec4 a_cubeColor;
 
 in vec3 v_normal;
+in float v_occlusion;
 in vec3 v_position;
 
 out vec4 fragColor;
+
+const vec3 lightDirection = vec3(0.0, 1.0, 0.0);
 
 const float tex_scale = 1.0;
 
@@ -27,13 +31,10 @@ void main()
     vec2 coord1 = v_position.yz * tex_scale;  
     vec2 coord2 = v_position.zx * tex_scale;  
     vec2 coord3 = v_position.xy * tex_scale;
-    coord1.x = mod(coord1.x, 0.25);
-    coord2.x = mod(coord2.x, 0.25);
-    coord3.x = mod(coord3.x, 0.25);
     
     vec4 xColor = texture(ground, coord1);
     vec4 yColor = texture(ground, coord2);
-    vec4 zColor = texture(ground, coord3);
+    vec4 zColor = texture(ground, coord2);
     
      // Finally, blend the results of the 3 planar projections.  
     vec4 blended_color = 
@@ -41,6 +42,12 @@ void main()
         yColor * vec4(blend_weights.y) +  
         zColor * vec4(blend_weights.z);
         
-    fragColor = blended_color;
-    //fragColor = vec4(coord1, 0.0, 1.0);
+    // Add color from colorTex mainly dependent on height
+    vec2 colorCoord = vec2(mod(v_position.y, 0.25) * 4 + 0.5, v_position.x) * 2.0;
+    vec3 colorAddition = texture(colorTex, colorCoord).xyz;
+    blended_color.xyz = mix(blended_color.xyz, colorAddition, 0.2);
+        
+    float shadow = dot(v_normal, lightDirection);
+    
+    fragColor = vec4(blended_color.xyz * smoothstep(-0.2, 0.6, shadow) * v_occlusion, 1.0);
 }

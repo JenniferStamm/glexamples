@@ -25,15 +25,20 @@ class ChunkRenderer : public globjects::Referenced
 {
 
 public:
-	ChunkRenderer(globjects::ref_ptr<globjects::Texture> groundTexture);
+	ChunkRenderer();
     ~ChunkRenderer();
 
     virtual void render(std::vector<globjects::ref_ptr<Chunk>> chunks);
+
+	void setColorTexture(globjects::ref_ptr<globjects::Texture> colorTexture);
+	void setGroundTexture(globjects::ref_ptr<globjects::Texture> groundTexture);
 
     void setTransform(glm::mat4x4 transform);
 
     void generateDensities(Chunk * chunk);
     void generateMesh(Chunk * chunk);
+
+	void updateTexture(bool useMipMap);
 
 protected:
     void setupProgram();
@@ -73,5 +78,6 @@ protected:
     globjects::ref_ptr<globjects::Texture> m_noiseTexture3;
     globjects::ref_ptr<globjects::Texture> m_noiseTexture4;
 
+	globjects::ref_ptr<globjects::Texture> m_colorTexture;
 	globjects::ref_ptr<globjects::Texture> m_groundTexture;
 };

@@ -15,6 +15,8 @@
 #include <globjects/TransformFeedback.h>
 #include <globjects/VertexAttributeBinding.h>
 
+#include <loggingzeug/logging.h>
+
 #include "LookUpData.h"
 #include "Chunk.h"
 
@@ -23,14 +25,15 @@ using namespace glm;
 using namespace globjects;
 
 const ivec3 dimensions(32, 32, 32);
-const int margin(1);
+const int margin(5);
 
-ChunkRenderer::ChunkRenderer(globjects::ref_ptr<globjects::Texture> groundTexture)
+ChunkRenderer::ChunkRenderer()
     : m_densityPositions()
     , m_edgeConnectList()
     , m_positions()
     , m_transform()
-	, m_groundTexture(groundTexture)
+	, m_colorTexture(nullptr)
+	, m_groundTexture(nullptr)
 {
     setupNoiseTextures();
     setupDensityGeneration();
@@ -44,7 +47,14 @@ ChunkRenderer::~ChunkRenderer() = default;
 
 void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
 {
+	if (!m_groundTexture || !m_colorTexture)
+	{
+		loggingzeug::warning("ChunkRenderer") << "Missing textures";
+		return;
+	}
+
 	m_groundTexture->bindActive(GL_TEXTURE0);
+	m_colorTexture->bindActive(GL_TEXTURE1);
 
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, m_transform);
@@ -57,6 +67,17 @@ void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
 
     m_renderProgram->release();
 	m_groundTexture->unbind();
+	m_colorTexture->unbind();
+}
+
+void ChunkRenderer::setColorTexture(globjects::ref_ptr<globjects::Texture> colorTexture)
+{
+	m_colorTexture = colorTexture;
+}
+
+void ChunkRenderer::setGroundTexture(globjects::ref_ptr<globjects::Texture> groundTexture)
+{
+	m_groundTexture = groundTexture;
 }
 
 void ChunkRenderer::setTransform(mat4x4 transform)
@@ -78,7 +99,8 @@ void ChunkRenderer::setupProgram()
 
 void ChunkRenderer::setupRendering()
 {
-    m_groundTexture->setName("Ground Texture");
+	m_renderProgram->setUniform("ground", 0);
+	m_renderProgram->setUniform("colorTex", 1);
 }
 
 void ChunkRenderer::setupDensityGeneration()
@@ -171,7 +193,7 @@ void ChunkRenderer::setupMeshGeneration()
     ref_ptr<VertexAttributeBinding> positionsBinding = m_meshVao->binding(0);
     positionsBinding->setAttribute(0);
     positionsBinding->setBuffer(m_positions, 0, sizeof(vec3));
-    positionsBinding->setFormat(3, GL_FLOAT, GL_FALSE, 0);
+    positionsBinding->setFormat(4, GL_FLOAT, GL_FALSE, 0);
     m_meshVao->enable(0);
 }
 
@@ -296,4 +318,22 @@ void ChunkRenderer::generateMesh(Chunk* chunk)
     chunk->setTriangleCount(primitivesWritten);
     chunk->teardownMeshGeneration();
     
+}
+
+void ChunkRenderer::updateTexture(bool useMipMap)
+{
+	if (useMipMap)
+	{
+		m_groundTexture->generateMipmap();
+		m_groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		m_colorTexture->generateMipmap();
+		m_colorTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		m_colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	} 
+	else
+	{
+		m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		m_colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
 }

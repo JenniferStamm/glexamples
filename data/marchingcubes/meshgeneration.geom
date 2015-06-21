@@ -19,7 +19,7 @@ layout(points) in;
 
 layout(points, max_vertices = 15) out;
 
-out vec3 out_position;
+out vec4 out_position;
 out vec3 out_normal;
 
 const vec3 x  = vec3(0.5,0,0);
@@ -42,7 +42,10 @@ float densityAt(in int index) {
 }
 
 int indexAtPosition(in ivec3 position) {
-    return (position.z + a_margin) * (a_dim.x + 2 * a_margin + 1) * (a_dim.y + 2 * a_margin + 1) + (position.y + a_margin) * (a_dim.x + 2 * a_margin + 1) + (position.x + a_margin);
+    ivec3 densityDims = a_dim + 2 * a_margin + 1;
+    int densitySize = densityDims.x * densityDims.y * densityDims.z;
+
+    return clamp((position.z + a_margin) * (a_dim.x + 2 * a_margin + 1) * (a_dim.y + 2 * a_margin + 1) + (position.y + a_margin) * (a_dim.x + 2 * a_margin + 1) + (position.x + a_margin), 0, densitySize - 1);
 }
 
 float densityAtPosition(in ivec3 position) {
@@ -96,7 +99,17 @@ void main() {
             vec3 vertexBNormal = normalAtPosition(ivec3(center + vertexBPos));
             vec3 mixedNormal = mix(vertexANormal,vertexBNormal,mixing);
             out_normal = mixedNormal;
-            out_position = (center + mix(vertexAPos, vertexBPos, mixing)) / a_dim;
+            vec3 position = center + mix(vertexAPos, vertexBPos, mixing);
+            vec3 scaledPosition = position / a_dim;
+            
+            ivec3 dir = ivec3(1, 1, 1);
+            float occlusion = 1;
+            for (int i = 1; i < 5; ++i) {
+                ivec3 checkPosition = ivec3(round(position.x + dir.x * i), round(position.y + dir.y * i), round(position.z + dir.z * i));
+                occlusion *= 1 - (0.3 * step(0, densityAtPosition(checkPosition)));
+            }
+            
+            out_position = vec4(scaledPosition, occlusion);
             EmitVertex();
             EndPrimitive();
         }
