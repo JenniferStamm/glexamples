@@ -39,6 +39,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager)
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
 ,   m_chunks()
 ,   m_chunkRenderer()
+,   m_chunkQueue()
 ,   m_useMipMap(true)
 ,   m_useMipMapChanged(false)
 {
@@ -125,17 +126,14 @@ void MarchingCubes::onInitialize()
 	m_chunkRenderer->setColorTexture(colorTexture);
 
     m_chunks = {};
-    int size = 3;
+    int size = 7;
     for (int z = 0; z < size; ++z)
     {
         for (int y = 0; y < size; ++y)
         {
             for (int x = 0; x < size; ++x)
             {
-                auto newChunk = new Chunk(vec3(x, y, z));
-                m_chunkRenderer->generateDensities(newChunk);
-                m_chunkRenderer->generateMesh(newChunk);
-                m_chunks.push_back(newChunk);
+                m_chunkQueue.push(vec3(x, y, z));
             }
         }
     }
@@ -178,4 +176,20 @@ void MarchingCubes::onPaint()
     m_chunkRenderer->render(m_chunks);
 
     Framebuffer::unbind(GL_FRAMEBUFFER);
+
+
+    // Generate up to 3 chunks
+    for (int i = 0; i < 3; ++i)
+    {
+        if (m_chunkQueue.empty())
+            break;
+        auto offset = m_chunkQueue.front();
+        auto newChunk = new Chunk(offset);
+        m_chunkRenderer->generateDensities(newChunk);
+        m_chunkRenderer->generateMesh(newChunk);
+        m_chunks.push_back(newChunk);
+
+        m_chunkQueue.pop();
+    }
+
 }

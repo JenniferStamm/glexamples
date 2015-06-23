@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <queue>
 
 #include <glm/vec3.hpp>
 
@@ -63,6 +64,8 @@ protected:
 
     std::vector<globjects::ref_ptr<Chunk>> m_chunks;
     globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
+
+    std::queue<glm::vec3> m_chunkQueue;
 
 	/* parameters */
 	bool m_useMipMap;
