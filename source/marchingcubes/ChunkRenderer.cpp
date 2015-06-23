@@ -208,7 +208,7 @@ void ChunkRenderer::setupNoiseTextures()
 
 ref_ptr<Texture> ChunkRenderer::setupNoiseTexture(vec3 offset)
 {
-    static const int size(32);
+    static const int size(16);
 
     float data[size * size * size];
 
