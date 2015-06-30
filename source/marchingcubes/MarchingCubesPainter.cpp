@@ -79,7 +79,7 @@ void MarchingCubes::setupGrid()
 
 void MarchingCubes::setupOpenGLState()
 {
-    glClearColor(0.85f, 0.87f, 0.91f, 1.0f);
+    glClearColor(0.f, 0.f, 0.2f, 1.0f);
 }
 
 void MarchingCubes::onInitialize()
