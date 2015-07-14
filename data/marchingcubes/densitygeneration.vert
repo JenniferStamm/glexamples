@@ -23,7 +23,7 @@ void main()
     
     realPosition += vec3(xWarp, yWarp, zWarp) * 4;
     
-    out_density = -realPosition.y + 1;
+    out_density = -realPosition.y;
     out_density += texture(noiseTexture1, realPosition * 4.03).r * 0.1;
     out_density += texture(noiseTexture2, realPosition * 1.96).r * 0.2;
     out_density += texture(noiseTexture3, realPosition * 1.01).r * 0.4;

@@ -2,8 +2,10 @@
 
 #include <memory>
 #include <queue>
+#include <unordered_map>
 
 #include <glm/vec3.hpp>
+#include <vec3_hash.h>
 
 #include <glbinding/gl/types.h>
 
@@ -62,7 +64,7 @@ protected:
     /* members */
     globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
 
-    std::vector<globjects::ref_ptr<Chunk>> m_chunks;
+    std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>> m_chunks;
     globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
 
     std::queue<glm::vec3> m_chunkQueue;

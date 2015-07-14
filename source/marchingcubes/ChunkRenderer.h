@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <unordered_map>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -28,7 +28,7 @@ public:
 	ChunkRenderer();
     ~ChunkRenderer();
 
-    virtual void render(std::vector<globjects::ref_ptr<Chunk>> chunks);
+    virtual void render(std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>> chunks);
 
 	void setColorTexture(globjects::ref_ptr<globjects::Texture> colorTexture);
 	void setGroundTexture(globjects::ref_ptr<globjects::Texture> groundTexture);

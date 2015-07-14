@@ -1,6 +1,7 @@
 #include "ChunkRenderer.h"
 
 #include <glm/vec3.hpp>
+#include <vec3_hash.h>
 #include <glm/gtc/noise.hpp>
 
 #include <glbinding/gl/enum.h>
@@ -45,7 +46,7 @@ ChunkRenderer::ChunkRenderer()
 
 ChunkRenderer::~ChunkRenderer() = default;
 
-void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
+void ChunkRenderer::render(std::unordered_map<vec3, ref_ptr<Chunk>> chunks)
 {
 	if (!m_groundTexture || !m_colorTexture)
 	{
@@ -61,8 +62,8 @@ void ChunkRenderer::render(std::vector<ref_ptr<Chunk>> chunks)
 
     for (auto chunk : chunks)
     {
-        m_renderProgram->setUniform(m_offsetLocation, chunk->offset());    
-        chunk->draw();
+        m_renderProgram->setUniform(m_offsetLocation, chunk.first);    
+        chunk.second->draw();
     }
 
     m_renderProgram->release();

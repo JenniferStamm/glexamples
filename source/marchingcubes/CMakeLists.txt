@@ -48,6 +48,7 @@ set(api_includes
     ${include_path}/ChunkRenderer.h
     ${include_path}/LookUpData.h
     ${include_path}/MarchingCubesPainter.h
+    ${include_path}/vec3_hash.h
 )
 
 # Group source files

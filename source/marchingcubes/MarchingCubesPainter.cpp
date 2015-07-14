@@ -126,18 +126,7 @@ void MarchingCubes::onInitialize()
 	m_chunkRenderer->setGroundTexture(groundTexture);
 	m_chunkRenderer->setColorTexture(colorTexture);
 
-    m_chunks = {};
-    int size = 7;
-    for (int z = 0; z < size; ++z)
-    {
-        for (int y = 0; y < size; ++y)
-        {
-            for (int x = 0; x < size; ++x)
-            {
-                m_chunkQueue.push(vec3(x, y, z));
-            }
-        }
-    }
+    m_chunks.clear();
 }
 
 void MarchingCubes::onPaint()
@@ -178,20 +167,69 @@ void MarchingCubes::onPaint()
     m_grid->draw();
 
     Framebuffer::unbind(GL_FRAMEBUFFER);
+    
+    float distanceForAdding = 4.f;
+
+    auto offset = ivec3(m_cameraCapability->eye() - distanceForAdding);
+
+    for (int z = 0; z < distanceForAdding * 2; ++z)
+    {
+        for (int y = 0; y < distanceForAdding * 2; ++y)
+        {
+            for (int x = 0; x < distanceForAdding * 2; ++x)
+            {
+                auto newOffset = vec3(x, y, z) + vec3(offset);
+                if (m_chunkQueue.size() < 100 && m_chunks.find(newOffset) == m_chunks.end())
+                {
+                    m_chunkQueue.push(newOffset);
+                }
+            }
+        }
+    }
+
+    // Remove unneeded chunks
+
+    float distanceForRemoving = 7.f;
+
+    std::vector<vec3> chunksToRemove;
+
+    for (auto chunk : m_chunks)
+    {
+        auto currentOffset = chunk.first;
+        if (distance(currentOffset, m_cameraCapability->eye()) > distanceForRemoving)
+        {
+            chunksToRemove.push_back(chunk.first);
+        }
+    }
+
+    for (auto chunkToRemove : chunksToRemove)
+    {
+        m_chunks.erase(chunkToRemove);
+    }
 
 
-    // Generate up to 3 chunks
-    for (int i = 0; i < 3; ++i)
+
+    // Generate new non-empty chunks
+    const unsigned int chunksToGenerate = 3u;
+
+    for (int i = 0; i < chunksToGenerate;)
     {
         if (m_chunkQueue.empty())
             break;
-        auto offset = m_chunkQueue.front();
-        auto newChunk = new Chunk(offset);
+        auto newOffset = m_chunkQueue.front();
+        m_chunkQueue.pop();
+
+        // Don't add chunk if it was already generated
+        if (m_chunks.find(newOffset) != m_chunks.end())
+            continue;
+
+        auto newChunk = new Chunk(newOffset);
         m_chunkRenderer->generateDensities(newChunk);
         m_chunkRenderer->generateMesh(newChunk);
-        m_chunks.push_back(newChunk);
+        m_chunks[newOffset] = newChunk;
 
-        m_chunkQueue.pop();
+        if (!newChunk->isEmpty())
+            ++i;
     }
 
 }
