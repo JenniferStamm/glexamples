@@ -6,7 +6,7 @@
 
 GLOPERATE_PLUGIN_LIBRARY
 
-    GLOPERATE_PLUGIN(MarchingCubes
+    GLOPERATE_PAINTER_PLUGIN(MarchingCubes
     , "MarchingCubes"
     , "Copy to implement a new example"
     , GLEXAMPLES_AUTHOR_ORGANIZATION

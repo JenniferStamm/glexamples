@@ -14,7 +14,7 @@
 
 #include <gloperate/painter/Painter.h>
 
-#include <reflectionzeug/Color.h>
+#include <reflectionzeug/base/Color.h>
 
 class Chunk;
 class ChunkRenderer;
@@ -40,7 +40,7 @@ namespace gloperate
 class MarchingCubes : public gloperate::Painter
 {
 public:
-	MarchingCubes(gloperate::ResourceManager & resourceManager);
+	MarchingCubes(gloperate::ResourceManager & resourceManager, const std::string & relDataPath);
 	virtual ~MarchingCubes();
 
 	bool useMipMap() const;

@@ -32,8 +32,8 @@ using namespace globjects;
 
 using widgetzeug::make_unique;
 
-NoiseExample::NoiseExample(gloperate::ResourceManager & resourceManager)
-:   Painter(resourceManager)
+NoiseExample::NoiseExample(gloperate::ResourceManager & resourceManager, const std::string & relDataPath)
+:   Painter("NoiseExample", resourceManager, relDataPath)
 ,   m_targetFramebufferCapability{addCapability(new gloperate::TargetFramebufferCapability())}
 ,   m_viewportCapability{addCapability(new gloperate::ViewportCapability())}
 ,   m_projectionCapability{addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability))}

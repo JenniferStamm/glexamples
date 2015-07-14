@@ -6,7 +6,7 @@
 
 GLOPERATE_PLUGIN_LIBRARY
 
-    GLOPERATE_PLUGIN(NoiseExample
+    GLOPERATE_PAINTER_PLUGIN(NoiseExample
     , "NoiseExample"
     , "Copy to implement a new example"
     , GLEXAMPLES_AUTHOR_ORGANIZATION

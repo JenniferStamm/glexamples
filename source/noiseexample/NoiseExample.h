@@ -27,7 +27,7 @@ namespace gloperate
 class NoiseExample : public gloperate::Painter
 {
 public:
-    NoiseExample(gloperate::ResourceManager & resourceManager);
+	NoiseExample(gloperate::ResourceManager & resourceManager, const std::string & relDataPath);
     virtual ~NoiseExample();
 
     void setupProjection();
