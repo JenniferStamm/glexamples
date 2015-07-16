@@ -37,6 +37,37 @@ const vec3[8] vertices = vec3[8](
     x - y + z
     );
   
+const float dd = 0.7;
+const vec3[26] directions = vec3[26](
+    vec3(-dd, -dd, -dd),
+    vec3(-dd, -dd, 0),
+    vec3(-dd, -dd, dd),
+    vec3(-dd, 0, -dd),
+    vec3(-dd, 0, 0),
+    vec3(-dd, 0, dd),
+    vec3(-dd, dd, -dd),
+    vec3(-dd, dd, 0),
+    vec3(-dd, dd, dd),
+    vec3(0, -dd, -dd),
+    vec3(0, -dd, 0),
+    vec3(0, -dd, dd),
+    vec3(0, 0, -dd),
+    //vec3(0, 0, 0),
+    vec3(0, 0, dd),
+    vec3(0, dd, -dd),
+    vec3(0, dd, 0),
+    vec3(0, dd, dd),
+    vec3(dd, -dd, -dd),
+    vec3(dd, -dd, 0),
+    vec3(dd, -dd, dd),
+    vec3(dd, 0, -dd),
+    vec3(dd, 0, 0),
+    vec3(dd, 0, dd),
+    vec3(dd, dd, -dd),
+    vec3(dd, dd, 0),
+    vec3(dd, dd, dd));
+  
+  
 float densityAt(in int index) {
     return texelFetch(densities, index).r;
 }
@@ -149,11 +180,13 @@ void main() {
             vec3 position = center + mix(vertexAPos, vertexBPos, mixing);
             vec3 scaledPosition = position / a_dim;
             
-            ivec3 dir = ivec3(1, 1, 1);
+            
             float occlusion = 1;
-            for (int i = 1; i < 5; ++i) {
-                vec3 checkPosition = vec3(position.x + dir.x * i, position.y + dir.y * i, position.z + dir.z * i);
-                occlusion *= 1 - (0.3 * step(0, densityAtFloatPosition(checkPosition)));
+            for (int dirCounter = 0; dirCounter < 26; ++dirCounter) {
+                for (int i = 1; i < 5; ++i) {
+                    vec3 checkPosition = position + directions[dirCounter] * i;;
+                    occlusion *= 1 - (0.1/26 * step(0, densityAtFloatPosition(checkPosition)));
+                }
             }
             
             out_position = vec4(scaledPosition, occlusion);
