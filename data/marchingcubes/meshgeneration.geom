@@ -52,6 +52,53 @@ float densityAtPosition(in ivec3 position) {
     return densityAt(indexAtPosition(position));
 }
 
+float densityAtFloatPosition(in vec3 positionC) {
+    // According to http://bmia.bmt.tue.nl/people/BRomeny/Courses/8C080/Interpolation.pdf
+    ivec3 position000 = ivec3(floor(positionC.x), floor(positionC.y), floor(positionC.z));
+    ivec3 position111 = position000 + ivec3(1, 1, 1);
+    
+    float densityValues[8];
+    densityValues[0] = densityAtPosition(ivec3(position000));
+    densityValues[1] = densityAtPosition(ivec3(position000.xy, position000.z + 1));
+    densityValues[2] = densityAtPosition(ivec3(position000.x, position000.y + 1, position000.z));
+    densityValues[3] = densityAtPosition(ivec3(position000.x, position000.y + 1, position000.z + 1));
+    densityValues[4] = densityAtPosition(ivec3(position000.x + 1, position000.yz));
+    densityValues[5] = densityAtPosition(ivec3(position000.x + 1, position000.y, position000.z + 1));
+    densityValues[6] = densityAtPosition(ivec3(position000.x + 1, position000.y + 1, position000.z));
+    densityValues[7] = densityAtPosition(ivec3(position000.x + 1, position000.y + 1, position000.z + 1));
+    float normalizedVolumes[8];
+    normalizedVolumes[0] =  (position111.x - positionC.x) * (position111.y - positionC.y) * (position111.z - positionC.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    normalizedVolumes[1] =  (position111.x - positionC.x) * (position111.y - positionC.y) * (positionC.z - position000.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    normalizedVolumes[2] =  (position111.x - positionC.x) * (positionC.y - position000.y) * (position111.z - positionC.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    normalizedVolumes[3] =  (position111.x - positionC.x) * (positionC.y - position000.y) * (positionC.z - position000.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    normalizedVolumes[4] =  (positionC.x - position000.x) * (position111.y - positionC.y) * (position111.z - positionC.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    normalizedVolumes[5] =  (positionC.x - position000.x) * (position111.y - positionC.y) * (positionC.z - position000.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    normalizedVolumes[6] =  (positionC.x - position000.x) * (positionC.y - position000.y) * (position111.z - positionC.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    normalizedVolumes[7] =  (positionC.x - position000.x) * (positionC.y - position000.y) * (positionC.z - position000.z) /
+                            (position111.x - position000.x) * (position111.y - position000.y) * (position111.z - position000.z);
+    
+    
+    
+    float densityC = densityValues[0] * normalizedVolumes[0] +
+                     densityValues[1] * normalizedVolumes[1] +
+                     densityValues[2] * normalizedVolumes[2] +
+                     densityValues[3] * normalizedVolumes[3] +
+                     densityValues[4] * normalizedVolumes[4] +
+                     densityValues[5] * normalizedVolumes[5] +
+                     densityValues[6] * normalizedVolumes[6] +
+                     densityValues[7] * normalizedVolumes[7];
+
+    return densityC;
+    //return densityAtPosition(ivec3(round(positionC.x), round(positionC.y), round(positionC.z)));
+}
+
 vec3 normalAtPosition(in ivec3 position) {
     int d = 1;
     float diffX = densityAtPosition(position + ivec3(d,0,0)) - densityAtPosition(position + ivec3(-d,0,0));
@@ -105,8 +152,8 @@ void main() {
             ivec3 dir = ivec3(1, 1, 1);
             float occlusion = 1;
             for (int i = 1; i < 5; ++i) {
-                ivec3 checkPosition = ivec3(round(position.x + dir.x * i), round(position.y + dir.y * i), round(position.z + dir.z * i));
-                occlusion *= 1 - (0.3 * step(0, densityAtPosition(checkPosition)));
+                vec3 checkPosition = vec3(position.x + dir.x * i, position.y + dir.y * i, position.z + dir.z * i);
+                occlusion *= 1 - (0.3 * step(0, densityAtFloatPosition(checkPosition)));
             }
             
             out_position = vec4(scaledPosition, occlusion);
