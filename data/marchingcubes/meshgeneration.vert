@@ -3,8 +3,12 @@
 
 layout(location = 1) in uint a_value;
 
-out vec4 v_position[3];
-out vec3 v_normal[3];
+out vec4 v_position0;
+out vec4 v_position1;
+out vec4 v_position2;
+out vec3 v_normal0;
+out vec3 v_normal1;
+out vec3 v_normal2;
 
 uniform ivec3 a_dim;
 uniform int a_margin;
@@ -136,6 +140,8 @@ void main() {
     
     ivec3 edges = ivec3((a_value >> 8) & 0x0F, (a_value >> 4) & 0x0F, a_value & 0x0F);
     
+    vec4 v_position[3];
+    vec3 v_normal[3];
     
     for (int j = 0; j < 3; j++) {
         int edge = edges[j];
@@ -166,6 +172,13 @@ void main() {
         
         v_position[j] = vec4(scaledPosition,  1 - occlusion);
     }
+
+    v_position0 = v_position[0];
+    v_position1 = v_position[1];
+    v_position2 = v_position[2];
     
+    v_normal0 = v_normal[0];
+    v_normal1 = v_normal[1];
+    v_normal2 = v_normal[2];
 }
 
