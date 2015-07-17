@@ -136,9 +136,9 @@ float densityAtFloatPosition(in vec3 positionC) {
 
 
 void main() {
-    ivec3 voxel = ivec3((a_value >> 24) & 0x3F, (a_value >> 18) & 0x3F, (a_value >> 12 & 0x3F));
+    ivec3 voxel = ivec3((a_value >> 24) & 0x3Fu, (a_value >> 18) & 0x3Fu, (a_value >> 12 & 0x3Fu));
     
-    ivec3 edges = ivec3((a_value >> 8) & 0x0F, (a_value >> 4) & 0x0F, a_value & 0x0F);
+    ivec3 edges = ivec3((a_value >> 8) & 0x0Fu, (a_value >> 4) & 0x0Fu, a_value & 0x0Fu);
     
     vec4 v_position[3];
     vec3 v_normal[3];
