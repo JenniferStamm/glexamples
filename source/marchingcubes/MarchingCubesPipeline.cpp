@@ -13,6 +13,7 @@
 MarchingCubesPipeline::MarchingCubesPipeline()
 : AbstractPipeline("MarchingCubes")
 , viewport(nullptr)
+, useMipMap(true)
 , targetFBO(nullptr)
 {
     auto renderStage = new RenderStage();
@@ -20,6 +21,10 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->viewport = viewport;
     renderStage->camera = camera;
     renderStage->projection = projection;
+    renderStage->targetFBO = targetFBO;
+    renderStage->useMipMap = useMipMap;
+    renderStage->colorTexture = colorTexture;
+    renderStage->groundTexture = groundTexture;
 
     //addStages();
 }
