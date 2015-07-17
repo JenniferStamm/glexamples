@@ -153,15 +153,18 @@ void main() {
         vec3 position = mix(vec3(vertexAPos), vec3(vertexBPos), mixing);
         vec3 scaledPosition = position / a_dim;
         
-        float occlusion = 1;
+        float occlusion = 0;
         for (int dirCounter = 0; dirCounter < 26; ++dirCounter) {
+            float dirVisibility = 1;
             for (int i = 1; i < 5; ++i) {
                 vec3 checkPosition = position + directions[dirCounter] * i;
-                occlusion *= 1 - (0.1/26 * step(0, densityAtFloatPosition(checkPosition)));
+                dirVisibility *= clamp(densityAtFloatPosition(checkPosition) * 9999, 0, 1);
             }
+            occlusion += dirVisibility;
         }
+        occlusion /= 26;
         
-        v_position[j] = vec4(scaledPosition, occlusion);
+        v_position[j] = vec4(scaledPosition,  1 - occlusion);
     }
     
 }
