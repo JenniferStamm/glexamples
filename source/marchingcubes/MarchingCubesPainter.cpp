@@ -32,7 +32,7 @@ using namespace globjects;
 using widgetzeug::make_unique;
 
 MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const std::string & relDataPath)
-:   Painter("MarchingCubesExample", resourceManager, relDataPath)
+:   PipelinePainter("MarchingCubesExample", resourceManager, relDataPath, m_pipeline)
 , m_targetFramebufferCapability{ addCapability(new gloperate::TargetFramebufferCapability()) }
 ,   m_viewportCapability{addCapability(new gloperate::ViewportCapability())}
 ,   m_projectionCapability{addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability))}
@@ -43,8 +43,19 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
 ,   m_useMipMap(true)
 ,   m_useMipMapChanged(false)
 {
-	addProperty<bool>("useMipMap", this,
-		&MarchingCubes::useMipMap, &MarchingCubes::setUseMipMap);
+    m_pipeline.targetFBO.setData(m_targetFramebufferCapability);
+    m_pipeline.viewport.setData(m_viewportCapability);
+    m_pipeline.camera.setData(m_cameraCapability);
+    m_pipeline.projection.setData(m_projectionCapability);
+
+    m_targetFramebufferCapability->changed.connect([this]() { m_pipeline.targetFBO.invalidate(); });
+    m_viewportCapability->changed.connect([this]() { m_pipeline.viewport.invalidate(); });
+    m_cameraCapability->changed.connect([this]() { m_pipeline.camera.invalidate(); });
+    m_projectionCapability->changed.connect([this]() { m_pipeline.projection.invalidate(); });
+
+
+    addProperty<bool>("useMipMap", this,
+        &MarchingCubes::useMipMap, &MarchingCubes::setUseMipMap);
 }
 
 MarchingCubes::~MarchingCubes() = default;
@@ -85,6 +96,8 @@ void MarchingCubes::setupOpenGLState()
 
 void MarchingCubes::onInitialize()
 {
+    PipelinePainter::onInitialize();
+
     // create program
 
     globjects::init();
@@ -131,6 +144,8 @@ void MarchingCubes::onInitialize()
 
 void MarchingCubes::onPaint()
 {
+    PipelinePainter::onPaint();
+
     if (m_viewportCapability->hasChanged())
     {
         glViewport(
