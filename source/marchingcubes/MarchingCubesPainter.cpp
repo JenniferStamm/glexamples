@@ -207,7 +207,7 @@ void MarchingCubes::onPaint()
         m_chunks.erase(chunkToRemove);
     }
 
-
+    
 
     // Generate new non-empty chunks
     const unsigned int chunksToGenerate = 3u;
@@ -225,7 +225,10 @@ void MarchingCubes::onPaint()
 
         auto newChunk = new Chunk(newOffset);
         m_chunkRenderer->generateDensities(newChunk);
-        m_chunkRenderer->generateMesh(newChunk);
+        m_chunkRenderer->generateList(newChunk);
+        if (!newChunk->isEmpty())
+            m_chunkRenderer->generateMesh(newChunk);
+        
         m_chunks[newOffset] = newChunk;
 
         if (!newChunk->isEmpty())

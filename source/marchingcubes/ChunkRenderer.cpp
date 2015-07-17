@@ -38,6 +38,7 @@ ChunkRenderer::ChunkRenderer()
 {
     setupNoiseTextures();
     setupDensityGeneration();
+    setupListGeneration();
     setupMeshGeneration();
     setupProgram();
     setupRendering();
@@ -147,23 +148,23 @@ void ChunkRenderer::setupDensityGeneration()
     m_densityPositionVao->enable(0);
 }
 
-void ChunkRenderer::setupMeshGeneration()
+void ChunkRenderer::setupListGeneration()
 {
     // Setup the program
 
-    m_meshGenerationProgram = new Program();
-    m_meshGenerationProgram->attach(
-        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/meshgeneration.vert"),
-        Shader::fromFile(GL_GEOMETRY_SHADER, "data/marchingcubes/meshgeneration.geom"));
-    m_meshGenerationProgram->link();
+    m_listGenerationProgram = new Program();
+    m_listGenerationProgram->attach(
+        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/listgeneration.vert"),
+        Shader::fromFile(GL_GEOMETRY_SHADER, "data/marchingcubes/listgeneration.geom"));
+    m_listGenerationProgram->link();
 
     // Setup the transform feedback itself
 
-    m_meshGenerationTransformFeedback = new TransformFeedback();
-    m_meshGenerationTransformFeedback->setVaryings(m_meshGenerationProgram, { "out_position", "out_normal" }, GLenum::GL_SEPARATE_ATTRIBS);
+    m_listGenerationTransformFeedback = new TransformFeedback();
+    m_listGenerationTransformFeedback->setVaryings(m_listGenerationProgram, { "out_value" }, GLenum::GL_SEPARATE_ATTRIBS);
 
 
-    m_meshVao = new VertexArray;
+    m_listVao = new VertexArray;
 
     // Setup edge connect list
 
@@ -191,11 +192,38 @@ void ChunkRenderer::setupMeshGeneration()
 
     // Setup positions binding
 
-    ref_ptr<VertexAttributeBinding> positionsBinding = m_meshVao->binding(0);
+    ref_ptr<VertexAttributeBinding> positionsBinding = m_listVao->binding(1);
     positionsBinding->setAttribute(0);
     positionsBinding->setBuffer(m_positions, 0, sizeof(vec3));
     positionsBinding->setFormat(4, GL_FLOAT, GL_FALSE, 0);
-    m_meshVao->enable(0);
+    m_listVao->enable(1);
+}
+
+void ChunkRenderer::setupMeshGeneration()
+{
+    // Setup the program
+
+    m_meshGenerationProgram = new Program();
+    m_meshGenerationProgram->attach(
+        Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/meshgeneration.vert"),
+        Shader::fromFile(GL_GEOMETRY_SHADER, "data/marchingcubes/meshgeneration.geom"));
+    m_meshGenerationProgram->link();
+
+    // Setup the transform feedback itself
+
+    m_meshGenerationTransformFeedback = new TransformFeedback();
+    m_meshGenerationTransformFeedback->setVaryings(m_meshGenerationProgram, { "out_position", "out_normal" }, GLenum::GL_SEPARATE_ATTRIBS);
+
+
+    m_meshVao = new VertexArray;
+
+
+    // Setup value binding
+
+    ref_ptr<VertexAttributeBinding> valueBinding = m_meshVao->binding(1);
+    valueBinding->setAttribute(0);
+    valueBinding->setFormat(1, GL_UNSIGNED_INT, GL_FALSE, 0);
+    m_meshVao->enable(1);
 }
 
 void ChunkRenderer::setupNoiseTextures()
@@ -272,23 +300,61 @@ void ChunkRenderer::generateDensities(Chunk * chunk)
 
 }
 
+void ChunkRenderer::generateList(Chunk* chunk)
+{
+    chunk->setupListGeneration(m_positionsSize);
+
+    m_listGenerationProgram->use();
+    m_listGenerationProgram->setUniform("a_dim", dimensions);
+    m_listGenerationProgram->setUniform("a_margin", margin);
+    m_listGenerationProgram->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
+    m_listGenerationProgram->setUniform("densities", 0);
+
+    // Setup uniform block for edge connect list
+
+    auto ubo = m_listGenerationProgram->uniformBlock("edgeConnectList");
+    m_edgeConnectList->bindBase(GL_UNIFORM_BUFFER, 1);
+    ubo->setBinding(1);
+
+    m_listVao->bind();
+
+    chunk->list()->bindBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
+    
+    glEnable(GL_RASTERIZER_DISCARD);
+
+    m_listGenerationProgram->use();
+    ref_ptr<Query> countQuery = new Query;
+    countQuery->begin(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+    m_listGenerationTransformFeedback->begin(GL_POINTS);
+    m_listVao->drawArrays(GL_POINTS, 0, m_positionsSize);
+    m_listGenerationTransformFeedback->end();
+    countQuery->end(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+    m_listGenerationTransformFeedback->unbind();
+    m_listGenerationProgram->release();
+
+    glDisable(GL_RASTERIZER_DISCARD);
+
+    m_listVao->unbind();
+    m_listGenerationProgram->release();
+
+    glFlush();
+
+    
+    unsigned int primitivesWritten = countQuery->get(GL_QUERY_RESULT);
+    
+    chunk->setTriangleCount(primitivesWritten);
+    chunk->teardownListGeneration();
+}
+
 void ChunkRenderer::generateMesh(Chunk* chunk)
 {
-    chunk->setupMeshGeneration(m_positionsSize);
+    chunk->setupMeshGeneration(m_meshVao.get());
 
     m_meshGenerationProgram->use();
     m_meshGenerationProgram->setUniform("a_dim", dimensions);
     m_meshGenerationProgram->setUniform("a_margin", margin);
-    m_meshGenerationProgram->setUniform("a_caseToNumPolys", LookUpData::m_caseToNumPolys);
     m_meshGenerationProgram->setUniform("a_edgeToVertices", LookUpData::m_edgeToVertices);
     m_meshGenerationProgram->setUniform("densities", 0);
-
-    // Setup uniform block for edge connect list
-
-    auto ubo = m_meshGenerationProgram->uniformBlock("edgeConnectList");
-    m_edgeConnectList->bindBase(GL_UNIFORM_BUFFER, 1);
-    ubo->setBinding(1);
-
 
     m_meshVao->bind();
 
@@ -298,25 +364,19 @@ void ChunkRenderer::generateMesh(Chunk* chunk)
     glEnable(GL_RASTERIZER_DISCARD);
 
     m_meshGenerationProgram->use();
-    ref_ptr<Query> countQuery = new Query;
-    countQuery->begin(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
     m_meshGenerationTransformFeedback->begin(GL_POINTS);
-    m_meshVao->drawArrays(GL_POINTS, 0, m_positionsSize);
+    m_meshVao->drawArrays(GL_POINTS, 0, chunk->triangleCount());
     m_meshGenerationTransformFeedback->end();
-    countQuery->end(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
     m_meshGenerationTransformFeedback->unbind();
     m_meshGenerationProgram->release();
 
     glDisable(GL_RASTERIZER_DISCARD);
 
     m_meshVao->unbind();
-    m_renderProgram->release();
+    m_meshGenerationProgram->release();
 
     glFlush();
 
-    unsigned int primitivesWritten = countQuery->get(GL_QUERY_RESULT);
-
-    chunk->setTriangleCount(primitivesWritten);
     chunk->teardownMeshGeneration();
     
 }

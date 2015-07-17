@@ -36,6 +36,7 @@ public:
     void setTransform(glm::mat4x4 transform);
 
     void generateDensities(Chunk * chunk);
+    void generateList(Chunk * chunk);
     void generateMesh(Chunk * chunk);
 
 	void updateTexture(bool useMipMap);
@@ -44,6 +45,7 @@ protected:
     void setupProgram();
     void setupRendering();
     void setupDensityGeneration();
+    void setupListGeneration();
     void setupMeshGeneration();
     void setupNoiseTextures();
     globjects::ref_ptr<globjects::Texture> setupNoiseTexture(glm::vec3 offset);
@@ -55,6 +57,7 @@ protected:
 
     globjects::ref_ptr<globjects::VertexArray> m_densityPositionVao;
     globjects::ref_ptr<globjects::VertexArray> m_meshVao;
+    globjects::ref_ptr<globjects::VertexArray> m_listVao;
 
     globjects::ref_ptr<globjects::Buffer> m_densityPositions;
     gl::GLsizei m_densityPositionsSize;
@@ -63,6 +66,9 @@ protected:
 
     globjects::ref_ptr<globjects::TransformFeedback> m_densityGenerationTransformFeedback;
     globjects::ref_ptr<globjects::Program> m_densityGenerationProgram;
+
+    globjects::ref_ptr<globjects::TransformFeedback> m_listGenerationTransformFeedback;
+    globjects::ref_ptr<globjects::Program> m_listGenerationProgram;
 
     globjects::ref_ptr<globjects::TransformFeedback> m_meshGenerationTransformFeedback;
     globjects::ref_ptr<globjects::Program> m_meshGenerationProgram;

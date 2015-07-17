@@ -27,6 +27,7 @@ public:
 
     glm::vec3 offset() const { return m_offset; }
     globjects::ref_ptr<globjects::Buffer> densities() const { return m_densities; }
+    globjects::ref_ptr<globjects::Buffer> list() const { return m_list; }
     globjects::ref_ptr<globjects::Buffer> vertexPositions() const { return m_vertexPositions; }
     globjects::ref_ptr<globjects::Buffer> vertexNormals() const { return m_vertexNormals; }
     unsigned int triangleCount() const { return m_triangleCount; }
@@ -34,7 +35,9 @@ public:
     bool isEmpty() const { return m_isEmpty; }
     void setupDensityGeneration(unsigned int densitySize);
     void teardownDensityGeneration();
-    void setupMeshGeneration(unsigned int verticesSize);
+    void setupListGeneration(unsigned int verticesSize);
+    void teardownListGeneration();
+    void setupMeshGeneration(globjects::VertexArray * meshVao);
     void teardownMeshGeneration();
 
 protected:
@@ -42,6 +45,8 @@ protected:
 
     globjects::ref_ptr<globjects::Buffer> m_densities;
     globjects::ref_ptr<globjects::Texture> m_densitiesTexture;
+
+    globjects::ref_ptr<globjects::Buffer> m_list;
 
     globjects::ref_ptr<globjects::Buffer> m_vertexPositions;
     globjects::ref_ptr<globjects::Buffer> m_vertexNormals;
