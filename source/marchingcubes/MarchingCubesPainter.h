@@ -32,7 +32,7 @@ namespace gloperate
     class AdaptiveGrid;
     class AbstractTargetFramebufferCapability;
     class AbstractViewportCapability;
-    class AbstractPerspectiveProjectionCapability;
+    class PerspectiveProjectionCapability;
     class AbstractCameraCapability;
 }
 
@@ -52,7 +52,7 @@ protected:
     /* capabilities */
     gloperate::AbstractTargetFramebufferCapability * m_targetFramebufferCapability;
     gloperate::AbstractViewportCapability * m_viewportCapability;
-    gloperate::AbstractPerspectiveProjectionCapability * m_projectionCapability;
+    gloperate::PerspectiveProjectionCapability * m_projectionCapability;
     gloperate::AbstractCameraCapability * m_cameraCapability;
 
 };

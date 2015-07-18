@@ -10,11 +10,12 @@ namespace gloperate
 {
 
 class AbstractTargetFramebufferCapability;
-class AbstractPerspectiveProjectionCapability;
+class PerspectiveProjectionCapability;
 class AbstractCameraCapability;
 class AbstractViewportCapability;
 class AbstractVirtualTimeCapability;
 class AbstractTypedRenderTargetCapability;
+class ResourceManager;
 
 } // namespace gloperate
 
@@ -23,18 +24,19 @@ class AbstractTypedRenderTargetCapability;
 class MarchingCubesPipeline : public gloperate::AbstractPipeline
 {
 public:
-    MarchingCubesPipeline();
+	MarchingCubesPipeline();
     virtual ~MarchingCubesPipeline() = default;
 
 public:
     gloperate::Data<gloperate::AbstractViewportCapability *> viewport;
     gloperate::Data<gloperate::AbstractCameraCapability *> camera;
-    gloperate::Data<gloperate::AbstractPerspectiveProjectionCapability *> projection;
+    gloperate::Data<gloperate::PerspectiveProjectionCapability *> projection;
 
     gloperate::Data<bool> useMipMap;
 
-    globjects::ref_ptr<globjects::Texture> colorTexture;
-    globjects::ref_ptr<globjects::Texture> groundTexture;
+	gloperate::Data<globjects::ref_ptr<globjects::Texture>> colorTexture;
+	gloperate::Data<globjects::ref_ptr<globjects::Texture>> groundTexture;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
+
 };

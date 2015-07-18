@@ -28,6 +28,7 @@ RenderStage::RenderStage()
 :   AbstractStage("Render")
 , m_chunkRenderer()
 , m_chunkQueue()
+, m_initialized(false)
 {
     addInput("viewport", viewport);
     addInput("camera", camera);
@@ -35,6 +36,8 @@ RenderStage::RenderStage()
     addInput("targetFBO", targetFBO);
 
     addInput("useMipMap", useMipMap);
+
+	alwaysProcess(true);
 }
 
 void RenderStage::initialize()
@@ -52,36 +55,42 @@ void RenderStage::initialize()
     setupProjection();
     setupOpenGLState();
 
-    groundTexture->setName("GroundTexture");
-    groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-    if (useMipMap.data())
-    {
-        groundTexture->generateMipmap();
-        groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    }
+	if (groundTexture.data() && colorTexture.data())
+	{
+		groundTexture.data()->setName("GroundTexture");
+		groundTexture.data()->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+		groundTexture.data()->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+		if (useMipMap.data())
+		{
+			groundTexture.data()->generateMipmap();
+			groundTexture.data()->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			groundTexture.data()->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		}
 
-    colorTexture->setName("ColorTexture");
-    colorTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    colorTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-    if (useMipMap.data())
-    {
-        colorTexture->generateMipmap();
-        colorTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    }
+		colorTexture.data()->setName("ColorTexture");
+		colorTexture.data()->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+		colorTexture.data()->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+		if (useMipMap.data())
+		{
+			colorTexture.data()->generateMipmap();
+			colorTexture.data()->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			colorTexture.data()->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		}
+	}
 
+	
     m_chunkRenderer = new ChunkRenderer();
-    m_chunkRenderer->setGroundTexture(groundTexture);
-    m_chunkRenderer->setColorTexture(colorTexture);
+	m_chunkRenderer->setGroundTexture(groundTexture.data());
+	m_chunkRenderer->setColorTexture(colorTexture.data());
 
     m_chunks.clear();
+
+	//render();
 }
 
 void RenderStage::process()
 {
-    auto rerender = false;
+    auto rerender = true;
 
     if (viewport.hasChanged())
     {
@@ -96,15 +105,25 @@ void RenderStage::process()
         rerender = true;
     }
 
-    if (camera.hasChanged() || projection.hasChanged())
+    if (camera.hasChanged() || projection.hasChanged() || targetFBO.hasChanged())
     {
         rerender = true;
     }
 
-    if (useMipMap.hasChanged())
+	if (groundTexture.hasChanged())
+	{
+		m_chunkRenderer->setGroundTexture(groundTexture.data());
+	}
+
+	if (colorTexture.hasChanged())
+	{
+		m_chunkRenderer->setColorTexture(colorTexture.data());
+	}
+
+    /*if (useMipMap.hasChanged())
     {
         m_chunkRenderer->updateTexture(useMipMap.data());
-    }
+    }*/
 
     if (rerender)
     {
@@ -128,16 +147,16 @@ void RenderStage::render()
 
     const auto transform = projection.data()->projection() * camera.data()->view();
     const auto eye = camera.data()->eye();
-
+	
     m_chunkRenderer->setTransform(transform);
 
     m_chunkRenderer->render(m_chunks);
-
+	
     m_grid->update(eye, transform);
     m_grid->draw();
 
     Framebuffer::unbind(GL_FRAMEBUFFER);
-
+	
     float distanceForAdding = 4.f;
 
     auto offset = ivec3(eye - distanceForAdding);
@@ -204,6 +223,8 @@ void RenderStage::render()
         if (!newChunk->isEmpty())
             ++i;
     }
+
+	invalidateOutputs();
 }
 
 void RenderStage::setupGrid()

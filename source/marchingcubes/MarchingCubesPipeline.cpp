@@ -1,11 +1,14 @@
 #include "MarchingCubesPipeline.h"
 
+#include <globjects/Texture.h>
+
 #include <gloperate/painter/AbstractViewportCapability.h>
 #include <gloperate/painter/TypedRenderTargetCapability.h>
-#include <gloperate/painter/AbstractPerspectiveProjectionCapability.h>
+#include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/AbstractCameraCapability.h>
 #include <gloperate/painter/AbstractVirtualTimeCapability.h>
 #include <gloperate/painter/AbstractTargetFramebufferCapability.h>
+#include <gloperate/resources/ResourceManager.h>
 
 #include "RenderStage.h"
 
@@ -23,8 +26,11 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->projection = projection;
     renderStage->targetFBO = targetFBO;
     renderStage->useMipMap = useMipMap;
-    renderStage->colorTexture = colorTexture;
-    renderStage->groundTexture = groundTexture;
+	renderStage->colorTexture = colorTexture;
+	renderStage->groundTexture = groundTexture;
 
-    //addStages();
+    addStages(
+		std::move(renderStage)
+	);
 }
+
