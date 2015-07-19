@@ -37,6 +37,9 @@ RenderStage::RenderStage()
 
     addInput("useMipMap", useMipMap);
 
+    addInput("colorTexture", colorTexture);
+    addInput("groundTexture", groundTexture);
+
 	alwaysProcess(true);
 }
 
