@@ -135,17 +135,17 @@ void RenderStage::process()
         invalidateOutputs();
     }
 
-    m_fbo->bind();
+    //m_fbo->bind();
 
     std::array<int, 4> sourceRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
     std::array<int, 4> destRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
 
     globjects::Framebuffer * destFbo = targetFBO.data()->framebuffer() ? targetFBO.data()->framebuffer() : globjects::Framebuffer::defaultFBO();
 
-    m_fbo->blit(gl::GL_COLOR_ATTACHMENT0, sourceRect, destFbo, gl::GL_BACK_LEFT, destRect, gl::GL_COLOR_BUFFER_BIT, gl::GL_NEAREST);
-    m_fbo->blit(gl::GL_DEPTH_ATTACHMENT, sourceRect, destFbo, gl::GL_BACK_LEFT, destRect, gl::GL_DEPTH_BUFFER_BIT, gl::GL_NEAREST);
+    m_fbo->blit(gl::GL_COLOR_ATTACHMENT0, sourceRect, destFbo, destFbo->id() == 0 ? gl::GL_BACK_LEFT : gl::GL_COLOR_ATTACHMENT0, destRect, gl::GL_COLOR_BUFFER_BIT, gl::GL_NEAREST);
+    m_fbo->blit(gl::GL_DEPTH_ATTACHMENT, sourceRect, destFbo, destFbo->id() == 0 ? gl::GL_BACK_LEFT : gl::GL_DEPTH_ATTACHMENT, destRect, gl::GL_DEPTH_BUFFER_BIT, gl::GL_NEAREST);
 
-    m_fbo->unbind();
+    //m_fbo->unbind();
 
 }
 
@@ -274,7 +274,7 @@ void RenderStage::setupFbo()
     m_fbo->setName("Render FBO");
 
     m_fbo->attachTexture(GL_COLOR_ATTACHMENT0, m_colorTexture);
-    m_fbo->attachTexture(GL_DEPTH_STENCIL_ATTACHMENT, m_depthTexture);
+    m_fbo->attachTexture(GL_DEPTH_ATTACHMENT, m_depthTexture);
 }
 
 void RenderStage::resizeFbo(int width, int height)
