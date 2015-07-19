@@ -1,14 +1,10 @@
 #pragma once
 
-#include <unordered_map>
-
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <glbinding/gl/types.h>
 
 #include <globjects/base/ref_ptr.h>
-
-#include <gloperate/primitives/AbstractDrawable.h>
 
 class Chunk;
 

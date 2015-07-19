@@ -3,7 +3,6 @@
 #include <queue>
 
 #include <glm/vec3.hpp>
-#include <vec3_hash.h>
 
 #include <globjects/base/ref_ptr.h>
 
@@ -15,8 +14,6 @@
 
 namespace gloperate
 {
-    class AbstractViewportCapability;
-    class PerspectiveProjectionCapability;
     class AbstractCameraCapability;
 }
 class Chunk;

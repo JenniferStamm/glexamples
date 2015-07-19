@@ -15,10 +15,7 @@ class Chunk;
 namespace globjects
 {
     class Program;
-    class Buffer;
     class Texture;
-    class TransformFeedback;
-    class VertexArray;
 }
 
 class ChunkRenderer : public globjects::Referenced

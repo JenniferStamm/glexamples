@@ -2,12 +2,9 @@
 
 #include <glm/vec3.hpp>
 #include <vec3_hash.h>
-#include <glm/gtc/noise.hpp>
 
 #include <glbinding/gl/enum.h>
 
-#include <globjects/Buffer.h>
-#include <globjects/VertexArray.h>
 #include <globjects/VertexAttributeBinding.h>
 #include <globjects/globjects.h>
 #include <globjects/Program.h>

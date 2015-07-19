@@ -1,7 +1,6 @@
 #include "ChunkFactory.h"
 
 #include <glm/vec3.hpp>
-#include <vec3_hash.h>
 #include <glm/gtc/noise.hpp>
 
 #include <glbinding/gl/enum.h>
@@ -15,8 +14,6 @@
 #include <globjects/Query.h>
 #include <globjects/TransformFeedback.h>
 #include <globjects/VertexAttributeBinding.h>
-
-#include <loggingzeug/logging.h>
 
 #include "LookUpData.h"
 #include "Chunk.h"
