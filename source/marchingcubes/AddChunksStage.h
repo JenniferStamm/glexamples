@@ -29,7 +29,7 @@ public:
 public:
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
 
-    gloperate::Data<std::vector<glm::vec3>> chunksToAdd;
+    gloperate::Data<std::queue<glm::vec3>> chunksToAdd;
 
 protected:
     virtual void process() override;

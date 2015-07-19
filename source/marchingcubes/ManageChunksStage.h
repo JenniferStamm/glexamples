@@ -32,7 +32,7 @@ public:
 
 public:
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
-    gloperate::InputSlot<std::vector<glm::vec3>> chunksToAdd; 
+    gloperate::InputSlot<std::queue<glm::vec3>> chunksToAdd; 
     gloperate::InputSlot<glm::vec3> rotationVector1;
     gloperate::InputSlot<glm::vec3> rotationVector2;
     gloperate::InputSlot<float> warpFactor;
@@ -41,11 +41,11 @@ public:
 
 protected:
     virtual void process() override; 
+
+    bool shouldRemoveChunk(glm::vec3 chunkPosition) const;
     
 protected:
     globjects::ref_ptr<ChunkFactory> m_chunkFactory;
-
-    std::queue<glm::vec3> m_chunkQueue;
 
 };
 

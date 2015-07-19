@@ -59,15 +59,11 @@ void ManageChunksStage::process()
     }
 
     // Remove unneeded chunks
-
-    float distanceForRemoving = 7.f;
-
     std::vector<vec3> chunksToRemove;
 
     for (auto chunk : chunks.data())
     {
-        auto currentOffset = chunk.first;
-        if (distance(currentOffset, camera.data()->eye()) > distanceForRemoving)
+        if (shouldRemoveChunk(chunk.first))
         {
             chunksToRemove.push_back(chunk.first);
         }
@@ -78,33 +74,31 @@ void ManageChunksStage::process()
         chunks->erase(chunkToRemove);
     }
 
-    // Add to queue
-    for (auto chunkToAdd : chunksToAdd.data())
-    {
-        m_chunkQueue.push(chunkToAdd);
-    }
-
+    // Copy chunk list
+    auto localChunksToAdd = chunksToAdd.data();
 
     // Generate new non-empty chunks
     const unsigned int chunksToGenerate = 3u;
 
     for (int i = 0; i < chunksToGenerate;)
-    {
-        if (m_chunkQueue.empty())
-            break;
-        glm::vec3 newOffset = m_chunkQueue.front();
-        m_chunkQueue.pop();
-        while (chunks->find(newOffset) != chunks->end())
+    {       
+        bool newChunkFound = false;
+        vec3 newOffset;
+
+        while (!localChunksToAdd.empty())
         {
-            if (m_chunkQueue.empty())
+            newOffset = localChunksToAdd.front();
+            localChunksToAdd.pop();
+            // Break if it is a new chunk
+            if (chunks->find(newOffset) == chunks->end())
+            {
+                newChunkFound = true;
                 break;
-            newOffset = m_chunkQueue.front();
-            m_chunkQueue.pop();
+            }
         }
 
-        // Don't add chunk if it was already generated
-        if (chunks->find(newOffset) != chunks->end())
-            continue;
+        if (!newChunkFound)
+            break;
 
         auto newChunk = new Chunk(newOffset);
         m_chunkFactory->generateDensities(newChunk);
@@ -121,3 +115,9 @@ void ManageChunksStage::process()
     invalidateOutputs();
 }
 
+bool ManageChunksStage::shouldRemoveChunk(glm::vec3 chunkPosition) const
+{
+    float distanceForRemoving = 7.f;
+
+    return distance(chunkPosition, camera.data()->eye()) > distanceForRemoving;
+}

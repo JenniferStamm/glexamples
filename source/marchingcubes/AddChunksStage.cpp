@@ -28,7 +28,8 @@ void AddChunksStage::initialize()
 
 void AddChunksStage::process()
 {
-    chunksToAdd->clear();
+    std::queue<vec3> empty;
+    std::swap(chunksToAdd.data(), empty);
 
     float distanceForAdding = 4.f;
 
@@ -42,7 +43,7 @@ void AddChunksStage::process()
             {
                 auto newOffset = vec3(x, y, z) + vec3(offset);
 
-                chunksToAdd->push_back(newOffset);
+                chunksToAdd->push(newOffset);
             }
         }
     }
