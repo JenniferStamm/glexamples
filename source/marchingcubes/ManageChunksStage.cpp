@@ -123,7 +123,7 @@ void ManageChunksStage::process()
 
 bool ManageChunksStage::shouldRemoveChunk(glm::vec3 chunkPosition) const
 {
-    float distanceForRemoving = 7.f;
+    float distanceForRemoving = 10.f;
 
     return distance(chunkPosition, camera.data()->eye()) > distanceForRemoving;
 }

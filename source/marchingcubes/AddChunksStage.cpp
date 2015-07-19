@@ -31,19 +31,25 @@ void AddChunksStage::process()
     std::queue<vec3> empty;
     std::swap(chunksToAdd.data(), empty);
 
-    float distanceForAdding = 4.f;
+    int directionMax = 8;
+    int upMax = 3;
+    int rightMax = 4;
 
-    auto offset = ivec3(camera.data()->eye() - distanceForAdding);
+    auto startPosition = camera.data()->eye();
 
-    for (int z = 0; z < distanceForAdding * 2; ++z)
+    auto direction = normalize(camera.data()->center() - camera.data()->eye());
+    auto up = normalize(camera.data()->up());
+    auto right = normalize(cross(up, direction));
+
+    for (int z = 0; z < directionMax; ++z)
     {
-        for (int y = 0; y < distanceForAdding * 2; ++y)
+        for (int y = -upMax; y < upMax; ++y)
         {
-            for (int x = 0; x < distanceForAdding * 2; ++x)
+            for (int x = -rightMax; x < rightMax; ++x)
             {
-                auto newOffset = vec3(x, y, z) + vec3(offset);
+                auto newOffset = ivec3(startPosition + right * float(x) + up * float(y) + direction * float(z));
 
-                chunksToAdd->push(newOffset);
+                chunksToAdd->push(vec3(newOffset));
             }
         }
     }
