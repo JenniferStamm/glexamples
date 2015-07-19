@@ -40,6 +40,8 @@ set(sources
     ${source_path}/ChunkRenderer.cpp
     ${source_path}/LookUpData.cpp
     ${source_path}/MarchingCubesPainter.cpp
+    ${source_path}/MarchingCubesPipeline.cpp
+    ${source_path}/RenderStage.cpp
     ${source_path}/plugin.cpp
 )
 
@@ -48,6 +50,8 @@ set(api_includes
     ${include_path}/ChunkRenderer.h
     ${include_path}/LookUpData.h
     ${include_path}/MarchingCubesPainter.h
+    ${include_path}/MarchingCubesPipeline.h
+    ${include_path}/RenderStage.h
     ${include_path}/vec3_hash.h
 )
 
