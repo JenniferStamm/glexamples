@@ -8,6 +8,7 @@
 
 #include <globjects/globjects.h>
 #include <globjects/Texture.h>
+#include <globjects/Framebuffer.h>
 
 #include <gloperate/painter/AbstractViewportCapability.h>
 #include <gloperate/painter/AbstractCameraCapability.h>
@@ -56,6 +57,7 @@ void RenderStage::initialize()
     setupGrid();
     setupProjection();
     setupOpenGLState();
+    setupFbo();
 
 	if (groundTexture.data() && colorTexture.data())
 	{
@@ -92,7 +94,7 @@ void RenderStage::initialize()
 
 void RenderStage::process()
 {
-    auto rerender = true;
+    auto rerender = false;
 
     if (viewport.hasChanged())
     {
@@ -101,8 +103,7 @@ void RenderStage::process()
             viewport.data()->y(),
             viewport.data()->width(),
             viewport.data()->height());
-
-        viewport.data()->setChanged(false);
+        resizeFbo(viewport.data()->width(), viewport.data()->height());
 
         rerender = true;
     }
@@ -134,16 +135,23 @@ void RenderStage::process()
         invalidateOutputs();
     }
 
+    m_fbo->bind();
+
+    std::array<int, 4> sourceRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
+    std::array<int, 4> destRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
+
+    globjects::Framebuffer * destFbo = targetFBO.data()->framebuffer() ? targetFBO.data()->framebuffer() : globjects::Framebuffer::defaultFBO();
+
+    m_fbo->blit(gl::GL_COLOR_ATTACHMENT0, sourceRect, destFbo, gl::GL_BACK_LEFT, destRect, gl::GL_COLOR_BUFFER_BIT, gl::GL_NEAREST);
+    m_fbo->blit(gl::GL_DEPTH_ATTACHMENT, sourceRect, destFbo, gl::GL_BACK_LEFT, destRect, gl::GL_DEPTH_BUFFER_BIT, gl::GL_NEAREST);
+
+    m_fbo->unbind();
+
 }
 
 void RenderStage::render()
 {
-    auto fbo = targetFBO.data()->framebuffer();
-
-    if (!fbo)
-        fbo = globjects::Framebuffer::defaultFBO();
-
-    fbo->bind(GL_FRAMEBUFFER);
+    m_fbo->bind(GL_FRAMEBUFFER);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -157,7 +165,7 @@ void RenderStage::render()
     m_grid->update(eye, transform);
     m_grid->draw();
 
-    Framebuffer::unbind(GL_FRAMEBUFFER);
+    m_fbo->unbind();
 	
     float distanceForAdding = 4.f;
 
@@ -226,7 +234,6 @@ void RenderStage::render()
             ++i;
     }
 
-	invalidateOutputs();
 }
 
 void RenderStage::setupGrid()
@@ -250,4 +257,30 @@ void RenderStage::setupOpenGLState()
 {
     glClearColor(0.f, 0.f, 0.2f, 1.0f);
     glEnable(GL_CULL_FACE);
+}
+
+void RenderStage::setupFbo()
+{
+    static const auto createTexture = [](const std::string & name)
+    {
+        auto tex = Texture::createDefault(GL_TEXTURE_2D);
+        tex->setName(name);
+        return tex;
+    };
+
+    m_colorTexture = createTexture("Color Texture");
+    m_depthTexture = createTexture("Depth Texture");
+    m_fbo = make_ref<globjects::Framebuffer>();
+    m_fbo->setName("Render FBO");
+
+    m_fbo->attachTexture(GL_COLOR_ATTACHMENT0, m_colorTexture);
+    m_fbo->attachTexture(GL_DEPTH_STENCIL_ATTACHMENT, m_depthTexture);
+}
+
+void RenderStage::resizeFbo(int width, int height)
+{
+    m_colorTexture->image2D(0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    m_depthTexture->image2D(0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, nullptr);
+
+    m_fbo->printStatus(true);
 }
