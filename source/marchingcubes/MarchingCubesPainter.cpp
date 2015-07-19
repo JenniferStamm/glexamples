@@ -36,6 +36,8 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
 ,   m_projectionCapability{addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
 {
+    globjects::init();
+
     m_pipeline.targetFBO.setData(m_targetFramebufferCapability);
     m_pipeline.viewport.setData(m_viewportCapability);
     m_pipeline.camera.setData(m_cameraCapability);

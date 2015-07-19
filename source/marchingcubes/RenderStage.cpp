@@ -42,7 +42,6 @@ RenderStage::RenderStage()
 
 void RenderStage::initialize()
 {
-    globjects::init();
 
 #ifdef __APPLE__
     Shader::clearGlobalReplacements();
