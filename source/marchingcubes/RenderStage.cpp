@@ -41,6 +41,11 @@ RenderStage::RenderStage()
     addInput("rotationVector2", rotationVector2);
     addInput("warpFactor", warpFactor);
 
+    addInput("colorTexture", colorTexture);
+    addInput("groundTexture", groundTexture);
+
+    addInput("chunksToAdd", chunksToAdd);
+
 	alwaysProcess(true);
 }
 
@@ -162,17 +167,17 @@ void RenderStage::process()
         invalidateOutputs();
     }
 
-    m_fbo->bind();
+    //m_fbo->bind();
 
     std::array<int, 4> sourceRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
     std::array<int, 4> destRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
 
     globjects::Framebuffer * destFbo = targetFBO.data()->framebuffer() ? targetFBO.data()->framebuffer() : globjects::Framebuffer::defaultFBO();
 
-    m_fbo->blit(gl::GL_COLOR_ATTACHMENT0, sourceRect, destFbo, gl::GL_BACK_LEFT, destRect, gl::GL_COLOR_BUFFER_BIT, gl::GL_NEAREST);
-    m_fbo->blit(gl::GL_DEPTH_ATTACHMENT, sourceRect, destFbo, gl::GL_BACK_LEFT, destRect, gl::GL_DEPTH_BUFFER_BIT, gl::GL_NEAREST);
+    m_fbo->blit(gl::GL_COLOR_ATTACHMENT0, sourceRect, destFbo, destFbo->id() == 0 ? gl::GL_BACK_LEFT : gl::GL_COLOR_ATTACHMENT0, destRect, gl::GL_COLOR_BUFFER_BIT, gl::GL_NEAREST);
+    m_fbo->blit(gl::GL_DEPTH_ATTACHMENT, sourceRect, destFbo, destFbo->id() == 0 ? gl::GL_BACK_LEFT : gl::GL_DEPTH_ATTACHMENT, destRect, gl::GL_DEPTH_BUFFER_BIT, gl::GL_NEAREST);
 
-    m_fbo->unbind();
+    //m_fbo->unbind();
 
 }
 
@@ -193,25 +198,6 @@ void RenderStage::render()
     m_grid->draw();
 
     m_fbo->unbind();
-	
-    float distanceForAdding = 4.f;
-
-    auto offset = ivec3(eye - distanceForAdding);
-
-    for (int z = 0; z < distanceForAdding * 2; ++z)
-    {
-        for (int y = 0; y < distanceForAdding * 2; ++y)
-        {
-            for (int x = 0; x < distanceForAdding * 2; ++x)
-            {
-                auto newOffset = vec3(x, y, z) + vec3(offset);
-                if (m_chunkQueue.size() < 100 && m_chunks.find(newOffset) == m_chunks.end())
-                {
-                    m_chunkQueue.push(newOffset);
-                }
-            }
-        }
-    }
 
     // Remove unneeded chunks
 
@@ -233,6 +219,11 @@ void RenderStage::render()
         m_chunks.erase(chunkToRemove);
     }
 
+    // Add to queue
+    for (auto chunkToAdd : chunksToAdd.data())
+    {
+        m_chunkQueue.push(chunkToAdd);
+    }
 
 
     // Generate new non-empty chunks
@@ -242,8 +233,15 @@ void RenderStage::render()
     {
         if (m_chunkQueue.empty())
             break;
-        auto newOffset = m_chunkQueue.front();
+        glm::vec3 newOffset = m_chunkQueue.front();
         m_chunkQueue.pop();
+        while (m_chunks.find(newOffset) != m_chunks.end())
+        {
+            if (m_chunkQueue.empty())
+                break;
+            newOffset = m_chunkQueue.front();
+            m_chunkQueue.pop();
+        }
 
         // Don't add chunk if it was already generated
         if (m_chunks.find(newOffset) != m_chunks.end())
@@ -260,7 +258,6 @@ void RenderStage::render()
         if (!newChunk->isEmpty())
             ++i;
     }
-
 }
 
 void RenderStage::setupGrid()
@@ -301,7 +298,7 @@ void RenderStage::setupFbo()
     m_fbo->setName("Render FBO");
 
     m_fbo->attachTexture(GL_COLOR_ATTACHMENT0, m_colorTexture);
-    m_fbo->attachTexture(GL_DEPTH_STENCIL_ATTACHMENT, m_depthTexture);
+    m_fbo->attachTexture(GL_DEPTH_ATTACHMENT, m_depthTexture);
 }
 
 void RenderStage::resizeFbo(int width, int height)

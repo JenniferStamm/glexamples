@@ -51,6 +51,7 @@ public:
     gloperate::InputSlot<float> warpFactor;
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> colorTexture;
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> groundTexture;
+    gloperate::InputSlot<std::vector<glm::vec3>> chunksToAdd;
 
 
 protected:
