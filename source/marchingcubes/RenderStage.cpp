@@ -124,10 +124,15 @@ void RenderStage::process()
         rerender = true;
 	}
 
-    /*if (useMipMap.hasChanged())
+    if (useMipMap.hasChanged())
     {
         m_chunkRenderer->updateTexture(useMipMap.data());
-    }*/
+    }
+
+    if (chunks.hasChanged())
+    {
+        rerender = true;
+    }
 
     if (rerender)
     {

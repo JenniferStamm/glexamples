@@ -34,6 +34,7 @@ void ManageChunksStage::initialize()
 void ManageChunksStage::process()
 {
     auto regenerate = false;
+    auto chunksChanged = false;
 
     if (rotationVector1.hasChanged())
     {
@@ -56,6 +57,7 @@ void ManageChunksStage::process()
     if (regenerate)
     {
         chunks->clear();
+        chunksChanged = true;
     }
 
     // Remove unneeded chunks
@@ -65,6 +67,7 @@ void ManageChunksStage::process()
     {
         if (shouldRemoveChunk(chunk.first))
         {
+            chunksChanged = true;
             chunksToRemove.push_back(chunk.first);
         }
     }
@@ -100,6 +103,8 @@ void ManageChunksStage::process()
         if (!newChunkFound)
             break;
 
+        chunksChanged = true;
+
         auto newChunk = new Chunk(newOffset);
         m_chunkFactory->generateDensities(newChunk);
         m_chunkFactory->generateList(newChunk);
@@ -112,7 +117,8 @@ void ManageChunksStage::process()
             ++i;
     }
 
-    invalidateOutputs();
+    if (chunksChanged)
+        invalidateOutputs();
 }
 
 bool ManageChunksStage::shouldRemoveChunk(glm::vec3 chunkPosition) const
