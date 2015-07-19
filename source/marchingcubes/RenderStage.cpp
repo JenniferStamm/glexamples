@@ -168,66 +168,6 @@ void RenderStage::render()
     m_grid->draw();
 
     m_fbo->unbind();
-
-    // Remove unneeded chunks
-
-    float distanceForRemoving = 7.f;
-
-    std::vector<vec3> chunksToRemove;
-
-    for (auto chunk : m_chunks)
-    {
-        auto currentOffset = chunk.first;
-        if (distance(currentOffset, eye) > distanceForRemoving)
-        {
-            chunksToRemove.push_back(chunk.first);
-        }
-    }
-
-    for (auto chunkToRemove : chunksToRemove)
-    {
-        m_chunks.erase(chunkToRemove);
-    }
-
-    // Add to queue
-    for (auto chunkToAdd : chunksToAdd.data())
-    {
-        m_chunkQueue.push(chunkToAdd);
-    }
-
-
-    // Generate new non-empty chunks
-    const unsigned int chunksToGenerate = 3u;
-
-    for (int i = 0; i < chunksToGenerate;)
-    {
-        if (m_chunkQueue.empty())
-            break;
-        glm::vec3 newOffset = m_chunkQueue.front();
-        m_chunkQueue.pop();
-        while (m_chunks.find(newOffset) != m_chunks.end())
-        {
-            if (m_chunkQueue.empty())
-                break;
-            newOffset = m_chunkQueue.front();
-            m_chunkQueue.pop();
-        }
-
-        // Don't add chunk if it was already generated
-        if (m_chunks.find(newOffset) != m_chunks.end())
-            continue;
-
-        auto newChunk = new Chunk(newOffset);
-        m_chunkRenderer->generateDensities(newChunk);
-        m_chunkRenderer->generateList(newChunk);
-        if (!newChunk->isEmpty())
-            m_chunkRenderer->generateMesh(newChunk);
-
-        m_chunks[newOffset] = newChunk;
-
-        if (!newChunk->isEmpty())
-            ++i;
-    }
 }
 
 void RenderStage::setupGrid()
