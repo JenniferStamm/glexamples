@@ -9,6 +9,10 @@ uniform sampler3D noiseTexture2;
 uniform sampler3D noiseTexture3;
 uniform sampler3D noiseTexture4;
 
+uniform vec3 rotationVector1;
+uniform vec3 rotationVector2;
+uniform float warpFactor;
+
 layout (location = 0) in vec3 in_position;
 
 out float out_density;
@@ -34,10 +38,10 @@ void main()
     float yWarp = texture(noiseTexture2, realPosition * 0.24).r;
     float zWarp = texture(noiseTexture3, realPosition * 0.18).r;
     
-    vec3 warpedPosition = realPosition + vec3(xWarp, yWarp, zWarp) * 3.4;
+    vec3 warpedPosition = realPosition + vec3(xWarp, yWarp, zWarp) * warpFactor;
     
-    mat4 rotate1 = rotationMatrix(vec3(1, 0.3, 0.1), 3);
-    mat4 rotate2 = rotationMatrix(vec3(0.1, 0.5, 0.3), 5);
+    mat4 rotate1 = rotationMatrix(rotationVector1, 3);
+    mat4 rotate2 = rotationMatrix(rotationVector2, 5);
     vec3 rotatedPosition1 = (rotate1 * vec4(realPosition, 1.0)).xyz;
     vec3 rotatedPosition2 = (rotate2 * vec4(realPosition, 1.0)).xyz;
     
@@ -45,5 +49,5 @@ void main()
     out_density += -warpedPosition.y;
     out_density += texture(noiseTexture1, warpedPosition * 3.23).r * 0.3;
     out_density += texture(noiseTexture2, rotatedPosition2 * 1.8).r * 1.0;
-    out_density += texture(noiseTexture1, rotatedPosition1 * 1.01).r * 1.5;
+    out_density += texture(noiseTexture3, rotatedPosition1 * 1.01).r * 1.5;
 }

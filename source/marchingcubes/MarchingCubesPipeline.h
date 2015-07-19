@@ -33,6 +33,9 @@ public:
     gloperate::Data<gloperate::PerspectiveProjectionCapability *> projection;
 
     gloperate::Data<bool> useMipMap;
+    gloperate::Data<glm::vec3> rotationVector1;
+    gloperate::Data<glm::vec3> rotationVector2;
+    gloperate::Data<float> warpFactor;
 
 	gloperate::Data<globjects::ref_ptr<globjects::Texture>> colorTexture;
 	gloperate::Data<globjects::ref_ptr<globjects::Texture>> groundTexture;

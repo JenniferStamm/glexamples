@@ -45,7 +45,10 @@ public:
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
     gloperate::InputSlot<gloperate::PerspectiveProjectionCapability *> projection;
     gloperate::InputSlot<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
-	gloperate::InputSlot<bool> useMipMap;
+    gloperate::InputSlot<bool> useMipMap;
+    gloperate::InputSlot<glm::vec3> rotationVector1;
+    gloperate::InputSlot<glm::vec3> rotationVector2;
+    gloperate::InputSlot<float> warpFactor;
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> colorTexture;
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> groundTexture;
 

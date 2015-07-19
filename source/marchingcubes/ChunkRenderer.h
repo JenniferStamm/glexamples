@@ -41,6 +41,8 @@ public:
 
 	void updateTexture(bool useMipMap);
 
+    globjects::Program * densityGenerationProgram() const { return m_densityGenerationProgram.get(); }
+
 protected:
     void setupProgram();
     void setupRendering();

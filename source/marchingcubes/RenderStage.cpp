@@ -37,6 +37,9 @@ RenderStage::RenderStage()
     addInput("targetFBO", targetFBO);
 
     addInput("useMipMap", useMipMap);
+    addInput("rotationVector1", rotationVector1);
+    addInput("rotationVector2", rotationVector2);
+    addInput("warpFactor", warpFactor);
 
 	alwaysProcess(true);
 }
@@ -92,6 +95,7 @@ void RenderStage::initialize()
 void RenderStage::process()
 {
     auto rerender = false;
+    auto regenerate = false;
 
     if (viewport.hasChanged())
     {
@@ -113,17 +117,43 @@ void RenderStage::process()
 	if (groundTexture.hasChanged())
 	{
 		m_chunkRenderer->setGroundTexture(groundTexture.data());
+        rerender = true;
 	}
 
 	if (colorTexture.hasChanged())
 	{
 		m_chunkRenderer->setColorTexture(colorTexture.data());
+        rerender = true;
 	}
+
+    if (rotationVector1.hasChanged())
+    {
+        m_chunkRenderer->densityGenerationProgram()->setUniform("rotationVector1", rotationVector1.data());
+        regenerate = true;
+    }
+
+    if (rotationVector2.hasChanged())
+    {
+        m_chunkRenderer->densityGenerationProgram()->setUniform("rotationVector2", rotationVector2.data());
+        regenerate = true;
+    }
+
+    if (warpFactor.hasChanged())
+    {
+        m_chunkRenderer->densityGenerationProgram()->setUniform("warpFactor", warpFactor.data());
+        regenerate = true;
+    }
 
     /*if (useMipMap.hasChanged())
     {
         m_chunkRenderer->updateTexture(useMipMap.data());
     }*/
+
+    if (regenerate)
+    {
+        m_chunks.clear();
+        rerender = true;
+    }
 
     if (rerender)
     {
