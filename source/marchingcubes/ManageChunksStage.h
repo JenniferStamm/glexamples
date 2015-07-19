@@ -19,8 +19,9 @@ namespace gloperate
     class PerspectiveProjectionCapability;
     class AbstractCameraCapability;
 }
-class Chunk;
 
+class Chunk;
+class ChunkFactory;
 
 class ManageChunksStage : public gloperate::AbstractStage
 {
@@ -31,12 +32,18 @@ public:
 
 public:
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
-    gloperate::InputSlot<std::vector<glm::vec3>> chunksToAdd;
+    gloperate::InputSlot<std::vector<glm::vec3>> chunksToAdd; 
+    gloperate::InputSlot<glm::vec3> rotationVector1;
+    gloperate::InputSlot<glm::vec3> rotationVector2;
+    gloperate::InputSlot<float> warpFactor;
 
     gloperate::Data<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
 protected:
-    virtual void process() override;
+    virtual void process() override; 
+    
+protected:
+    globjects::ref_ptr<ChunkFactory> m_chunkFactory;
 
     std::queue<glm::vec3> m_chunkQueue;
 

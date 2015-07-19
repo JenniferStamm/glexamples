@@ -46,12 +46,10 @@ public:
     gloperate::InputSlot<gloperate::PerspectiveProjectionCapability *> projection;
     gloperate::InputSlot<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
     gloperate::InputSlot<bool> useMipMap;
-    gloperate::InputSlot<glm::vec3> rotationVector1;
-    gloperate::InputSlot<glm::vec3> rotationVector2;
-    gloperate::InputSlot<float> warpFactor;
+    
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> colorTexture;
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> groundTexture;
-    gloperate::InputSlot<std::vector<glm::vec3>> chunksToAdd;
+    gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
 
 protected:
@@ -74,9 +72,7 @@ protected:
     globjects::ref_ptr<globjects::Texture> m_colorTexture;
     globjects::ref_ptr<globjects::Texture> m_depthTexture;
 
-    std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>> m_chunks;
     globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
-    std::queue<glm::vec3> m_chunkQueue;
 
 	bool m_initialized;
 

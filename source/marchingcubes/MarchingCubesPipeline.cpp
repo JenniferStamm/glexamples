@@ -11,6 +11,7 @@
 #include <gloperate/resources/ResourceManager.h>
 
 #include "AddChunksStage.h"
+#include "ManageChunksStage.h"
 #include "RenderStage.h"
 
 
@@ -24,24 +25,29 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , targetFBO(nullptr)
 {
     auto addChunksStage = new AddChunksStage();
+    auto manageChunksStage = new ManageChunksStage();
     auto renderStage = new RenderStage();
 
     addChunksStage->camera = camera;
+
+    manageChunksStage->camera = camera;
+    manageChunksStage->chunksToAdd = addChunksStage->chunksToAdd;
+    manageChunksStage->rotationVector1 = rotationVector1;
+    manageChunksStage->rotationVector2 = rotationVector2;
+    manageChunksStage->warpFactor = warpFactor;
 
     renderStage->viewport = viewport;
     renderStage->camera = camera;
     renderStage->projection = projection;
     renderStage->targetFBO = targetFBO;
     renderStage->useMipMap = useMipMap;
-    renderStage->rotationVector1 = rotationVector1;
-    renderStage->rotationVector2 = rotationVector2;
-    renderStage->warpFactor = warpFactor;
 	renderStage->colorTexture = colorTexture;
 	renderStage->groundTexture = groundTexture;
-    renderStage->chunksToAdd = addChunksStage->chunksToAdd;
+    renderStage->chunks = manageChunksStage->chunks;
 
     addStages(
         std::move(addChunksStage),
+        std::move(manageChunksStage),
 		std::move(renderStage)
 	);
 }

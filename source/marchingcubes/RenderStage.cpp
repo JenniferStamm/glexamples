@@ -28,7 +28,6 @@ using namespace globjects;
 RenderStage::RenderStage()
 :   AbstractStage("Render")
 , m_chunkRenderer()
-, m_chunkQueue()
 , m_initialized(false)
 {
     addInput("viewport", viewport);
@@ -37,14 +36,11 @@ RenderStage::RenderStage()
     addInput("targetFBO", targetFBO);
 
     addInput("useMipMap", useMipMap);
-    addInput("rotationVector1", rotationVector1);
-    addInput("rotationVector2", rotationVector2);
-    addInput("warpFactor", warpFactor);
 
     addInput("colorTexture", colorTexture);
     addInput("groundTexture", groundTexture);
 
-    addInput("chunksToAdd", chunksToAdd);
+    addInput("chunks", chunks);
 
 	alwaysProcess(true);
 }
@@ -92,15 +88,12 @@ void RenderStage::initialize()
 	m_chunkRenderer->setGroundTexture(groundTexture.data());
 	m_chunkRenderer->setColorTexture(colorTexture.data());
 
-    m_chunks.clear();
-
 	//render();
 }
 
 void RenderStage::process()
 {
     auto rerender = false;
-    auto regenerate = false;
 
     if (viewport.hasChanged())
     {
@@ -131,34 +124,10 @@ void RenderStage::process()
         rerender = true;
 	}
 
-    if (rotationVector1.hasChanged())
-    {
-        m_chunkRenderer->densityGenerationProgram()->setUniform("rotationVector1", rotationVector1.data());
-        regenerate = true;
-    }
-
-    if (rotationVector2.hasChanged())
-    {
-        m_chunkRenderer->densityGenerationProgram()->setUniform("rotationVector2", rotationVector2.data());
-        regenerate = true;
-    }
-
-    if (warpFactor.hasChanged())
-    {
-        m_chunkRenderer->densityGenerationProgram()->setUniform("warpFactor", warpFactor.data());
-        regenerate = true;
-    }
-
     /*if (useMipMap.hasChanged())
     {
         m_chunkRenderer->updateTexture(useMipMap.data());
     }*/
-
-    if (regenerate)
-    {
-        m_chunks.clear();
-        rerender = true;
-    }
 
     if (rerender)
     {
@@ -192,7 +161,7 @@ void RenderStage::render()
 	
     m_chunkRenderer->setTransform(transform);
 
-    m_chunkRenderer->render(m_chunks);
+    m_chunkRenderer->render(chunks.data());
 	
     m_grid->update(eye, transform);
     m_grid->draw();

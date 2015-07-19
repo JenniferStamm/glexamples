@@ -19,7 +19,7 @@
 #include <gloperate/primitives/AdaptiveGrid.h>
 
 #include "Chunk.h"
-#include "ChunkRenderer.h"
+#include "ChunkFactory.h"
 
 using namespace gl;
 using namespace glm;
@@ -27,20 +27,51 @@ using namespace globjects;
 
 ManageChunksStage::ManageChunksStage()
 :   AbstractStage("ManageChunks")
+, m_chunkFactory()
 {
     addInput("camera", camera);
     addInput("chunksToAdd", chunksToAdd);
+    addInput("rotationVector1", rotationVector1);
+    addInput("rotationVector2", rotationVector2);
+    addInput("warpFactor", warpFactor);
 
     addOutput("chunks", chunks);
+
+    alwaysProcess(true);
 }
 
 void ManageChunksStage::initialize()
 {
-    
+    m_chunkFactory = new ChunkFactory();
 }
 
 void ManageChunksStage::process()
 {
+    auto regenerate = false;
+
+    if (rotationVector1.hasChanged())
+    {
+        m_chunkFactory->densityGenerationProgram()->setUniform("rotationVector1", rotationVector1.data());
+        regenerate = true;
+    }
+
+    if (rotationVector2.hasChanged())
+    {
+        m_chunkFactory->densityGenerationProgram()->setUniform("rotationVector2", rotationVector2.data());
+        regenerate = true;
+    }
+
+    if (warpFactor.hasChanged())
+    {
+        m_chunkFactory->densityGenerationProgram()->setUniform("warpFactor", warpFactor.data());
+        regenerate = true;
+    }
+
+    if (regenerate)
+    {
+        chunks->clear();
+    }
+
     // Remove unneeded chunks
 
     float distanceForRemoving = 7.f;
@@ -90,12 +121,12 @@ void ManageChunksStage::process()
             continue;
 
         auto newChunk = new Chunk(newOffset);
-        m_chunkRenderer->generateDensities(newChunk);
-        m_chunkRenderer->generateList(newChunk);
+        m_chunkFactory->generateDensities(newChunk);
+        m_chunkFactory->generateList(newChunk);
         if (!newChunk->isEmpty())
-            m_chunkRenderer->generateMesh(newChunk);
+            m_chunkFactory->generateMesh(newChunk);
 
-        m_chunks[newOffset] = newChunk;
+        chunks.data()[newOffset] = newChunk;
 
         if (!newChunk->isEmpty())
             ++i;
