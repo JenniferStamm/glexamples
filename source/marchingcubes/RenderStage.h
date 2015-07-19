@@ -6,7 +6,6 @@
 #include <vec3_hash.h>
 
 #include <globjects/base/ref_ptr.h>
-#include <globjects/Texture.h>
 
 
 #include <gloperate/pipeline/AbstractStage.h>
@@ -24,6 +23,11 @@ namespace gloperate
     class AdaptiveGrid;
 }
 
+namespace globjects
+{
+    class Framebuffer;
+    class Texture;
+}
 
 class Chunk;
 class ChunkRenderer;
@@ -54,10 +58,17 @@ protected:
     void setupGrid();
     void setupProjection();
     void setupOpenGLState();
+    void setupFbo();
+
+    void resizeFbo(int width, int height);
 
 
 protected:
     globjects::ref_ptr<gloperate::AdaptiveGrid> m_grid;
+
+    globjects::ref_ptr<globjects::Framebuffer> m_fbo;
+    globjects::ref_ptr<globjects::Texture> m_colorTexture;
+    globjects::ref_ptr<globjects::Texture> m_depthTexture;
 
     std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>> m_chunks;
     globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
