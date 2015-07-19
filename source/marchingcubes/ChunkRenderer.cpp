@@ -254,6 +254,8 @@ ref_ptr<Texture> ChunkRenderer::setupNoiseTexture(vec3 offset)
         }
     }
     auto texture = Texture::createDefault(GL_TEXTURE_3D);
+    texture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     texture->setParameter(GLenum::GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     texture->setParameter(GLenum::GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     texture->setParameter(GLenum::GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);

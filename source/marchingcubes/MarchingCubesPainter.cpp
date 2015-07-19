@@ -12,6 +12,8 @@
 #include <globjects/DebugMessage.h>
 #include <globjects/Texture.h>
 
+#include <reflectionzeug/property/extensions/GlmProperties.h>
+
 #include <widgetzeug/make_unique.hpp>
 
 #include <gloperate/painter/TargetFramebufferCapability.h>
@@ -51,9 +53,15 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     m_projectionCapability->changed.connect([this]() { m_pipeline.projection.invalidate(); });
 
 
-    reflectionzeug::PropertyGroup * marchingCubesGroup = addGroup("MarchingCubes");
+    auto renderingGroup = addGroup("Rendering");
+    renderingGroup->addProperty(createProperty("UseMipMap", m_pipeline.useMipMap));
 
-    marchingCubesGroup->addProperty(createProperty("UseMipMap", m_pipeline.useMipMap));
+    auto terrainGroup = addGroup("Terrain Generation");
+    terrainGroup->addProperty(createProperty("Rotation Vector 1", m_pipeline.rotationVector1));
+    terrainGroup->addProperty(createProperty("Rotation Vector 2", m_pipeline.rotationVector2));
+    terrainGroup->addProperty(createProperty("Warp Factor", m_pipeline.warpFactor));
+
+
 }
 
 MarchingCubes::~MarchingCubes() = default;

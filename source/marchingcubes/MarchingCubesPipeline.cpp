@@ -18,6 +18,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 : AbstractPipeline("MarchingCubes")
 , viewport(nullptr)
 , useMipMap(true)
+, rotationVector1(glm::vec3(1, 0.3, 0.5))
+, rotationVector2(glm::vec3(0.1, 0.5, 0.3))
+, warpFactor(3.4)
 , targetFBO(nullptr)
 {
     auto addChunksStage = new AddChunksStage();
@@ -30,6 +33,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->projection = projection;
     renderStage->targetFBO = targetFBO;
     renderStage->useMipMap = useMipMap;
+    renderStage->rotationVector1 = rotationVector1;
+    renderStage->rotationVector2 = rotationVector2;
+    renderStage->warpFactor = warpFactor;
 	renderStage->colorTexture = colorTexture;
 	renderStage->groundTexture = groundTexture;
     renderStage->chunksToAdd = addChunksStage->chunksToAdd;
