@@ -1,7 +1,5 @@
 #include "MarchingCubesPipeline.h"
 
-#include <globjects/Texture.h>
-
 #include <gloperate/painter/AbstractViewportCapability.h>
 #include <gloperate/painter/TypedRenderTargetCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
@@ -41,8 +39,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->projection = projection;
     renderStage->targetFBO = targetFBO;
     renderStage->useMipMap = useMipMap;
-	renderStage->colorTexture = colorTexture;
-	renderStage->groundTexture = groundTexture;
+    renderStage->resourceManager = resourceManager;
     renderStage->chunks = manageChunksStage->chunks;
 
     addStages(

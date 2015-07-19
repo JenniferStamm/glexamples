@@ -44,8 +44,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     m_pipeline.viewport.setData(m_viewportCapability);
     m_pipeline.camera.setData(m_cameraCapability);
 	m_pipeline.projection.setData(m_projectionCapability); 
-	m_pipeline.colorTexture.setData(m_resourceManager.load<globjects::Texture>("data/marchingcubes/terrain_color.jpg"));
-	m_pipeline.groundTexture.setData(m_resourceManager.load<globjects::Texture>("data/marchingcubes/ground.png"));
+    m_pipeline.resourceManager.setData(&m_resourceManager);
 
     m_targetFramebufferCapability->changed.connect([this]() { m_pipeline.targetFBO.invalidate(); });
     m_viewportCapability->changed.connect([this]() { m_pipeline.viewport.invalidate(); });

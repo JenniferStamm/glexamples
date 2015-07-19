@@ -21,6 +21,7 @@ namespace gloperate
     class AbstractCameraCapability;
     class AbstractTargetFramebufferCapability;
     class AdaptiveGrid;
+    class ResourceManager;
 }
 
 namespace globjects
@@ -44,11 +45,10 @@ public:
     gloperate::InputSlot<gloperate::AbstractViewportCapability *> viewport;
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
     gloperate::InputSlot<gloperate::PerspectiveProjectionCapability *> projection;
+    gloperate::InputSlot<gloperate::ResourceManager *> resourceManager;
     gloperate::InputSlot<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
     gloperate::InputSlot<bool> useMipMap;
     
-	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> colorTexture;
-	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> groundTexture;
     gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
 
@@ -61,6 +61,7 @@ protected:
     void setupProjection();
     void setupOpenGLState();
     void setupFbo();
+    void setupTextures();
 
     void resizeFbo(int width, int height);
 
@@ -71,6 +72,9 @@ protected:
     globjects::ref_ptr<globjects::Framebuffer> m_fbo;
     globjects::ref_ptr<globjects::Texture> m_colorTexture;
     globjects::ref_ptr<globjects::Texture> m_depthTexture;
+
+    globjects::ref_ptr<globjects::Texture> m_striationTexture;
+    globjects::ref_ptr<globjects::Texture> m_groundTexture;
 
     globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
 

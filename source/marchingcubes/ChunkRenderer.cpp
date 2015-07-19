@@ -24,7 +24,7 @@ using namespace globjects;
 
 ChunkRenderer::ChunkRenderer()
     : m_transform()
-	, m_colorTexture(nullptr)
+	, m_striationTexture(nullptr)
 	, m_groundTexture(nullptr)
 {
     setupProgram();
@@ -36,14 +36,14 @@ ChunkRenderer::~ChunkRenderer() = default;
 
 void ChunkRenderer::render(std::unordered_map<vec3, ref_ptr<Chunk>> chunks)
 {
-	if (!m_groundTexture || !m_colorTexture)
+	if (!m_groundTexture || !m_striationTexture)
 	{
 		loggingzeug::warning("ChunkRenderer") << "Missing textures";
 		return;
 	}
 
 	m_groundTexture->bindActive(GL_TEXTURE0);
-	m_colorTexture->bindActive(GL_TEXTURE1);
+	m_striationTexture->bindActive(GL_TEXTURE1);
 
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, m_transform);
@@ -56,12 +56,12 @@ void ChunkRenderer::render(std::unordered_map<vec3, ref_ptr<Chunk>> chunks)
 
     m_renderProgram->release();
 	m_groundTexture->unbind();
-	m_colorTexture->unbind();
+	m_striationTexture->unbind();
 }
 
-void ChunkRenderer::setColorTexture(globjects::ref_ptr<globjects::Texture> colorTexture)
+void ChunkRenderer::setStriationTexture(globjects::ref_ptr<globjects::Texture> striationTexture)
 {
-	m_colorTexture = colorTexture;
+    m_striationTexture = striationTexture;
 }
 
 void ChunkRenderer::setGroundTexture(globjects::ref_ptr<globjects::Texture> groundTexture)
@@ -89,7 +89,7 @@ void ChunkRenderer::setupProgram()
 void ChunkRenderer::setupRendering()
 {
 	m_renderProgram->setUniform("ground", 0);
-	m_renderProgram->setUniform("colorTex", 1);
+	m_renderProgram->setUniform("striation", 1);
 }
 
 void ChunkRenderer::updateTexture(bool useMipMap)
@@ -99,13 +99,13 @@ void ChunkRenderer::updateTexture(bool useMipMap)
 		m_groundTexture->generateMipmap();
 		m_groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		m_colorTexture->generateMipmap();
-		m_colorTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		m_colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		m_striationTexture->generateMipmap();
+		m_striationTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		m_striationTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	} 
 	else
 	{
 		m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		m_colorTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		m_striationTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 }

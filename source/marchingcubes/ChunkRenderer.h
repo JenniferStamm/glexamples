@@ -27,7 +27,7 @@ public:
 
     virtual void render(std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>> chunks);
 
-	void setColorTexture(globjects::ref_ptr<globjects::Texture> colorTexture);
+	void setStriationTexture(globjects::ref_ptr<globjects::Texture> striationTexture);
 	void setGroundTexture(globjects::ref_ptr<globjects::Texture> groundTexture);
 
     void setTransform(glm::mat4x4 transform);
@@ -46,6 +46,6 @@ protected:
 
     glm::mat4x4 m_transform;
 
-	globjects::ref_ptr<globjects::Texture> m_colorTexture;
+	globjects::ref_ptr<globjects::Texture> m_striationTexture;
 	globjects::ref_ptr<globjects::Texture> m_groundTexture;
 };

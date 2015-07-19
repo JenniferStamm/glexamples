@@ -17,6 +17,7 @@
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/Camera.h>
 #include <gloperate/primitives/AdaptiveGrid.h>
+#include <gloperate/resources/ResourceManager.h>
 
 #include "Chunk.h"
 #include "ChunkRenderer.h"
@@ -33,12 +34,11 @@ RenderStage::RenderStage()
     addInput("viewport", viewport);
     addInput("camera", camera);
     addInput("projection", projection);
+    addInput("resourceManager", resourceManager);
     addInput("targetFBO", targetFBO);
 
     addInput("useMipMap", useMipMap);
 
-    addInput("colorTexture", colorTexture);
-    addInput("groundTexture", groundTexture);
 
     addInput("chunks", chunks);
 
@@ -59,34 +59,13 @@ void RenderStage::initialize()
     setupProjection();
     setupOpenGLState();
     setupFbo();
-
-	if (groundTexture.data() && colorTexture.data())
-	{
-		groundTexture.data()->setName("GroundTexture");
-		groundTexture.data()->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-		groundTexture.data()->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-		if (useMipMap.data())
-		{
-			groundTexture.data()->generateMipmap();
-			groundTexture.data()->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			groundTexture.data()->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		}
-
-		colorTexture.data()->setName("ColorTexture");
-		colorTexture.data()->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-		colorTexture.data()->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-		if (useMipMap.data())
-		{
-			colorTexture.data()->generateMipmap();
-			colorTexture.data()->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			colorTexture.data()->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		}
-	}
+    setupTextures();
 
 	
+	
     m_chunkRenderer = new ChunkRenderer();
-	m_chunkRenderer->setGroundTexture(groundTexture.data());
-	m_chunkRenderer->setColorTexture(colorTexture.data());
+	m_chunkRenderer->setGroundTexture(m_groundTexture);
+	m_chunkRenderer->setStriationTexture(m_striationTexture);
 
 	//render();
 }
@@ -112,21 +91,10 @@ void RenderStage::process()
         rerender = true;
     }
 
-	if (groundTexture.hasChanged())
-	{
-		m_chunkRenderer->setGroundTexture(groundTexture.data());
-        rerender = true;
-	}
-
-	if (colorTexture.hasChanged())
-	{
-		m_chunkRenderer->setColorTexture(colorTexture.data());
-        rerender = true;
-	}
-
     if (useMipMap.hasChanged())
     {
         m_chunkRenderer->updateTexture(useMipMap.data());
+        rerender = true;
     }
 
     if (chunks.hasChanged())
@@ -213,6 +181,26 @@ void RenderStage::setupFbo()
 
     m_fbo->attachTexture(GL_COLOR_ATTACHMENT0, m_colorTexture);
     m_fbo->attachTexture(GL_DEPTH_ATTACHMENT, m_depthTexture);
+}
+
+void RenderStage::setupTextures()
+{
+    if (resourceManager.data())
+    {
+        m_groundTexture = resourceManager.data()->load<Texture>("data/marchingcubes/ground.png");
+
+        m_groundTexture->setName("GroundTexture");
+        m_groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+        m_groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        m_striationTexture = resourceManager.data()->load<Texture>("data/marchingcubes/terrain_color.jpg");
+
+        m_striationTexture->setName("StriationTexture");
+        m_striationTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+        m_striationTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+        
+    }
+
 }
 
 void RenderStage::resizeFbo(int width, int height)
