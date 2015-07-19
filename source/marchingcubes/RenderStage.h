@@ -48,6 +48,7 @@ public:
 	gloperate::InputSlot<bool> useMipMap;
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> colorTexture;
 	gloperate::InputSlot<globjects::ref_ptr<globjects::Texture>> groundTexture;
+    gloperate::InputSlot<std::vector<glm::vec3>> chunksToAdd;
 
 
 protected:

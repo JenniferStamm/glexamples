@@ -36,6 +36,7 @@ set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/")
 set(source_path "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 set(sources
+    ${source_path}/AddChunksStage.cpp
     ${source_path}/Chunk.cpp
     ${source_path}/ChunkRenderer.cpp
     ${source_path}/LookUpData.cpp
@@ -46,6 +47,7 @@ set(sources
 )
 
 set(api_includes
+    ${include_path}/AddChunksStage.h
     ${include_path}/Chunk.h
     ${include_path}/ChunkRenderer.h
     ${include_path}/LookUpData.h

@@ -41,6 +41,8 @@ RenderStage::RenderStage()
     addInput("colorTexture", colorTexture);
     addInput("groundTexture", groundTexture);
 
+    addInput("chunksToAdd", chunksToAdd);
+
 	alwaysProcess(true);
 }
 
@@ -166,25 +168,6 @@ void RenderStage::render()
     m_grid->draw();
 
     m_fbo->unbind();
-	
-    float distanceForAdding = 4.f;
-
-    auto offset = ivec3(eye - distanceForAdding);
-
-    for (int z = 0; z < distanceForAdding * 2; ++z)
-    {
-        for (int y = 0; y < distanceForAdding * 2; ++y)
-        {
-            for (int x = 0; x < distanceForAdding * 2; ++x)
-            {
-                auto newOffset = vec3(x, y, z) + vec3(offset);
-                if (m_chunkQueue.size() < 100 && m_chunks.find(newOffset) == m_chunks.end())
-                {
-                    m_chunkQueue.push(newOffset);
-                }
-            }
-        }
-    }
 
     // Remove unneeded chunks
 
@@ -206,6 +189,11 @@ void RenderStage::render()
         m_chunks.erase(chunkToRemove);
     }
 
+    // Add to queue
+    for (auto chunkToAdd : chunksToAdd.data())
+    {
+        m_chunkQueue.push(chunkToAdd);
+    }
 
 
     // Generate new non-empty chunks
@@ -215,8 +203,15 @@ void RenderStage::render()
     {
         if (m_chunkQueue.empty())
             break;
-        auto newOffset = m_chunkQueue.front();
+        glm::vec3 newOffset = m_chunkQueue.front();
         m_chunkQueue.pop();
+        while (m_chunks.find(newOffset) != m_chunks.end())
+        {
+            if (m_chunkQueue.empty())
+                break;
+            newOffset = m_chunkQueue.front();
+            m_chunkQueue.pop();
+        }
 
         // Don't add chunk if it was already generated
         if (m_chunks.find(newOffset) != m_chunks.end())
@@ -233,7 +228,6 @@ void RenderStage::render()
         if (!newChunk->isEmpty())
             ++i;
     }
-
 }
 
 void RenderStage::setupGrid()
