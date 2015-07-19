@@ -78,7 +78,7 @@ float densityAtPosition(in ivec3 position) {
 }
 
 vec3 normalAtPosition(in ivec3 position) {
-    int d = 1;
+    int d = 3;
     float diffX = densityAtPosition(position + ivec3(d,0,0)) - densityAtPosition(position + ivec3(-d,0,0));
     float diffY = densityAtPosition(position + ivec3(0,d,0)) - densityAtPosition(position + ivec3(0,-d,0));
     float diffZ = densityAtPosition(position + ivec3(0,0,d)) - densityAtPosition(position + ivec3(0,0,-d));
