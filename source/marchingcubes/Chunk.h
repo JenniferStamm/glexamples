@@ -33,6 +33,8 @@ public:
     unsigned int triangleCount() const { return m_triangleCount; }
     void setTriangleCount(unsigned int triangleCount);
     bool isEmpty() const { return m_isEmpty; }
+    bool isValid() const { return m_isValid; }
+    void setValid(bool isValid) { m_isValid = isValid; }
     void setupDensityGeneration(unsigned int densitySize);
     void teardownDensityGeneration();
     void setupListGeneration(unsigned int verticesSize);
@@ -56,4 +58,6 @@ protected:
     unsigned int m_triangleCount;
 
     bool m_isEmpty;
+
+    bool m_isValid;
 };

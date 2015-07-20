@@ -56,7 +56,10 @@ void ManageChunksStage::process()
 
     if (regenerate)
     {
-        chunks->clear();
+        for (auto chunk : chunks.data())
+        {
+            chunk.second->setValid(false);
+        }
         chunksChanged = true;
     }
 
@@ -80,41 +83,45 @@ void ManageChunksStage::process()
     // Copy chunk list
     auto localChunksToAdd = chunksToAdd.data();
 
+    vec3 newOffset;
+
+    while (!localChunksToAdd.empty())
+    {
+        newOffset = localChunksToAdd.front();
+        localChunksToAdd.pop();
+        // Break if it is a new chunk
+        if (!shouldRemoveChunk(newOffset) && chunks->find(newOffset) == chunks->end())
+        {
+            auto newChunk = new Chunk(newOffset);
+            chunks.data()[newOffset] = newChunk;
+        }
+    }
+
     // Generate new non-empty chunks
     const unsigned int chunksToGenerate = 3u;
-
-    for (int i = 0; i < chunksToGenerate;)
+    unsigned int generatedChunks = 0;
+    for (auto chunk : chunks.data())
     {       
-        bool newChunkFound = false;
-        vec3 newOffset;
-
-        while (!localChunksToAdd.empty())
-        {
-            newOffset = localChunksToAdd.front();
-            localChunksToAdd.pop();
-            // Break if it is a new chunk
-            if (chunks->find(newOffset) == chunks->end())
-            {
-                newChunkFound = true;
-                break;
-            }
-        }
-
-        if (!newChunkFound)
+        if (generatedChunks >= chunksToGenerate)
             break;
+
+        if (chunk.second->isValid())
+            continue;
 
         chunksChanged = true;
 
-        auto newChunk = new Chunk(newOffset);
-        m_chunkFactory->generateDensities(newChunk);
-        m_chunkFactory->generateList(newChunk);
-        if (!newChunk->isEmpty())
-            m_chunkFactory->generateMesh(newChunk);
+        auto currentChunk = chunk.second;
 
-        chunks.data()[newOffset] = newChunk;
 
-        if (!newChunk->isEmpty())
-            ++i;
+        m_chunkFactory->generateDensities(currentChunk);
+        m_chunkFactory->generateList(currentChunk);
+        if (!currentChunk->isEmpty())
+            m_chunkFactory->generateMesh(currentChunk);
+
+        currentChunk->setValid(true);
+
+        if (!currentChunk->isEmpty())
+            ++generatedChunks;
     }
 
     if (chunksChanged)

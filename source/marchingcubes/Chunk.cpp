@@ -32,7 +32,8 @@ Chunk::Chunk(glm::vec3 offset)
     , m_densitiesTexture()
     , m_offset(offset)
     , m_triangleCount(0)
-    , m_isEmpty(false)
+    , m_isEmpty(true)
+    , m_isValid(false)
 {
     setupRendering();
 }
@@ -75,10 +76,11 @@ void Chunk::setTriangleCount(unsigned triangleCount)
 {
     m_triangleCount = triangleCount;
 
+    m_isEmpty = triangleCount <= 0;
+
     // Vertices buffer can be freed if chunk is empty
-    if (m_triangleCount == 0)
+    if (m_isEmpty)
     {
-        m_isEmpty = true;
         m_list = nullptr;
         m_vertexPositions = nullptr;
         m_vertexNormals = nullptr;
