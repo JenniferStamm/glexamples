@@ -38,6 +38,7 @@ public:
     gloperate::Data<glm::vec3> rotationVector1;
     gloperate::Data<glm::vec3> rotationVector2;
     gloperate::Data<float> warpFactor;
+    gloperate::Data<bool> removeFloaters;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
 

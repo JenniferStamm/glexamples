@@ -28,6 +28,7 @@ public:
     void generateList(Chunk * chunk);
     void generateMesh(Chunk * chunk);
 
+    void setRemoveFloaters(bool removeFloaters);
     globjects::Program * densityGenerationProgram() const { return m_densityGenerationProgram.get(); }
 
 protected:

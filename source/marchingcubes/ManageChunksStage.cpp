@@ -20,6 +20,7 @@ ManageChunksStage::ManageChunksStage()
     addInput("rotationVector1", rotationVector1);
     addInput("rotationVector2", rotationVector2);
     addInput("warpFactor", warpFactor);
+    addInput("removeFloaters", removeFloaters);
 
     addOutput("chunks", chunks);
 
@@ -51,6 +52,12 @@ void ManageChunksStage::process()
     if (warpFactor.hasChanged())
     {
         m_chunkFactory->densityGenerationProgram()->setUniform("warpFactor", warpFactor.data());
+        regenerate = true;
+    }
+
+    if (removeFloaters.hasChanged())
+    {
+        m_chunkFactory->setRemoveFloaters(removeFloaters.data());
         regenerate = true;
     }
 

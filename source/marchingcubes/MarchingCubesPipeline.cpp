@@ -20,6 +20,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , rotationVector1(glm::vec3(1, 0.3, 0.5))
 , rotationVector2(glm::vec3(0.1, 0.5, 0.3))
 , warpFactor(3.4)
+, removeFloaters(false)
 , targetFBO(nullptr)
 {
     auto addChunksStage = new AddChunksStage();
@@ -33,6 +34,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     manageChunksStage->rotationVector1 = rotationVector1;
     manageChunksStage->rotationVector2 = rotationVector2;
     manageChunksStage->warpFactor = warpFactor;
+    manageChunksStage->removeFloaters = removeFloaters;
 
     renderStage->viewport = viewport;
     renderStage->camera = camera;

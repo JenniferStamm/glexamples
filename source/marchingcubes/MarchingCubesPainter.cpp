@@ -59,6 +59,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     terrainGroup->addProperty(createProperty("Rotation Vector 1", m_pipeline.rotationVector1));
     terrainGroup->addProperty(createProperty("Rotation Vector 2", m_pipeline.rotationVector2));
     terrainGroup->addProperty(createProperty("Warp Factor", m_pipeline.warpFactor));
+    terrainGroup->addProperty(createProperty("Remove Floaters", m_pipeline.removeFloaters));
 
 
 }

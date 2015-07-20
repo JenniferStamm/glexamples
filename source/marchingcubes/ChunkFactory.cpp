@@ -316,3 +316,8 @@ void ChunkFactory::generateMesh(Chunk* chunk)
     chunk->teardownMeshGeneration();
     
 }
+
+void ChunkFactory::setRemoveFloaters(bool removeFloaters)
+{
+    m_listGenerationProgram->setUniform("removeFloaters", removeFloaters);
+}
