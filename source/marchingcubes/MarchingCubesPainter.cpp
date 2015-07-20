@@ -1,20 +1,8 @@
 #include "MarchingCubesPainter.h"
 
-#include <vector>
-
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <glbinding/gl/enum.h>
-#include <glbinding/gl/bitfield.h>
-
-#include <globjects/globjects.h>
-#include <globjects/logging.h>
-#include <globjects/DebugMessage.h>
-#include <globjects/Texture.h>
-
 #include <reflectionzeug/property/extensions/GlmProperties.h>
 
-#include <widgetzeug/make_unique.hpp>
+#include <globjects/globjects.h>
 
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/ViewportCapability.h>
@@ -22,14 +10,9 @@
 #include <gloperate/painter/CameraCapability.h>
 #include <gloperate/resources/ResourceManager.h>
 
-#include <gloperate/primitives/AdaptiveGrid.h>
-
-
 using namespace gl;
 using namespace glm;
 using namespace globjects;
-
-using widgetzeug::make_unique;
 
 MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const std::string & relDataPath)
 :   PipelinePainter("MarchingCubesExample", resourceManager, relDataPath, m_pipeline)
@@ -65,13 +48,3 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
 }
 
 MarchingCubes::~MarchingCubes() = default;
-
-void MarchingCubes::onInitialize()
-{
-    PipelinePainter::onInitialize();
-}
-
-void MarchingCubes::onPaint()
-{
-    PipelinePainter::onPaint();
-}

@@ -15,8 +15,6 @@
 
 namespace gloperate
 {
-    class AbstractViewportCapability;
-    class PerspectiveProjectionCapability;
     class AbstractCameraCapability;
 }
 

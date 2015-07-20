@@ -4,14 +4,6 @@
 
 #include <glm/vec3.hpp>
 
-#include <globjects/base/ref_ptr.h>
-
-
-namespace globjects
-{
-	class Buffer;
-}
-
 class LookUpData 
 {
 public:

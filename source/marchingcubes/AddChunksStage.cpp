@@ -1,13 +1,8 @@
 #include "AddChunksStage.h"
 
 #include <globjects/globjects.h>
-#include <globjects/Texture.h>
-#include <globjects/Framebuffer.h>
 
 #include <gloperate/painter/AbstractCameraCapability.h>
-
-#include "Chunk.h"
-#include "ChunkRenderer.h"
 
 using namespace gl;
 using namespace glm;

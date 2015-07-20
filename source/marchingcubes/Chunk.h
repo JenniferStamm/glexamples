@@ -1,8 +1,6 @@
 #pragma once
 
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <glbinding/gl/types.h>
+#include <glm/vec3.hpp>
 
 #include <globjects/base/ref_ptr.h>
 

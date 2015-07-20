@@ -1,7 +1,5 @@
 #pragma once
 
-#include <globjects/base/ref_ptr.h>
-
 #include <gloperate/pipeline/AbstractPipeline.h>
 #include <gloperate/pipeline/Data.h>
 

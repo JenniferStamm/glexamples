@@ -19,7 +19,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useMipMap(true)
 , rotationVector1(glm::vec3(1, 0.3, 0.5))
 , rotationVector2(glm::vec3(0.1, 0.5, 0.3))
-, warpFactor(3.4)
+, warpFactor(3.4f)
 , removeFloaters(false)
 , targetFBO(nullptr)
 {

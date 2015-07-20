@@ -1,21 +1,16 @@
 #include "ChunkRenderer.h"
 
-#include <glm/vec3.hpp>
 #include <vec3_hash.h>
 
 #include <glbinding/gl/enum.h>
 
-#include <globjects/VertexAttributeBinding.h>
 #include <globjects/globjects.h>
 #include <globjects/Program.h>
 #include <globjects/Texture.h>
 #include <globjects/Query.h>
-#include <globjects/TransformFeedback.h>
-#include <globjects/VertexAttributeBinding.h>
 
 #include <loggingzeug/logging.h>
 
-#include "LookUpData.h"
 #include "Chunk.h"
 
 using namespace gl;

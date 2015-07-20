@@ -1,21 +1,11 @@
 #include "Chunk.h"
 
-#include <vector>
-
-#include <glm/vec3.hpp>
-
 #include <glbinding/gl/enum.h>
 
 #include <globjects/Buffer.h>
 #include <globjects/VertexArray.h>
 #include <globjects/VertexAttributeBinding.h>
-#include <globjects/globjects.h>
-#include <globjects/Program.h>
 #include <globjects/Texture.h>
-#include <globjects/TransformFeedback.h>
-#include <globjects/VertexAttributeBinding.h>
-
-#include "LookUpData.h"
 
 using namespace gl;
 using namespace glm;
@@ -93,7 +83,6 @@ void Chunk::setTriangleCount(unsigned triangleCount)
 
 void Chunk::setupDensityGeneration(unsigned int densitySize)
 {
-
     // Setup result buffer
 
     m_densities = new Buffer();

@@ -1,6 +1,5 @@
 #include "ChunkFactory.h"
 
-#include <glm/vec3.hpp>
 #include <glm/gtc/noise.hpp>
 
 #include <glbinding/gl/enum.h>
@@ -13,7 +12,6 @@
 #include <globjects/Texture.h>
 #include <globjects/Query.h>
 #include <globjects/TransformFeedback.h>
-#include <globjects/VertexAttributeBinding.h>
 
 #include "LookUpData.h"
 #include "Chunk.h"
@@ -320,4 +318,9 @@ void ChunkFactory::generateMesh(Chunk* chunk)
 void ChunkFactory::setRemoveFloaters(bool removeFloaters)
 {
     m_listGenerationProgram->setUniform("removeFloaters", removeFloaters);
+}
+
+globjects::Program* ChunkFactory::densityGenerationProgram() const
+{
+    return m_densityGenerationProgram.get();
 }

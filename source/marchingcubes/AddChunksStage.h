@@ -4,9 +4,6 @@
 
 #include <glm/vec3.hpp>
 
-#include <globjects/base/ref_ptr.h>
-
-
 #include <gloperate/pipeline/AbstractStage.h>
 #include <gloperate/pipeline/Data.h>
 #include <gloperate/pipeline/InputSlot.h>
@@ -16,8 +13,8 @@ namespace gloperate
 {
     class AbstractCameraCapability;
 }
-class Chunk;
 
+class Chunk;
 
 class AddChunksStage : public gloperate::AbstractStage
 {

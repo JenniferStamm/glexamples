@@ -2,13 +2,12 @@
 
 #include <unordered_map>
 
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 
 #include <glbinding/gl/types.h>
 
 #include <globjects/base/ref_ptr.h>
-
-#include <gloperate/primitives/AbstractDrawable.h>
 
 class Chunk;
 

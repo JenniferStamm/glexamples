@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec3.hpp>
 
 #include <glbinding/gl/types.h>
 
@@ -29,7 +29,7 @@ public:
     void generateMesh(Chunk * chunk);
 
     void setRemoveFloaters(bool removeFloaters);
-    globjects::Program * densityGenerationProgram() const { return m_densityGenerationProgram.get(); }
+    globjects::Program * densityGenerationProgram() const;
 
 protected:
     void setupDensityGeneration();

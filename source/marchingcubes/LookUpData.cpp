@@ -26,7 +26,7 @@ std::vector<ivec2> LookUpData::m_edgeToVertices =
   ivec2(4, 5), ivec2(5, 6), ivec2(6, 7), ivec2(7, 4),
   ivec2(0, 4), ivec2(1, 5), ivec2(2, 6), ivec2(3, 7) };
 
-std::vector<glm::ivec4> LookUpData::m_edgeConnectList = { ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
+std::vector<ivec4> LookUpData::m_edgeConnectList = { ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
 ivec4(0, 8, 3, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
 ivec4(0, 1, 9, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),
 ivec4(1, 8, 3, -1), ivec4(9, 8, 1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1), ivec4(-1, -1, -1, -1),

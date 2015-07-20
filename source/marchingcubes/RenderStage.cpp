@@ -12,14 +12,11 @@
 
 #include <gloperate/painter/AbstractViewportCapability.h>
 #include <gloperate/painter/AbstractCameraCapability.h>
-#include <gloperate/painter/AbstractProjectionCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/TargetFramebufferCapability.h>
-#include <gloperate/painter/Camera.h>
 #include <gloperate/primitives/AdaptiveGrid.h>
 #include <gloperate/resources/ResourceManager.h>
 
-#include "Chunk.h"
 #include "ChunkRenderer.h"
 
 using namespace gl;
