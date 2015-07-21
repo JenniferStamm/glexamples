@@ -204,6 +204,10 @@ void ChunkFactory::generateDensities(Chunk * chunk)
     m_noiseTexture3->bindActive(GL_TEXTURE3);
     m_noiseTexture4->bindActive(GL_TEXTURE4);
     m_densityGenerationTransformFeedback->bind();
+
+    m_densityGenerationProgram->setUniform("a_terrainPositions", chunk->terrainPositions());
+    m_densityGenerationProgram->setUniform("a_terrainPositionCount", int(chunk->terrainPositions().size()));
+    
     m_densityGenerationProgram->setUniform("a_offset", chunk->offset());
     m_densityGenerationProgram->setUniform("noiseTexture1", 1);
     m_densityGenerationProgram->setUniform("noiseTexture2", 2);

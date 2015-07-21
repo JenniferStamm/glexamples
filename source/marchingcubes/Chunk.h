@@ -5,6 +5,7 @@
 #include <globjects/base/ref_ptr.h>
 
 #include <gloperate/primitives/AbstractDrawable.h>
+#include <vector>
 
 namespace globjects
 {
@@ -40,6 +41,8 @@ public:
     void setupMeshGeneration(globjects::VertexArray * meshVao);
     void teardownMeshGeneration();
 
+    void addTerrainPosition(glm::vec3 terrainPosition);
+
 protected:
     void setupRendering();
 
@@ -53,6 +56,15 @@ protected:
 
     glm::vec3 m_offset;
 
+    std::vector<glm::vec3> m_terrainPositions;
+
+public:
+    std::vector<glm::vec3> terrainPositions() const
+    {
+        return m_terrainPositions;
+    }
+
+protected:
     unsigned int m_triangleCount;
 
     bool m_isEmpty;

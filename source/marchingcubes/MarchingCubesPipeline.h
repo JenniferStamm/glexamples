@@ -13,8 +13,10 @@ class PerspectiveProjectionCapability;
 class AbstractCameraCapability;
 class AbstractViewportCapability;
 class AbstractVirtualTimeCapability;
-class AbstractTypedRenderTargetCapability;
+class TypedRenderTargetCapability;
 class ResourceManager;
+class InputCapability;
+class CoordinateProvider;
 
 } // namespace gloperate
 
@@ -39,5 +41,8 @@ public:
     gloperate::Data<bool> removeFloaters;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
+    gloperate::Data<gloperate::TypedRenderTargetCapability *> renderTargets;
+    gloperate::Data<gloperate::InputCapability *> input;
+    gloperate::Data<gloperate::CoordinateProvider *> coordinateProvider;
 
 };

@@ -9,15 +9,19 @@
 #include <globjects/globjects.h>
 #include <globjects/Texture.h>
 #include <globjects/Framebuffer.h>
+#include <globjects/Renderbuffer.h>
 
 #include <gloperate/painter/AbstractViewportCapability.h>
 #include <gloperate/painter/AbstractCameraCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/TargetFramebufferCapability.h>
+#include <gloperate/painter/TypedRenderTargetCapability.h>
+#include <gloperate/base/RenderTargetType.h>
 #include <gloperate/primitives/AdaptiveGrid.h>
 #include <gloperate/resources/ResourceManager.h>
 
 #include "ChunkRenderer.h"
+#include <glbinding/gl/boolean.h>
 
 using namespace gl;
 using namespace glm;
@@ -33,6 +37,7 @@ RenderStage::RenderStage()
     addInput("projection", projection);
     addInput("resourceManager", resourceManager);
     addInput("targetFBO", targetFBO);
+    addInput("renderTargets", renderTargets);
 
     addInput("useMipMap", useMipMap);
 
@@ -64,7 +69,8 @@ void RenderStage::initialize()
 	m_chunkRenderer->setGroundTexture(m_groundTexture);
 	m_chunkRenderer->setStriationTexture(m_striationTexture);
 
-	//render();
+    renderTargets.data()->setRenderTarget(gloperate::RenderTargetType::Depth, m_fbo,
+        gl::GL_DEPTH_STENCIL_ATTACHMENT, gl::GL_DEPTH_COMPONENT);
 }
 
 void RenderStage::process()
@@ -108,13 +114,15 @@ void RenderStage::process()
 
     //m_fbo->bind();
 
+
     std::array<int, 4> sourceRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
     std::array<int, 4> destRect = { { viewport.data()->x(), viewport.data()->y(), viewport.data()->width(), viewport.data()->height() } };
 
     globjects::Framebuffer * destFbo = targetFBO.data()->framebuffer() ? targetFBO.data()->framebuffer() : globjects::Framebuffer::defaultFBO();
 
+        
     m_fbo->blit(gl::GL_COLOR_ATTACHMENT0, sourceRect, destFbo, destFbo->id() == 0 ? gl::GL_BACK_LEFT : gl::GL_COLOR_ATTACHMENT0, destRect, gl::GL_COLOR_BUFFER_BIT, gl::GL_NEAREST);
-    m_fbo->blit(gl::GL_DEPTH_ATTACHMENT, sourceRect, destFbo, destFbo->id() == 0 ? gl::GL_BACK_LEFT : gl::GL_DEPTH_ATTACHMENT, destRect, gl::GL_DEPTH_BUFFER_BIT, gl::GL_NEAREST);
+    m_fbo->blit(gl::GL_DEPTH_STENCIL_ATTACHMENT, sourceRect, destFbo, destFbo->id() == 0 ? gl::GL_BACK_LEFT : gl::GL_DEPTH_STENCIL_ATTACHMENT, destRect, gl::GL_DEPTH_BUFFER_BIT, gl::GL_NEAREST);
 
     //m_fbo->unbind();
 
@@ -177,7 +185,8 @@ void RenderStage::setupFbo()
     m_fbo->setName("Render FBO");
 
     m_fbo->attachTexture(GL_COLOR_ATTACHMENT0, m_colorTexture);
-    m_fbo->attachTexture(GL_DEPTH_ATTACHMENT, m_depthTexture);
+    m_fbo->attachTexture(GL_DEPTH_STENCIL_ATTACHMENT, m_depthTexture);
+
 }
 
 void RenderStage::setupTextures()

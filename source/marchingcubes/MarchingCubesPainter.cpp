@@ -4,11 +4,17 @@
 
 #include <globjects/globjects.h>
 
+#include <gloperate/base/RenderTargetType.h>
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/ViewportCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/CameraCapability.h>
+#include <gloperate/painter/TypedRenderTargetCapability.h>
+#include <gloperate/painter/InputCapability.h>
 #include <gloperate/resources/ResourceManager.h>
+#include <gloperate/navigation/CoordinateProvider.h>
+
+#include <glbinding/gl/enum.h>
 
 using namespace gl;
 using namespace glm;
@@ -20,19 +26,39 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
 ,   m_viewportCapability{addCapability(new gloperate::ViewportCapability())}
 ,   m_projectionCapability{addCapability(new gloperate::PerspectiveProjectionCapability(m_viewportCapability))}
 ,   m_cameraCapability{addCapability(new gloperate::CameraCapability())}
+,   m_inputCapability{ addCapability(new gloperate::InputCapability()) }
+, m_renderTargetCapability{ addCapability(new gloperate::TypedRenderTargetCapability()) }
 {
     globjects::init();
+
+
+    m_coordinateProvider = new gloperate::CoordinateProvider(
+        m_cameraCapability, m_projectionCapability, m_viewportCapability, m_renderTargetCapability);
 
     m_pipeline.targetFBO.setData(m_targetFramebufferCapability);
     m_pipeline.viewport.setData(m_viewportCapability);
     m_pipeline.camera.setData(m_cameraCapability);
 	m_pipeline.projection.setData(m_projectionCapability); 
     m_pipeline.resourceManager.setData(&m_resourceManager);
+    m_pipeline.renderTargets.setData(m_renderTargetCapability);
+    m_pipeline.input.setData(m_inputCapability);
+    m_pipeline.coordinateProvider.setData(m_coordinateProvider);
 
     m_targetFramebufferCapability->changed.connect([this]() { m_pipeline.targetFBO.invalidate(); });
     m_viewportCapability->changed.connect([this]() { m_pipeline.viewport.invalidate(); });
     m_cameraCapability->changed.connect([this]() { m_pipeline.camera.invalidate(); });
     m_projectionCapability->changed.connect([this]() { m_pipeline.projection.invalidate(); });
+    m_renderTargetCapability->changed.connect([this]() { m_pipeline.renderTargets.invalidate(); });
+    m_inputCapability->changed.connect([this]() { m_pipeline.input.invalidate(); });
+
+        
+    //m_pipeline.targetFBO.invalidated
+
+    //m_renderTargetCapability->changed.connect([this]() { this->onTargetFramebufferChanged(); });
+    //m_cameraCapability->changed.connect([this]() { this->onTargetFramebufferChanged(); });
+
+
+    
 
 
     auto renderingGroup = addGroup("Rendering");
@@ -43,7 +69,6 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     terrainGroup->addProperty(createProperty("Rotation Vector 2", m_pipeline.rotationVector2));
     terrainGroup->addProperty(createProperty("Warp Factor", m_pipeline.warpFactor));
     terrainGroup->addProperty(createProperty("Remove Floaters", m_pipeline.removeFloaters));
-
 
 }
 

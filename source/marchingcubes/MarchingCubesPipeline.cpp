@@ -6,7 +6,9 @@
 #include <gloperate/painter/AbstractCameraCapability.h>
 #include <gloperate/painter/AbstractVirtualTimeCapability.h>
 #include <gloperate/painter/AbstractTargetFramebufferCapability.h>
+#include <gloperate/painter/InputCapability.h>
 #include <gloperate/resources/ResourceManager.h>
+#include <gloperate/navigation/CoordinateProvider.h>
 
 #include "AddChunksStage.h"
 #include "ManageChunksStage.h"
@@ -22,6 +24,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , warpFactor(3.4f)
 , removeFloaters(false)
 , targetFBO(nullptr)
+, renderTargets(nullptr)
 {
     auto addChunksStage = new AddChunksStage();
     auto manageChunksStage = new ManageChunksStage();
@@ -30,6 +33,8 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     addChunksStage->camera = camera;
 
     manageChunksStage->camera = camera;
+    manageChunksStage->input = input;
+    manageChunksStage->coordinateProvider = coordinateProvider;
     manageChunksStage->chunksToAdd = addChunksStage->chunksToAdd;
     manageChunksStage->rotationVector1 = rotationVector1;
     manageChunksStage->rotationVector2 = rotationVector2;
@@ -40,6 +45,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->camera = camera;
     renderStage->projection = projection;
     renderStage->targetFBO = targetFBO;
+    renderStage->renderTargets = renderTargets;
     renderStage->useMipMap = useMipMap;
     renderStage->resourceManager = resourceManager;
     renderStage->chunks = manageChunksStage->chunks;

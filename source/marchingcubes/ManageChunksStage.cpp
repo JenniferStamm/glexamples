@@ -3,6 +3,8 @@
 #include <globjects/globjects.h>
 
 #include <gloperate/painter/AbstractCameraCapability.h>
+#include <gloperate/painter/InputCapability.h>
+#include <gloperate/navigation/CoordinateProvider.h>
 
 #include "Chunk.h"
 #include "ChunkFactory.h"
@@ -14,8 +16,12 @@ using namespace globjects;
 ManageChunksStage::ManageChunksStage()
 :   AbstractStage("ManageChunks")
 , m_chunkFactory()
+, m_mouseMoved(false)
+, m_mousePressed(false)
 {
     addInput("camera", camera);
+    addInput("input", input);
+    addInput("coordinateProvider", coordinateProvider);
     addInput("chunksToAdd", chunksToAdd);
     addInput("rotationVector1", rotationVector1);
     addInput("rotationVector2", rotationVector2);
@@ -27,16 +33,56 @@ ManageChunksStage::ManageChunksStage()
     alwaysProcess(true);
 }
 
+ManageChunksStage::~ManageChunksStage()
+{
+    if (input.data())
+    {
+        input.data()->removeMouseHandler(this);
+    }
+}
+
 void ManageChunksStage::initialize()
 {
     m_chunkFactory = new ChunkFactory();
+    
+}
+
+void ManageChunksStage::addTerrainAt(glm::vec3 worldPosition)
+{
+    vec3 chunkOffset = vec3(floor(worldPosition[0]), floor(worldPosition[1]), floor(worldPosition[2]));
+    for (int z = -1; z <= 1; ++z)
+        for (int y = -1; y <= 1; ++y)
+            for (int x = -1; x <= 1; ++x)
+            {
+                auto chunk = chunks->find(chunkOffset + vec3(x, y, z));
+                if (chunk != chunks->end())
+                {
+                    chunk->second->addTerrainPosition(worldPosition);
+                }
+            }
 }
 
 void ManageChunksStage::process()
 {
+    if (input.hasChanged())
+    {
+        input.data()->addMouseHandler(this);
+    }
+    
+
+
     auto regenerate = false;
     auto chunksChanged = false;
 
+    for (auto pos : m_mouseClicks)
+    {
+        auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(pos);
+        addTerrainAt(worldPosition);
+        chunksChanged = true;
+    }
+
+    m_mouseClicks.clear();
+    
     if (rotationVector1.hasChanged())
     {
         m_chunkFactory->densityGenerationProgram()->setUniform("rotationVector1", rotationVector1.data());
@@ -133,6 +179,27 @@ void ManageChunksStage::process()
 
     if (chunksChanged)
         invalidateOutputs();
+}
+
+void ManageChunksStage::onMouseMove(int x, int y)
+{
+    m_mouseMoved = true;
+}
+
+void ManageChunksStage::onMouseRelease(int x, int y, gloperate::MouseButton button)
+{
+    if (m_mousePressed && !m_mouseMoved)
+    {
+        m_mouseClicks.push_back(ivec2(x, y));
+        scheduleProcess();
+    }
+    m_mousePressed = false;
+}
+
+void ManageChunksStage::onMousePress(int x, int y, gloperate::MouseButton button)
+{
+    m_mousePressed = true;
+    m_mouseMoved = false;
 }
 
 bool ManageChunksStage::shouldRemoveChunk(glm::vec3 chunkPosition) const

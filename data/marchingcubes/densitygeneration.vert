@@ -4,6 +4,9 @@
 
 uniform vec3 a_offset;
 
+uniform vec3 a_terrainPositions[64];
+uniform int a_terrainPositionCount;
+
 uniform sampler3D noiseTexture1;
 uniform sampler3D noiseTexture2;
 uniform sampler3D noiseTexture3;
@@ -50,4 +53,9 @@ void main()
     out_density += texture(noiseTexture1, warpedPosition * 3.23).r * 0.3;
     out_density += texture(noiseTexture2, rotatedPosition2 * 1.8).r * 1.0;
     out_density += texture(noiseTexture3, rotatedPosition1 * 1.01).r * 1.5;
+    
+    for (int i = 0; i < a_terrainPositionCount; i++) {
+        float dist = distance(realPosition,a_terrainPositions[i]);
+        out_density += 0.005 / (dist * dist);
+    }
 }

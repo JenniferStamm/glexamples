@@ -16,6 +16,7 @@ namespace gloperate
     class PerspectiveProjectionCapability;
     class AbstractCameraCapability;
     class AbstractTargetFramebufferCapability;
+    class TypedRenderTargetCapability;
     class AdaptiveGrid;
     class ResourceManager;
 }
@@ -23,6 +24,7 @@ namespace gloperate
 namespace globjects
 {
     class Framebuffer;
+    class Renderbuffer;
     class Texture;
 }
 
@@ -43,6 +45,7 @@ public:
     gloperate::InputSlot<gloperate::PerspectiveProjectionCapability *> projection;
     gloperate::InputSlot<gloperate::ResourceManager *> resourceManager;
     gloperate::InputSlot<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
+    gloperate::InputSlot<gloperate::TypedRenderTargetCapability *> renderTargets;
     gloperate::InputSlot<bool> useMipMap;
     
     gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;

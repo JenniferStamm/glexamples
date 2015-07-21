@@ -134,3 +134,9 @@ void Chunk::teardownMeshGeneration()
     m_densities = nullptr;
     m_densitiesTexture = nullptr;
 }
+
+void Chunk::addTerrainPosition(glm::vec3 terrainPosition)
+{
+    m_terrainPositions.push_back(terrainPosition);
+    m_isValid = false;
+}
