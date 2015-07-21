@@ -53,5 +53,5 @@ void main()
         
     float shadow = dot(v_normal, lightDirection);
     
-    fragColor = vec4(mix(v_normal, blended_color.xyz, useGroundTexture)* mix(1.0, v_occlusion, useOcclusion) * mix(1.0, smoothstep(-0.2, 0.6, shadow), useShadow), 1.0);
+    fragColor = vec4(mix(v_normal, blended_color.xyz, float(useGroundTexture))* mix(1.0, v_occlusion, float(useOcclusion)) * mix(1.0, smoothstep(-0.2, 0.6, shadow), float(useShadow)), 1.0);
 }
