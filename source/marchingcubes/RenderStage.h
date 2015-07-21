@@ -47,6 +47,10 @@ public:
     gloperate::InputSlot<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
     gloperate::InputSlot<gloperate::TypedRenderTargetCapability *> renderTargets;
     gloperate::InputSlot<bool> useMipMap;
+    gloperate::InputSlot<bool> useShadow;
+    gloperate::InputSlot<bool> useOcclusion;
+    gloperate::InputSlot<bool> useGroundTexture;
+    gloperate::InputSlot<bool> useStriationTexture;
     
     gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 

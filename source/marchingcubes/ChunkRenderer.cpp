@@ -21,6 +21,10 @@ ChunkRenderer::ChunkRenderer()
     : m_transform()
 	, m_striationTexture(nullptr)
 	, m_groundTexture(nullptr)
+    , m_useShadow(false)
+    , m_useOcclusion(false)
+    , m_useGroundTexture(false)
+    , m_useStriationTexture(false)
 {
     setupProgram();
     setupRendering();
@@ -42,6 +46,11 @@ void ChunkRenderer::render(std::unordered_map<vec3, ref_ptr<Chunk>> chunks)
 
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, m_transform);
+    m_renderProgram->setUniform("useShadow", m_useShadow);
+    m_renderProgram->setUniform("useOcclusion", m_useOcclusion);
+    m_renderProgram->setUniform("useGroundTexture", m_useGroundTexture);
+    m_renderProgram->setUniform("useStriationTexture", m_useStriationTexture);
+
 
     for (auto chunk : chunks)
     {
@@ -62,6 +71,26 @@ void ChunkRenderer::setStriationTexture(globjects::ref_ptr<globjects::Texture> s
 void ChunkRenderer::setGroundTexture(globjects::ref_ptr<globjects::Texture> groundTexture)
 {
 	m_groundTexture = groundTexture;
+}
+
+void ChunkRenderer::setUseShadow(bool useShadow)
+{
+    m_useShadow = useShadow;
+}
+
+void ChunkRenderer::setUseOcclusion(bool useOcclusion)
+{
+    m_useOcclusion = useOcclusion;
+}
+
+void ChunkRenderer::setUseGroundTexture(bool useGroundTexture)
+{
+    m_useGroundTexture = useGroundTexture;
+}
+
+void ChunkRenderer::setUseStriationTexture(bool useStriationTexture)
+{
+    m_useStriationTexture = useStriationTexture;
 }
 
 void ChunkRenderer::setTransform(mat4x4 transform)

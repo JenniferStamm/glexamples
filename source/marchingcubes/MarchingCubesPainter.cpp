@@ -58,11 +58,6 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     //m_cameraCapability->changed.connect([this]() { this->onTargetFramebufferChanged(); });
 
 
-    
-
-
-    auto renderingGroup = addGroup("Rendering");
-    renderingGroup->addProperty(createProperty("UseMipMap", m_pipeline.useMipMap));
 
     auto terrainGroup = addGroup("Terrain Generation");
     terrainGroup->addProperty(createProperty("Rotation Vector 1", m_pipeline.rotationVector1));
@@ -70,6 +65,13 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     terrainGroup->addProperty(createProperty("Warp Factor", m_pipeline.warpFactor));
     terrainGroup->addProperty(createProperty("Remove Floaters", m_pipeline.removeFloaters));
 
+
+    auto prettyTerrainGroup = addGroup("Pretty Terrain");
+    prettyTerrainGroup->addProperty(createProperty("UseLight", m_pipeline.useShadow));
+    prettyTerrainGroup->addProperty(createProperty("useOcclusion", m_pipeline.useOcclusion));
+    prettyTerrainGroup->addProperty(createProperty("useGroundTexture", m_pipeline.useGroundTexture));
+    prettyTerrainGroup->addProperty(createProperty("UseMipMap", m_pipeline.useMipMap));
+    prettyTerrainGroup->addProperty(createProperty("useStriationTexture", m_pipeline.useStriationTexture));
 }
 
 MarchingCubes::~MarchingCubes() = default;

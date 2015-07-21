@@ -18,13 +18,17 @@
 MarchingCubesPipeline::MarchingCubesPipeline()
 : AbstractPipeline("MarchingCubes")
 , viewport(nullptr)
-, useMipMap(true)
+, useMipMap(false)
 , rotationVector1(glm::vec3(1, 0.3, 0.5))
 , rotationVector2(glm::vec3(0.1, 0.5, 0.3))
 , warpFactor(3.4f)
 , removeFloaters(false)
 , targetFBO(nullptr)
 , renderTargets(nullptr)
+, useShadow(false)
+, useOcclusion(false)
+, useGroundTexture(false)
+, useStriationTexture(false)
 {
     auto addChunksStage = new AddChunksStage();
     auto manageChunksStage = new ManageChunksStage();
@@ -48,6 +52,10 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->renderTargets = renderTargets;
     renderStage->useMipMap = useMipMap;
     renderStage->resourceManager = resourceManager;
+    renderStage->useShadow = useShadow;
+    renderStage->useOcclusion = useOcclusion;
+    renderStage->useGroundTexture = useGroundTexture;
+    renderStage->useStriationTexture = useStriationTexture;
     renderStage->chunks = manageChunksStage->chunks;
 
     addStages(

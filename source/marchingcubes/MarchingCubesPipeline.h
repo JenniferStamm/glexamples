@@ -39,6 +39,10 @@ public:
     gloperate::Data<glm::vec3> rotationVector2;
     gloperate::Data<float> warpFactor;
     gloperate::Data<bool> removeFloaters;
+    gloperate::Data<bool> useShadow;
+    gloperate::Data<bool> useOcclusion;
+    gloperate::Data<bool> useGroundTexture;
+    gloperate::Data<bool> useStriationTexture;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
     gloperate::Data<gloperate::TypedRenderTargetCapability *> renderTargets;

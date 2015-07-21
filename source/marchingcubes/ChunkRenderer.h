@@ -28,6 +28,10 @@ public:
 
 	void setStriationTexture(globjects::ref_ptr<globjects::Texture> striationTexture);
 	void setGroundTexture(globjects::ref_ptr<globjects::Texture> groundTexture);
+    void setUseShadow(bool useShadow);
+    void setUseOcclusion(bool useOcclusion);
+    void setUseGroundTexture(bool useGroundTexture);
+    void setUseStriationTexture(bool useStriationTexture);
 
     void setTransform(glm::mat4x4 transform);
 
@@ -47,4 +51,8 @@ protected:
 
 	globjects::ref_ptr<globjects::Texture> m_striationTexture;
 	globjects::ref_ptr<globjects::Texture> m_groundTexture;
+    bool m_useShadow;
+    bool m_useOcclusion;
+    bool m_useGroundTexture;
+    bool m_useStriationTexture;
 };

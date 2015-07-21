@@ -40,6 +40,10 @@ RenderStage::RenderStage()
     addInput("renderTargets", renderTargets);
 
     addInput("useMipMap", useMipMap);
+    addInput("useOcclusion", useOcclusion);
+    addInput("useGroundTexture", useGroundTexture);
+    addInput("useShadow", useShadow);
+    addInput("useStriationTexture", useStriationTexture);
 
 
     addInput("chunks", chunks);
@@ -68,6 +72,11 @@ void RenderStage::initialize()
     m_chunkRenderer = new ChunkRenderer();
 	m_chunkRenderer->setGroundTexture(m_groundTexture);
 	m_chunkRenderer->setStriationTexture(m_striationTexture);
+    m_chunkRenderer->setUseShadow(useShadow.data());
+    m_chunkRenderer->setUseOcclusion(useOcclusion.data());
+    m_chunkRenderer->setUseGroundTexture(useGroundTexture.data());
+    m_chunkRenderer->setUseStriationTexture(useStriationTexture.data());
+
 
     renderTargets.data()->setRenderTarget(gloperate::RenderTargetType::Depth, m_fbo,
         gl::GL_DEPTH_STENCIL_ATTACHMENT, gl::GL_DEPTH_COMPONENT);
@@ -97,6 +106,30 @@ void RenderStage::process()
     if (useMipMap.hasChanged())
     {
         m_chunkRenderer->updateTexture(useMipMap.data());
+        rerender = true;
+    }
+
+    if (useShadow.hasChanged())
+    {
+        m_chunkRenderer->setUseShadow(useShadow.data());
+        rerender = true;
+    }
+
+    if (useOcclusion.hasChanged())
+    {
+        m_chunkRenderer->setUseOcclusion(useOcclusion.data());
+        rerender = true;
+    }
+
+    if (useGroundTexture.hasChanged())
+    {
+        m_chunkRenderer->setUseGroundTexture(useGroundTexture.data());
+        rerender = true;
+    }
+
+    if (useStriationTexture.hasChanged())
+    {
+        m_chunkRenderer->setUseStriationTexture(useStriationTexture.data());
         rerender = true;
     }
 
