@@ -42,9 +42,10 @@ void AddChunksStage::process()
         {
             for (int x = -rightMax; x < rightMax; ++x)
             {
-                auto newOffset = ivec3(startPosition + right * float(x) + up * float(y) + direction * float(z));
+                auto pos = startPosition + right * float(x) + up * float(y) + direction * float(z);
+                auto newOffset = vec3(floor(pos.x), floor(pos.y), floor(pos.z));
 
-                chunksToAdd->push(vec3(newOffset));
+                chunksToAdd->push(newOffset);
             }
         }
     }
