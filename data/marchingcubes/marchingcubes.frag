@@ -38,7 +38,7 @@ void main()
     
     vec4 xColor = texture(ground, coord1);
     vec4 yColor = texture(ground, coord2);
-    vec4 zColor = texture(ground, coord2);
+    vec4 zColor = texture(ground, coord3);
     
      // Finally, blend the results of the 3 planar projections.  
     vec4 blended_color = 
