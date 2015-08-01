@@ -11,8 +11,6 @@ using namespace gl;
 using namespace glm;
 using namespace globjects;
 
-const ivec3 dimensions(32, 32, 32);
-
 Chunk::Chunk(glm::vec3 offset)
     : AbstractDrawable()
     , m_densities()
