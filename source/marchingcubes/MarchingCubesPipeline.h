@@ -3,6 +3,8 @@
 #include <gloperate/pipeline/AbstractPipeline.h>
 #include <gloperate/pipeline/Data.h>
 
+#include <reflectionzeug/base/FilePath.h>
+
 #include <glm/vec3.hpp>
 
 namespace gloperate
@@ -41,6 +43,7 @@ public:
     gloperate::Data<bool> removeFloaters;
     gloperate::Data<bool> useShadow;
     gloperate::Data<bool> useOcclusion;
+    gloperate::Data<reflectionzeug::FilePath> groundTextureFilePath;
     gloperate::Data<bool> useGroundTexture;
     gloperate::Data<bool> useStriationTexture;
 

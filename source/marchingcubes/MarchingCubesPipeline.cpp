@@ -27,6 +27,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , renderTargets(nullptr)
 , useShadow(false)
 , useOcclusion(false)
+, groundTextureFilePath("data/marchingcubes/ground.png")
 , useGroundTexture(false)
 , useStriationTexture(false)
 {
@@ -54,6 +55,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->resourceManager = resourceManager;
     renderStage->useShadow = useShadow;
     renderStage->useOcclusion = useOcclusion;
+    renderStage->groundTextureFilePath = groundTextureFilePath;
     renderStage->useGroundTexture = useGroundTexture;
     renderStage->useStriationTexture = useStriationTexture;
     renderStage->chunks = manageChunksStage->chunks;

@@ -41,6 +41,7 @@ RenderStage::RenderStage()
 
     addInput("useMipMap", useMipMap);
     addInput("useOcclusion", useOcclusion);
+    addInput("groundTextureFilePath", groundTextureFilePath);
     addInput("useGroundTexture", useGroundTexture);
     addInput("useShadow", useShadow);
     addInput("useStriationTexture", useStriationTexture);
@@ -61,6 +62,8 @@ void RenderStage::initialize()
     debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
+    m_chunkRenderer = new ChunkRenderer();
+
     setupGrid();
     setupProjection();
     setupOpenGLState();
@@ -69,7 +72,6 @@ void RenderStage::initialize()
 
 	
 	
-    m_chunkRenderer = new ChunkRenderer();
 	m_chunkRenderer->setGroundTexture(m_groundTexture);
 	m_chunkRenderer->setStriationTexture(m_striationTexture);
     m_chunkRenderer->setUseShadow(useShadow.data());
@@ -85,6 +87,12 @@ void RenderStage::initialize()
 void RenderStage::process()
 {
     auto rerender = false;
+
+    if (groundTextureFilePath.hasChanged())
+    {
+        setupGroundTexture();
+        rerender = true;
+    }
 
     if (viewport.hasChanged())
     {
@@ -226,11 +234,7 @@ void RenderStage::setupTextures()
 {
     if (resourceManager.data())
     {
-        m_groundTexture = resourceManager.data()->load<Texture>("data/marchingcubes/ground.png");
-
-        m_groundTexture->setName("GroundTexture");
-        m_groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-        m_groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+        setupGroundTexture();
 
         m_striationTexture = resourceManager.data()->load<Texture>("data/marchingcubes/terrain_color.jpg");
 
@@ -240,6 +244,17 @@ void RenderStage::setupTextures()
         
     }
 
+}
+
+void RenderStage::setupGroundTexture()
+{
+    m_groundTexture = resourceManager.data()->load<Texture>(groundTextureFilePath->toString());
+
+    m_groundTexture->setName("GroundTexture");
+    m_groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    m_groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    m_chunkRenderer->setGroundTexture(m_groundTexture);
 }
 
 void RenderStage::resizeFbo(int width, int height)

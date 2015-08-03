@@ -8,6 +8,8 @@
 #include <gloperate/pipeline/AbstractStage.h>
 #include <gloperate/pipeline/InputSlot.h>
 
+#include <reflectionzeug/base/FilePath.h>
+
 
 namespace gloperate
 {
@@ -49,6 +51,7 @@ public:
     gloperate::InputSlot<bool> useMipMap;
     gloperate::InputSlot<bool> useShadow;
     gloperate::InputSlot<bool> useOcclusion;
+    gloperate::InputSlot<reflectionzeug::FilePath> groundTextureFilePath;
     gloperate::InputSlot<bool> useGroundTexture;
     gloperate::InputSlot<bool> useStriationTexture;
     
@@ -65,6 +68,7 @@ protected:
     void setupOpenGLState();
     void setupFbo();
     void setupTextures();
+    void setupGroundTexture();
 
     void resizeFbo(int width, int height);
 
