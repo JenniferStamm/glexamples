@@ -2,7 +2,6 @@
 
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
-#include <glm/trigonometric.hpp>
 
 #include <glbinding/gl/bitfield.h>
 #include <glbinding/gl/boolean.h>
@@ -12,7 +11,6 @@
 #include <globjects/Framebuffer.h>
 #include <globjects/globjects.h>
 #include <globjects/Program.h>
-#include <globjects/Query.h>
 #include <globjects/Renderbuffer.h>
 #include <globjects/Texture.h>
 
