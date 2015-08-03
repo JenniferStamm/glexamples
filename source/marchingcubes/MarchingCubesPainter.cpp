@@ -69,9 +69,11 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     auto prettyTerrainGroup = addGroup("Pretty Terrain");
     prettyTerrainGroup->addProperty(createProperty("Light", m_pipeline.useShadow));
     prettyTerrainGroup->addProperty(createProperty("Occlusion", m_pipeline.useOcclusion));
-    prettyTerrainGroup->addProperty(createProperty("Ground Texture", m_pipeline.useGroundTexture));
+    prettyTerrainGroup->addProperty(createProperty("Ground Texture", m_pipeline.groundTextureFilePath));
+    prettyTerrainGroup->addProperty(createProperty("Use Ground Texture", m_pipeline.useGroundTexture));
     prettyTerrainGroup->addProperty(createProperty("Mip Mapping", m_pipeline.useMipMap));
-    prettyTerrainGroup->addProperty(createProperty("Striation Texture", m_pipeline.useStriationTexture));
+    prettyTerrainGroup->addProperty(createProperty("Striation Texture", m_pipeline.striationTextureFilePath));
+    prettyTerrainGroup->addProperty(createProperty("Use Striation Texture", m_pipeline.useStriationTexture));
 }
 
 MarchingCubes::~MarchingCubes() = default;
