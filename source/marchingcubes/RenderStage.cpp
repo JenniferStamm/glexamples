@@ -5,29 +5,29 @@
 #include <glm/trigonometric.hpp>
 
 #include <glbinding/gl/bitfield.h>
+#include <glbinding/gl/boolean.h>
 #include <glbinding/gl/enum.h>
 #include <glbinding/gl/functions.h>
 
+#include <globjects/Framebuffer.h>
 #include <globjects/globjects.h>
 #include <globjects/Program.h>
 #include <globjects/Query.h>
-#include <globjects/Texture.h>
-#include <globjects/Framebuffer.h>
 #include <globjects/Renderbuffer.h>
+#include <globjects/Texture.h>
 
+#include <gloperate/base/RenderTargetType.h>
 #include <gloperate/painter/AbstractViewportCapability.h>
 #include <gloperate/painter/AbstractCameraCapability.h>
 #include <gloperate/painter/PerspectiveProjectionCapability.h>
 #include <gloperate/painter/TargetFramebufferCapability.h>
 #include <gloperate/painter/TypedRenderTargetCapability.h>
-#include <gloperate/base/RenderTargetType.h>
 #include <gloperate/primitives/AdaptiveGrid.h>
 #include <gloperate/resources/ResourceManager.h>
 
 #include <loggingzeug/logging.h>
 
 #include "Chunk.h"
-#include <glbinding/gl/boolean.h>
 
 using namespace gl;
 using namespace glm;

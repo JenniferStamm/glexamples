@@ -17,14 +17,14 @@
 
 namespace gloperate
 {
-    class AbstractViewportCapability;
-    class AbstractVirtualTimeCapability;
-    class PerspectiveProjectionCapability;
     class AbstractCameraCapability;
     class AbstractTargetFramebufferCapability;
-    class TypedRenderTargetCapability;
+    class AbstractViewportCapability;
+    class AbstractVirtualTimeCapability;
     class AdaptiveGrid;
+    class PerspectiveProjectionCapability;
     class ResourceManager;
+    class TypedRenderTargetCapability;
 }
 
 namespace globjects
@@ -36,8 +36,6 @@ namespace globjects
 }
 
 class Chunk;
-class ChunkRenderer;
-
 
 class RenderStage : public gloperate::AbstractStage
 {
