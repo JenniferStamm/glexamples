@@ -34,6 +34,8 @@ public:
     gloperate::Data<gloperate::PerspectiveProjectionCapability *> projection;
     gloperate::Data<gloperate::ResourceManager *> resourceManager;
 
+    gloperate::Data<bool> showWireframe;
+
     gloperate::Data<bool> useMipMap;
     gloperate::Data<glm::vec3> rotationVector1;
     gloperate::Data<glm::vec3> rotationVector2;

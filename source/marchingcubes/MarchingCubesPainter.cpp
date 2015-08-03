@@ -57,7 +57,8 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     //m_renderTargetCapability->changed.connect([this]() { this->onTargetFramebufferChanged(); });
     //m_cameraCapability->changed.connect([this]() { this->onTargetFramebufferChanged(); });
 
-
+    auto debugGroup = addGroup("Debugging");
+    debugGroup->addProperty(createProperty("Show Wireframe", m_pipeline.showWireframe));
 
     auto terrainGroup = addGroup("Terrain Generation");
     terrainGroup->addProperty(createProperty("Rotation Vector 1", m_pipeline.rotationVector1));

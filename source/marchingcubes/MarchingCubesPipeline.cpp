@@ -18,6 +18,7 @@
 MarchingCubesPipeline::MarchingCubesPipeline()
 : AbstractPipeline("MarchingCubes")
 , viewport(nullptr)
+, showWireframe(false)
 , useMipMap(false)
 , rotationVector1(glm::vec3(1, 0.3, 0.5))
 , rotationVector2(glm::vec3(0.1, 0.5, 0.3))
@@ -50,6 +51,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->projection = projection;
     renderStage->targetFBO = targetFBO;
     renderStage->renderTargets = renderTargets;
+    renderStage->showWireframe = showWireframe;
     renderStage->useMipMap = useMipMap;
     renderStage->resourceManager = resourceManager;
     renderStage->useShadow = useShadow;
