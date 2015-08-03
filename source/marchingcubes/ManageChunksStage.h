@@ -55,12 +55,16 @@ public:
     virtual void onMousePress(int x, int y, gloperate::MouseButton button) override;
 protected:
     bool shouldRemoveChunk(glm::vec3 chunkPosition) const;
+    void regenerateChunks();
     
 protected:
     globjects::ref_ptr<ChunkFactory> m_chunkFactory;
     std::vector<glm::ivec2> m_mouseClicks;
     bool m_mouseMoved;
     bool m_mousePressed;
+
+    bool m_chunksChanged;
+    bool m_allChunksGenerated;
 
 };
 

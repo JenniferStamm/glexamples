@@ -19,6 +19,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 : AbstractPipeline("MarchingCubes")
 , viewport(nullptr)
 , showWireframe(false)
+, freezeChunkLoading(false)
 , useMipMap(false)
 , rotationVector1(glm::vec3(1, 0.3, 0.5))
 , rotationVector2(glm::vec3(0.1, 0.5, 0.3))
@@ -36,6 +37,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     auto renderStage = new RenderStage();
 
     addChunksStage->camera = camera;
+    addChunksStage->freezeChunkLoading = freezeChunkLoading;
 
     manageChunksStage->camera = camera;
     manageChunksStage->input = input;

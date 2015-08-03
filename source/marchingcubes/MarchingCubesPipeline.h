@@ -35,6 +35,7 @@ public:
     gloperate::Data<gloperate::ResourceManager *> resourceManager;
 
     gloperate::Data<bool> showWireframe;
+    gloperate::Data<bool> freezeChunkLoading;
 
     gloperate::Data<bool> useMipMap;
     gloperate::Data<glm::vec3> rotationVector1;

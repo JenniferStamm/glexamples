@@ -25,6 +25,7 @@ public:
 
 public:
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
+    gloperate::InputSlot<bool> freezeChunkLoading;
 
     gloperate::Data<std::queue<glm::vec3>> chunksToAdd;
 
