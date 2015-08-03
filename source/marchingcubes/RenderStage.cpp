@@ -315,10 +315,8 @@ void RenderStage::updateTexture()
     if (useMipMap.data())
     {
         m_groundTexture->generateMipmap();
-        m_groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         m_striationTexture->generateMipmap();
-        m_striationTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         m_striationTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     }
     else
@@ -326,4 +324,7 @@ void RenderStage::updateTexture()
         m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         m_striationTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
+
+    m_groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    m_striationTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
