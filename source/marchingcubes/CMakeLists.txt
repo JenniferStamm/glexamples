@@ -39,7 +39,6 @@ set(sources
     ${source_path}/AddChunksStage.cpp
     ${source_path}/Chunk.cpp
     ${source_path}/ChunkFactory.cpp
-    ${source_path}/ChunkRenderer.cpp
     ${source_path}/LookUpData.cpp
     ${source_path}/ManageChunksStage.cpp
     ${source_path}/MarchingCubesPainter.cpp
@@ -52,7 +51,6 @@ set(api_includes
     ${include_path}/AddChunksStage.h
     ${include_path}/Chunk.h
     ${include_path}/ChunkFactory.h
-    ${include_path}/ChunkRenderer.h
     ${include_path}/LookUpData.h
     ${include_path}/ManageChunksStage.h
     ${include_path}/MarchingCubesPainter.h

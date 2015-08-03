@@ -1,7 +1,11 @@
 #pragma once
 
-#include <glm/vec3.hpp>
 #include <vec3_hash.h>
+
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+
+#include <glbinding/gl/types.h>
 
 #include <globjects/base/ref_ptr.h>
 
@@ -25,7 +29,8 @@ namespace gloperate
 
 namespace globjects
 {
-    class Framebuffer;
+    class Framebuffer; 
+    class Program;
     class Renderbuffer;
     class Texture;
 }
@@ -62,6 +67,9 @@ public:
 protected:
     virtual void process() override;
 
+    void drawChunks(
+        const glm::vec3 & eye,
+        const glm::mat4 & transform);
     void render();
 
     void setupGrid();
@@ -71,8 +79,11 @@ protected:
     void setupTextures();
     void setupGroundTexture();
     void setupStriationTexture();
+    void setupProgram();
+    void setupRendering();
 
     void resizeFbo(int width, int height);
+    void updateTexture();
 
 
 protected:
@@ -85,7 +96,10 @@ protected:
     globjects::ref_ptr<globjects::Texture> m_striationTexture;
     globjects::ref_ptr<globjects::Texture> m_groundTexture;
 
-    globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
+    globjects::ref_ptr<globjects::Program> m_renderProgram;
+
+    gl::GLint m_transformLocation;
+    gl::GLint m_offsetLocation;
 
 	bool m_initialized;
 
