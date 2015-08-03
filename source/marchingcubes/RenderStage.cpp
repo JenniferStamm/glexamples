@@ -20,6 +20,8 @@
 #include <gloperate/primitives/AdaptiveGrid.h>
 #include <gloperate/resources/ResourceManager.h>
 
+#include <loggingzeug/logging.h>
+
 #include "ChunkRenderer.h"
 #include <glbinding/gl/boolean.h>
 
@@ -246,6 +248,10 @@ void RenderStage::setupTextures()
 void RenderStage::setupGroundTexture()
 {
     m_groundTexture = resourceManager.data()->load<Texture>(groundTextureFilePath->toString());
+    if (!m_groundTexture)
+    {
+        loggingzeug::critical() << "Could not load Ground Texture";
+    }
 
     m_groundTexture->setName("GroundTexture");
     m_groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -257,6 +263,10 @@ void RenderStage::setupGroundTexture()
 void RenderStage::setupStriationTexture()
 {
     m_striationTexture = resourceManager.data()->load<Texture>(striationTextureFilePath->toString());
+    if (!m_striationTexture)
+    {
+        loggingzeug::critical() << "Could not load Striation Texture";
+    }
 
     m_striationTexture->setName("StriationTexture");
     m_striationTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
