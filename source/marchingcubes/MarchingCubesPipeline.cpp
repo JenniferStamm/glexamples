@@ -47,6 +47,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     manageChunksStage->rotationVector2 = rotationVector2;
     manageChunksStage->warpFactor = warpFactor;
     manageChunksStage->removeFloaters = removeFloaters;
+    manageChunksStage->freezeChunkLoading = freezeChunkLoading;
 
     renderStage->viewport = viewport;
     renderStage->camera = camera;

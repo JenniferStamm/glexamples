@@ -42,11 +42,13 @@ public:
     gloperate::InputSlot<glm::vec3> rotationVector2;
     gloperate::InputSlot<float> warpFactor;
     gloperate::InputSlot<bool> removeFloaters;
+    gloperate::InputSlot<bool> freezeChunkLoading;
 
     gloperate::Data<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
 protected:
     void addTerrainAt(glm::vec3 worldPosition);
+    void removeChunks();
     virtual void process() override;
 
 public:

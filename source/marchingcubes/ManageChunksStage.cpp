@@ -28,6 +28,7 @@ ManageChunksStage::ManageChunksStage()
     addInput("rotationVector2", rotationVector2);
     addInput("warpFactor", warpFactor);
     addInput("removeFloaters", removeFloaters);
+    addInput("freezeChunkLoading", freezeChunkLoading);
 
     addOutput("chunks", chunks);
 
@@ -63,14 +64,32 @@ void ManageChunksStage::addTerrainAt(glm::vec3 worldPosition)
             }
 }
 
+void ManageChunksStage::removeChunks()
+{
+    // Remove unneeded chunks
+    std::vector<vec3> chunksToRemove;
+
+    for (auto chunk : chunks.data())
+    {
+        if (shouldRemoveChunk(chunk.first))
+        {
+            m_chunksChanged = true;
+            chunksToRemove.push_back(chunk.first);
+        }
+    }
+
+    for (auto chunkToRemove : chunksToRemove)
+    {
+        chunks->erase(chunkToRemove);
+    }
+}
+
 void ManageChunksStage::process()
 {
     if (input.hasChanged())
     {
         input.data()->addMouseHandler(this);
     }
-
-
 
     auto regenerate = false;
     m_chunksChanged = false;
@@ -117,22 +136,8 @@ void ManageChunksStage::process()
         m_chunksChanged = true;
     }
 
-    // Remove unneeded chunks
-    std::vector<vec3> chunksToRemove;
-
-    for (auto chunk : chunks.data())
-    {
-        if (shouldRemoveChunk(chunk.first))
-        {
-            m_chunksChanged = true;
-            chunksToRemove.push_back(chunk.first);
-        }
-    }
-
-    for (auto chunkToRemove : chunksToRemove)
-    {
-        chunks->erase(chunkToRemove);
-    }
+    if (!freezeChunkLoading.data())
+        removeChunks();
 
     if (chunksToAdd.hasChanged())
         m_chunksChanged = true;
