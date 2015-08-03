@@ -72,6 +72,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     prettyTerrainGroup->addProperty(createProperty("Ground Texture", m_pipeline.groundTextureFilePath));
     prettyTerrainGroup->addProperty(createProperty("Use Ground Texture", m_pipeline.useGroundTexture));
     prettyTerrainGroup->addProperty(createProperty("Mip Mapping", m_pipeline.useMipMap));
+    prettyTerrainGroup->addProperty(createProperty("Striation Texture", m_pipeline.striationTextureFilePath));
     prettyTerrainGroup->addProperty(createProperty("Use Striation Texture", m_pipeline.useStriationTexture));
 }
 

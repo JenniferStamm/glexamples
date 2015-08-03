@@ -29,6 +29,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useOcclusion(false)
 , groundTextureFilePath("data/marchingcubes/ground.png")
 , useGroundTexture(false)
+, striationTextureFilePath("data/marchingcubes/terrain_color.jpg")
 , useStriationTexture(false)
 {
     auto addChunksStage = new AddChunksStage();
@@ -57,6 +58,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->useOcclusion = useOcclusion;
     renderStage->groundTextureFilePath = groundTextureFilePath;
     renderStage->useGroundTexture = useGroundTexture;
+    renderStage->striationTextureFilePath = striationTextureFilePath;
     renderStage->useStriationTexture = useStriationTexture;
     renderStage->chunks = manageChunksStage->chunks;
 

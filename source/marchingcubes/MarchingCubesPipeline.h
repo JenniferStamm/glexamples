@@ -45,6 +45,7 @@ public:
     gloperate::Data<bool> useOcclusion;
     gloperate::Data<reflectionzeug::FilePath> groundTextureFilePath;
     gloperate::Data<bool> useGroundTexture;
+    gloperate::Data<reflectionzeug::FilePath> striationTextureFilePath;
     gloperate::Data<bool> useStriationTexture;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;

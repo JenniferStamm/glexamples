@@ -53,6 +53,7 @@ public:
     gloperate::InputSlot<bool> useOcclusion;
     gloperate::InputSlot<reflectionzeug::FilePath> groundTextureFilePath;
     gloperate::InputSlot<bool> useGroundTexture;
+    gloperate::InputSlot<reflectionzeug::FilePath> striationTextureFilePath;
     gloperate::InputSlot<bool> useStriationTexture;
     
     gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
@@ -69,6 +70,7 @@ protected:
     void setupFbo();
     void setupTextures();
     void setupGroundTexture();
+    void setupStriationTexture();
 
     void resizeFbo(int width, int height);
 

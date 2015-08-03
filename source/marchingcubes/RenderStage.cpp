@@ -44,6 +44,7 @@ RenderStage::RenderStage()
     addInput("groundTextureFilePath", groundTextureFilePath);
     addInput("useGroundTexture", useGroundTexture);
     addInput("useShadow", useShadow);
+    addInput("striationTextureFilePath", striationTextureFilePath);
     addInput("useStriationTexture", useStriationTexture);
 
 
@@ -70,10 +71,6 @@ void RenderStage::initialize()
     setupFbo();
     setupTextures();
 
-	
-	
-	m_chunkRenderer->setGroundTexture(m_groundTexture);
-	m_chunkRenderer->setStriationTexture(m_striationTexture);
     m_chunkRenderer->setUseShadow(useShadow.data());
     m_chunkRenderer->setUseOcclusion(useOcclusion.data());
     m_chunkRenderer->setUseGroundTexture(useGroundTexture.data());
@@ -91,6 +88,12 @@ void RenderStage::process()
     if (groundTextureFilePath.hasChanged())
     {
         setupGroundTexture();
+        rerender = true;
+    }
+
+    if (striationTextureFilePath.hasChanged())
+    {
+        setupStriationTexture();
         rerender = true;
     }
 
@@ -235,13 +238,7 @@ void RenderStage::setupTextures()
     if (resourceManager.data())
     {
         setupGroundTexture();
-
-        m_striationTexture = resourceManager.data()->load<Texture>("data/marchingcubes/terrain_color.jpg");
-
-        m_striationTexture->setName("StriationTexture");
-        m_striationTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-        m_striationTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-        
+        setupStriationTexture();
     }
 
 }
@@ -255,6 +252,17 @@ void RenderStage::setupGroundTexture()
     m_groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     m_chunkRenderer->setGroundTexture(m_groundTexture);
+}
+
+void RenderStage::setupStriationTexture()
+{
+    m_striationTexture = resourceManager.data()->load<Texture>(striationTextureFilePath->toString());
+
+    m_striationTexture->setName("StriationTexture");
+    m_striationTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    m_striationTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    m_chunkRenderer->setStriationTexture(m_striationTexture);
 }
 
 void RenderStage::resizeFbo(int width, int height)
