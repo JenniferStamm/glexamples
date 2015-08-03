@@ -42,11 +42,13 @@ public:
     gloperate::InputSlot<glm::vec3> rotationVector2;
     gloperate::InputSlot<float> warpFactor;
     gloperate::InputSlot<bool> removeFloaters;
+    gloperate::InputSlot<bool> freezeChunkLoading;
 
     gloperate::Data<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
 protected:
     void addTerrainAt(glm::vec3 worldPosition);
+    void removeChunks();
     virtual void process() override;
 
 public:
@@ -55,12 +57,16 @@ public:
     virtual void onMousePress(int x, int y, gloperate::MouseButton button) override;
 protected:
     bool shouldRemoveChunk(glm::vec3 chunkPosition) const;
+    void regenerateChunks();
     
 protected:
     globjects::ref_ptr<ChunkFactory> m_chunkFactory;
     std::vector<glm::ivec2> m_mouseClicks;
     bool m_mouseMoved;
     bool m_mousePressed;
+
+    bool m_chunksChanged;
+    bool m_allChunksGenerated;
 
 };
 

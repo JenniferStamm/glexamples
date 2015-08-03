@@ -18,6 +18,7 @@ ManageChunksStage::ManageChunksStage()
 , m_chunkFactory()
 , m_mouseMoved(false)
 , m_mousePressed(false)
+, m_allChunksGenerated(true)
 {
     addInput("camera", camera);
     addInput("input", input);
@@ -27,6 +28,7 @@ ManageChunksStage::ManageChunksStage()
     addInput("rotationVector2", rotationVector2);
     addInput("warpFactor", warpFactor);
     addInput("removeFloaters", removeFloaters);
+    addInput("freezeChunkLoading", freezeChunkLoading);
 
     addOutput("chunks", chunks);
 
@@ -62,27 +64,45 @@ void ManageChunksStage::addTerrainAt(glm::vec3 worldPosition)
             }
 }
 
+void ManageChunksStage::removeChunks()
+{
+    // Remove unneeded chunks
+    std::vector<vec3> chunksToRemove;
+
+    for (auto chunk : chunks.data())
+    {
+        if (shouldRemoveChunk(chunk.first))
+        {
+            m_chunksChanged = true;
+            chunksToRemove.push_back(chunk.first);
+        }
+    }
+
+    for (auto chunkToRemove : chunksToRemove)
+    {
+        chunks->erase(chunkToRemove);
+    }
+}
+
 void ManageChunksStage::process()
 {
     if (input.hasChanged())
     {
         input.data()->addMouseHandler(this);
     }
-    
-
 
     auto regenerate = false;
-    auto chunksChanged = false;
+    m_chunksChanged = false;
 
     for (auto pos : m_mouseClicks)
     {
         auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(pos);
         addTerrainAt(worldPosition);
-        chunksChanged = true;
+        m_chunksChanged = true;
     }
 
     m_mouseClicks.clear();
-    
+
     if (rotationVector1.hasChanged())
     {
         m_chunkFactory->densityGenerationProgram()->setUniform("rotationVector1", rotationVector1.data());
@@ -113,72 +133,23 @@ void ManageChunksStage::process()
         {
             chunk.second->setValid(false);
         }
-        chunksChanged = true;
+        m_chunksChanged = true;
     }
 
-    // Remove unneeded chunks
-    std::vector<vec3> chunksToRemove;
+    if (!freezeChunkLoading.data())
+        removeChunks();
 
-    for (auto chunk : chunks.data())
+    if (chunksToAdd.hasChanged())
+        m_chunksChanged = true;
+
+    if (!m_allChunksGenerated)
+        m_chunksChanged = true;
+
+    if (m_chunksChanged)
     {
-        if (shouldRemoveChunk(chunk.first))
-        {
-            chunksChanged = true;
-            chunksToRemove.push_back(chunk.first);
-        }
-    }
-
-    for (auto chunkToRemove : chunksToRemove)
-    {
-        chunks->erase(chunkToRemove);
-    }
-
-    // Copy chunk list
-    auto localChunksToAdd = chunksToAdd.data();
-
-    vec3 newOffset;
-
-    while (!localChunksToAdd.empty())
-    {
-        newOffset = localChunksToAdd.front();
-        localChunksToAdd.pop();
-        // Break if it is a new chunk
-        if (!shouldRemoveChunk(newOffset) && chunks->find(newOffset) == chunks->end())
-        {
-            auto newChunk = new Chunk(newOffset);
-            chunks.data()[newOffset] = newChunk;
-        }
-    }
-
-    // Generate new non-empty chunks
-    const unsigned int chunksToGenerate = 3u;
-    unsigned int generatedChunks = 0;
-    for (auto chunk : chunks.data())
-    {       
-        if (generatedChunks >= chunksToGenerate)
-            break;
-
-        if (chunk.second->isValid())
-            continue;
-
-        chunksChanged = true;
-
-        auto currentChunk = chunk.second;
-
-
-        m_chunkFactory->generateDensities(currentChunk);
-        m_chunkFactory->generateList(currentChunk);
-        if (!currentChunk->isEmpty())
-            m_chunkFactory->generateMesh(currentChunk);
-
-        currentChunk->setValid(true);
-
-        if (!currentChunk->isEmpty())
-            ++generatedChunks;
-    }
-
-    if (chunksChanged)
+        regenerateChunks();
         invalidateOutputs();
+    }
 }
 
 void ManageChunksStage::onMouseMove(int x, int y)
@@ -207,4 +178,54 @@ bool ManageChunksStage::shouldRemoveChunk(glm::vec3 chunkPosition) const
     float distanceForRemoving = 10.f;
 
     return distance(chunkPosition, camera.data()->eye()) > distanceForRemoving;
+}
+
+void ManageChunksStage::regenerateChunks()
+{
+    m_allChunksGenerated = false;
+
+    // Copy chunk list
+    auto localChunksToAdd = chunksToAdd.data();
+
+    vec3 newOffset;
+
+    while (!localChunksToAdd.empty())
+    {
+        newOffset = localChunksToAdd.front();
+        localChunksToAdd.pop();
+        // Break if it is a new chunk
+        if (!shouldRemoveChunk(newOffset) && chunks->find(newOffset) == chunks->end())
+        {
+            auto newChunk = new Chunk(newOffset);
+            chunks.data()[newOffset] = newChunk;
+        }
+    }
+
+    // Generate new non-empty chunks
+    const unsigned int chunksToGenerate = 3u;
+    unsigned int generatedChunks = 0;
+    for (auto chunk : chunks.data())
+    {
+        if (generatedChunks >= chunksToGenerate)
+            return;
+
+        if (chunk.second->isValid())
+            continue;
+
+        auto currentChunk = chunk.second;
+
+
+        m_chunkFactory->generateDensities(currentChunk);
+        m_chunkFactory->generateList(currentChunk);
+        if (!currentChunk->isEmpty())
+            m_chunkFactory->generateMesh(currentChunk);
+
+        currentChunk->setValid(true);
+
+        if (!currentChunk->isEmpty())
+            ++generatedChunks;
+    }
+
+    m_allChunksGenerated = true;
+
 }

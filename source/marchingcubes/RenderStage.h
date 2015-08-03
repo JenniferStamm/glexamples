@@ -51,6 +51,7 @@ public:
     gloperate::InputSlot<gloperate::ResourceManager *> resourceManager;
     gloperate::InputSlot<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
     gloperate::InputSlot<gloperate::TypedRenderTargetCapability *> renderTargets;
+    gloperate::InputSlot<bool> showWireframe;
     gloperate::InputSlot<bool> useMipMap;
     gloperate::InputSlot<bool> useShadow;
     gloperate::InputSlot<bool> useOcclusion;

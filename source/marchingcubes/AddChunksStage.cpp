@@ -12,6 +12,7 @@ AddChunksStage::AddChunksStage()
 :   AbstractStage("AddChunks")
 {
     addInput("camera", camera);
+    addInput("freezeChunkLoading", freezeChunkLoading);
 
     addOutput("chunksToAdd", chunksToAdd);
 }
@@ -23,6 +24,9 @@ void AddChunksStage::initialize()
 
 void AddChunksStage::process()
 {
+    if (freezeChunkLoading.data())
+        return;
+
     std::queue<vec3> empty;
     std::swap(chunksToAdd.data(), empty);
 

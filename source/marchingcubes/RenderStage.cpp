@@ -42,6 +42,7 @@ RenderStage::RenderStage()
     addInput("targetFBO", targetFBO);
     addInput("renderTargets", renderTargets);
 
+    addInput("showWireframe", showWireframe);
     addInput("useMipMap", useMipMap);
     addInput("useOcclusion", useOcclusion);
     addInput("groundTextureFilePath", groundTextureFilePath);
@@ -108,6 +109,12 @@ void RenderStage::process()
 
     if (camera.hasChanged() || projection.hasChanged() || targetFBO.hasChanged())
     {
+        rerender = true;
+    }
+
+    if (showWireframe.hasChanged())
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, showWireframe.data() ? GL_LINE : GL_FILL);
         rerender = true;
     }
 
