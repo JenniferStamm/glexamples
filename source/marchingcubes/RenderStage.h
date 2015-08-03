@@ -1,36 +1,41 @@
 #pragma once
 
-#include <glm/vec3.hpp>
 #include <vec3_hash.h>
+
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
+
+#include <glbinding/gl/types.h>
 
 #include <globjects/base/ref_ptr.h>
 
 #include <gloperate/pipeline/AbstractStage.h>
 #include <gloperate/pipeline/InputSlot.h>
 
+#include <reflectionzeug/base/FilePath.h>
+
 
 namespace gloperate
 {
-    class AbstractViewportCapability;
-    class AbstractVirtualTimeCapability;
-    class PerspectiveProjectionCapability;
     class AbstractCameraCapability;
     class AbstractTargetFramebufferCapability;
-    class TypedRenderTargetCapability;
+    class AbstractViewportCapability;
+    class AbstractVirtualTimeCapability;
     class AdaptiveGrid;
+    class PerspectiveProjectionCapability;
     class ResourceManager;
+    class TypedRenderTargetCapability;
 }
 
 namespace globjects
 {
-    class Framebuffer;
+    class Framebuffer; 
+    class Program;
     class Renderbuffer;
     class Texture;
 }
 
 class Chunk;
-class ChunkRenderer;
-
 
 class RenderStage : public gloperate::AbstractStage
 {
@@ -50,7 +55,9 @@ public:
     gloperate::InputSlot<bool> useMipMap;
     gloperate::InputSlot<bool> useShadow;
     gloperate::InputSlot<bool> useOcclusion;
+    gloperate::InputSlot<reflectionzeug::FilePath> groundTextureFilePath;
     gloperate::InputSlot<bool> useGroundTexture;
+    gloperate::InputSlot<reflectionzeug::FilePath> striationTextureFilePath;
     gloperate::InputSlot<bool> useStriationTexture;
     
     gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
@@ -59,6 +66,9 @@ public:
 protected:
     virtual void process() override;
 
+    void drawChunks(
+        const glm::vec3 & eye,
+        const glm::mat4 & transform);
     void render();
 
     void setupGrid();
@@ -66,8 +76,13 @@ protected:
     void setupOpenGLState();
     void setupFbo();
     void setupTextures();
+    void setupGroundTexture();
+    void setupStriationTexture();
+    void setupProgram();
+    void setupRendering();
 
     void resizeFbo(int width, int height);
+    void updateTexture();
 
 
 protected:
@@ -80,7 +95,10 @@ protected:
     globjects::ref_ptr<globjects::Texture> m_striationTexture;
     globjects::ref_ptr<globjects::Texture> m_groundTexture;
 
-    globjects::ref_ptr<ChunkRenderer> m_chunkRenderer;
+    globjects::ref_ptr<globjects::Program> m_renderProgram;
+
+    gl::GLint m_transformLocation;
+    gl::GLint m_offsetLocation;
 
 	bool m_initialized;
 
