@@ -13,6 +13,7 @@
 #include "AddChunksStage.h"
 #include "ManageChunksStage.h"
 #include "RenderStage.h"
+#include "TerrainModificationStage.h"
 
 
 MarchingCubesPipeline::MarchingCubesPipeline()
@@ -35,15 +36,18 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useStriationTexture(false)
 {
     auto addChunksStage = new AddChunksStage();
+    auto terrainModificationStage = new TerrainModificationStage();
     auto manageChunksStage = new ManageChunksStage();
     auto renderStage = new RenderStage();
 
     addChunksStage->camera = camera;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
 
+    terrainModificationStage->input = input;
+
     manageChunksStage->camera = camera;
-    manageChunksStage->input = input;
     manageChunksStage->coordinateProvider = coordinateProvider;
+    manageChunksStage->addPosition = terrainModificationStage->addPosition;
     manageChunksStage->chunksToAdd = addChunksStage->chunksToAdd;
     manageChunksStage->rotationVector1 = rotationVector1;
     manageChunksStage->rotationVector2 = rotationVector2;
@@ -69,6 +73,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 
     addStages(
         std::move(addChunksStage),
+        std::move(terrainModificationStage),
         std::move(manageChunksStage),
 		std::move(renderStage)
 	);

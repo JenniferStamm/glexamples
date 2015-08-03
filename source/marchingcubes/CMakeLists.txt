@@ -44,6 +44,7 @@ set(sources
     ${source_path}/MarchingCubesPainter.cpp
     ${source_path}/MarchingCubesPipeline.cpp
     ${source_path}/RenderStage.cpp
+    ${source_path}/TerrainModificationStage.cpp
     ${source_path}/plugin.cpp
 )
 
@@ -56,6 +57,7 @@ set(api_includes
     ${include_path}/MarchingCubesPainter.h
     ${include_path}/MarchingCubesPipeline.h
     ${include_path}/RenderStage.h
+    ${include_path}/TerrainModificationStage.h
     ${include_path}/vec3_hash.h
 )
 

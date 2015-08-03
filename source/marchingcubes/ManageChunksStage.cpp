@@ -3,7 +3,6 @@
 #include <globjects/globjects.h>
 
 #include <gloperate/painter/AbstractCameraCapability.h>
-#include <gloperate/painter/InputCapability.h>
 #include <gloperate/navigation/CoordinateProvider.h>
 
 #include "Chunk.h"
@@ -16,13 +15,11 @@ using namespace globjects;
 ManageChunksStage::ManageChunksStage()
 :   AbstractStage("ManageChunks")
 , m_chunkFactory()
-, m_mouseMoved(false)
-, m_mousePressed(false)
 , m_allChunksGenerated(true)
 {
     addInput("camera", camera);
-    addInput("input", input);
     addInput("coordinateProvider", coordinateProvider);
+    addInput("addPosition", addPosition);
     addInput("chunksToAdd", chunksToAdd);
     addInput("rotationVector1", rotationVector1);
     addInput("rotationVector2", rotationVector2);
@@ -37,10 +34,7 @@ ManageChunksStage::ManageChunksStage()
 
 ManageChunksStage::~ManageChunksStage()
 {
-    if (input.data())
-    {
-        input.data()->removeMouseHandler(this);
-    }
+    
 }
 
 void ManageChunksStage::initialize()
@@ -86,22 +80,15 @@ void ManageChunksStage::removeChunks()
 
 void ManageChunksStage::process()
 {
-    if (input.hasChanged())
-    {
-        input.data()->addMouseHandler(this);
-    }
-
     auto regenerate = false;
     m_chunksChanged = false;
 
-    for (auto pos : m_mouseClicks)
+    if (addPosition.hasChanged())
     {
-        auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(pos);
+        auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(addPosition.data());
         addTerrainAt(worldPosition);
         m_chunksChanged = true;
     }
-
-    m_mouseClicks.clear();
 
     if (rotationVector1.hasChanged())
     {
@@ -150,27 +137,6 @@ void ManageChunksStage::process()
         regenerateChunks();
         invalidateOutputs();
     }
-}
-
-void ManageChunksStage::onMouseMove(int x, int y)
-{
-    m_mouseMoved = true;
-}
-
-void ManageChunksStage::onMouseRelease(int x, int y, gloperate::MouseButton button)
-{
-    if (m_mousePressed && !m_mouseMoved)
-    {
-        m_mouseClicks.push_back(ivec2(x, y));
-        scheduleProcess();
-    }
-    m_mousePressed = false;
-}
-
-void ManageChunksStage::onMousePress(int x, int y, gloperate::MouseButton button)
-{
-    m_mousePressed = true;
-    m_mouseMoved = false;
 }
 
 bool ManageChunksStage::shouldRemoveChunk(glm::vec3 chunkPosition) const
