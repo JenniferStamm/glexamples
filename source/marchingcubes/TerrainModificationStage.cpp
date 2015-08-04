@@ -11,6 +11,7 @@ TerrainModificationStage::TerrainModificationStage()
 {
     addInput("input", input);
     addOutput("addPosition", addPosition);
+    addOutput("removePosition", removePosition);
 }
 
 TerrainModificationStage::~TerrainModificationStage()
@@ -31,13 +32,17 @@ void TerrainModificationStage::onMousePress(int x, int y, gloperate::MouseButton
 {
     m_mousePressed = true;
     m_mouseMoved = false;
+    m_mouseButton = button;
 }
 
 void TerrainModificationStage::onMouseRelease(int x, int y, gloperate::MouseButton button)
 {
-    if (m_mousePressed && !m_mouseMoved && m_ctrlPressed)
+    if (m_mousePressed && !m_mouseMoved && m_ctrlPressed && m_mouseButton == button)
     {
-        addPosition = ivec2(x, y);
+        if (m_mouseButton == gloperate::MouseButtonLeft)
+            addPosition = ivec2(x, y);
+        if (m_mouseButton == gloperate::MouseButtonRight)
+            removePosition = ivec2(x, y);
     }
     m_mousePressed = false;
 }

@@ -16,6 +16,7 @@ public:
 
     gloperate::InputSlot<gloperate::InputCapability *> input;
     gloperate::Data<glm::ivec2> addPosition;
+    gloperate::Data<glm::ivec2> removePosition;
 
     virtual void onMouseMove(int x, int y) override;
     virtual void onMousePress(int x, int y, gloperate::MouseButton button) override;
@@ -27,6 +28,7 @@ protected:
     virtual void process() override;
 protected:
     bool m_ctrlPressed;
+    gloperate::MouseButton m_mouseButton;
     bool m_mouseMoved;
     bool m_mousePressed;
     

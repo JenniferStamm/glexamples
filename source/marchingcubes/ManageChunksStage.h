@@ -36,6 +36,7 @@ public:
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
     gloperate::InputSlot<gloperate::CoordinateProvider *> coordinateProvider;
     gloperate::InputSlot<glm::ivec2> addPosition;
+    gloperate::InputSlot<glm::ivec2> removePosition;
     gloperate::InputSlot<std::queue<glm::vec3>> chunksToAdd; 
     gloperate::InputSlot<glm::vec3> rotationVector1;
     gloperate::InputSlot<glm::vec3> rotationVector2;
@@ -48,6 +49,7 @@ public:
 
 protected:
     void addTerrainAt(glm::vec3 worldPosition);
+    void removeTerrainAt(glm::vec3 worldPosition);
     void removeChunks();
     virtual void process() override;
 

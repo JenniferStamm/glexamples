@@ -4,8 +4,10 @@
 
 uniform vec3 a_offset;
 
-uniform vec3 a_terrainPositions[64];
-uniform int a_terrainPositionCount;
+uniform vec3 a_addingTerrainPositions[64];
+uniform int a_addingTerrainPositionCount;
+uniform vec3 a_removingTerrainPositions[64];
+uniform int a_removingTerrainPositionCount;
 
 uniform sampler3D noiseTexture1;
 uniform sampler3D noiseTexture2;
@@ -61,8 +63,8 @@ void main()
     // Maximum influence at the clicked position
     float maxInfluence = 0.5;
     
-    for (int i = 0; i < a_terrainPositionCount; i++) {
-        float dist = distance(realPosition,a_terrainPositions[i]);
+    for (int i = 0; i < a_addingTerrainPositionCount; i++) {
+        float dist = distance(realPosition, a_addingTerrainPositions[i]);
         
         // Clamp influence to the radius, invert it
         float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
@@ -70,5 +72,16 @@ void main()
         // Scale to the maximum influence
         additionalDensity *= maxInfluence / modificationRadius;
         out_density += additionalDensity;
+    }
+    
+    for (int i = 0; i < a_removingTerrainPositionCount; i++) {
+        float dist = distance(realPosition, a_removingTerrainPositions[i]);
+        
+        // Clamp influence to the radius, invert it
+        float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
+        
+        // Scale to the maximum influence
+        additionalDensity *= maxInfluence / modificationRadius;
+        out_density -= additionalDensity;
     }
 }

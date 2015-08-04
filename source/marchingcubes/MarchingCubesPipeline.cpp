@@ -49,6 +49,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     manageChunksStage->camera = camera;
     manageChunksStage->coordinateProvider = coordinateProvider;
     manageChunksStage->addPosition = terrainModificationStage->addPosition;
+    manageChunksStage->removePosition = terrainModificationStage->removePosition;
     manageChunksStage->chunksToAdd = addChunksStage->chunksToAdd;
     manageChunksStage->rotationVector1 = rotationVector1;
     manageChunksStage->rotationVector2 = rotationVector2;

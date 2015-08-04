@@ -20,6 +20,7 @@ ManageChunksStage::ManageChunksStage()
     addInput("camera", camera);
     addInput("coordinateProvider", coordinateProvider);
     addInput("addPosition", addPosition);
+    addInput("removePosition", removePosition);
     addInput("chunksToAdd", chunksToAdd);
     addInput("rotationVector1", rotationVector1);
     addInput("rotationVector2", rotationVector2);
@@ -59,6 +60,21 @@ void ManageChunksStage::addTerrainAt(glm::vec3 worldPosition)
             }
 }
 
+void ManageChunksStage::removeTerrainAt(glm::vec3 worldPosition)
+{
+    vec3 chunkOffset = vec3(floor(worldPosition[0]), floor(worldPosition[1]), floor(worldPosition[2]));
+    for (int z = -1; z <= 1; ++z)
+        for (int y = -1; y <= 1; ++y)
+            for (int x = -1; x <= 1; ++x)
+            {
+                auto chunk = chunks->find(chunkOffset + vec3(x, y, z));
+                if (chunk != chunks->end())
+                {
+                    chunk->second->removeTerrainPosition(worldPosition);
+                }
+            }
+}
+
 void ManageChunksStage::removeChunks()
 {
     // Remove unneeded chunks
@@ -88,6 +104,13 @@ void ManageChunksStage::process()
     {
         auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(addPosition.data());
         addTerrainAt(worldPosition);
+        m_chunksChanged = true;
+    }
+
+    if (removePosition.hasChanged())
+    {
+        auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(removePosition.data());
+        removeTerrainAt(worldPosition);
         m_chunksChanged = true;
     }
 
