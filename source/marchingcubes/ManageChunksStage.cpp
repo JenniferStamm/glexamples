@@ -26,6 +26,7 @@ ManageChunksStage::ManageChunksStage()
     addInput("warpFactor", warpFactor);
     addInput("removeFloaters", removeFloaters);
     addInput("freezeChunkLoading", freezeChunkLoading);
+    addInput("modificationRadius", modificationRadius);
 
     addOutput("chunks", chunks);
 
@@ -105,6 +106,12 @@ void ManageChunksStage::process()
     if (warpFactor.hasChanged())
     {
         m_chunkFactory->densityGenerationProgram()->setUniform("warpFactor", warpFactor.data());
+        regenerate = true;
+    }
+    
+    if (modificationRadius.hasChanged())
+    {
+        m_chunkFactory->densityGenerationProgram()->setUniform("modificationRadius", modificationRadius.data());
         regenerate = true;
     }
 

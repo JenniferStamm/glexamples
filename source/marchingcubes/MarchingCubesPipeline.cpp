@@ -21,6 +21,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , viewport(nullptr)
 , showWireframe(false)
 , freezeChunkLoading(false)
+, modificationRadius(0.5f)
 , useMipMap(false)
 , rotationVector1(glm::vec3(1, 0.3, 0.5))
 , rotationVector2(glm::vec3(0.1, 0.5, 0.3))
@@ -54,6 +55,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     manageChunksStage->warpFactor = warpFactor;
     manageChunksStage->removeFloaters = removeFloaters;
     manageChunksStage->freezeChunkLoading = freezeChunkLoading;
+    manageChunksStage->modificationRadius = modificationRadius;
 
     renderStage->viewport = viewport;
     renderStage->camera = camera;

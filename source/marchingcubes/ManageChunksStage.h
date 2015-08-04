@@ -42,6 +42,7 @@ public:
     gloperate::InputSlot<float> warpFactor;
     gloperate::InputSlot<bool> removeFloaters;
     gloperate::InputSlot<bool> freezeChunkLoading;
+    gloperate::InputSlot<float> modificationRadius;
 
     gloperate::Data<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
