@@ -65,6 +65,8 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     terrainGroup->addProperty(createProperty("Terrain Type", m_pipeline.terrainType));
     terrainGroup->addProperty(createProperty("Base Texture", m_pipeline.userBaseTextureFilePath));
     terrainGroup->addProperty(createProperty("Extra Texture", m_pipeline.userExtraTextureFilePath));
+    terrainGroup->addProperty(createProperty("Density Generation Shader", m_pipeline.userDensityGenererationShaderFilePath));
+    terrainGroup->addProperty(createProperty("Fragment Shader", m_pipeline.userFragmentShaderFilePath));
     terrainGroup->addProperty(createProperty("Rotation Vector 1", m_pipeline.rotationVector1));
     terrainGroup->addProperty(createProperty("Rotation Vector 2", m_pipeline.rotationVector2));
     terrainGroup->addProperty(createProperty("Warp Factor", m_pipeline.warpFactor));
