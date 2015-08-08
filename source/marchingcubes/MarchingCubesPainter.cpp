@@ -62,6 +62,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     debugGroup->addProperty(createProperty("Freeze Chunk Loading", m_pipeline.freezeChunkLoading));
 
     auto terrainGroup = addGroup("Terrain Generation");
+    terrainGroup->addProperty(createProperty("Terrain Type", m_pipeline.terrainType));
     terrainGroup->addProperty(createProperty("Rotation Vector 1", m_pipeline.rotationVector1));
     terrainGroup->addProperty(createProperty("Rotation Vector 2", m_pipeline.rotationVector2));
     terrainGroup->addProperty(createProperty("Warp Factor", m_pipeline.warpFactor));
@@ -76,6 +77,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     prettyTerrainGroup->addProperty(createProperty("Mip Mapping", m_pipeline.useMipMap));
     prettyTerrainGroup->addProperty(createProperty("Striation Texture", m_pipeline.striationTextureFilePath));
     prettyTerrainGroup->addProperty(createProperty("Use Striation Texture", m_pipeline.useStriationTexture));
+
 }
 
 MarchingCubes::~MarchingCubes() = default;

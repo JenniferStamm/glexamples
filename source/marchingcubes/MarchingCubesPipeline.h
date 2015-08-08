@@ -7,6 +7,8 @@
 
 #include <glm/vec3.hpp>
 
+#include "TerrainData.h"
+
 namespace gloperate
 {
 
@@ -55,5 +57,7 @@ public:
     gloperate::Data<gloperate::TypedRenderTargetCapability *> renderTargets;
     gloperate::Data<gloperate::InputCapability *> input;
     gloperate::Data<gloperate::CoordinateProvider *> coordinateProvider;
+
+    gloperate::Data<TerrainType> terrainType;
 
 };

@@ -13,6 +13,7 @@
 #include "AddChunksStage.h"
 #include "ManageChunksStage.h"
 #include "RenderStage.h"
+#include "TerrainDataStage.h"
 
 
 MarchingCubesPipeline::MarchingCubesPipeline()
@@ -33,10 +34,16 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useGroundTexture(false)
 , striationTextureFilePath("data/marchingcubes/terrain_color.jpg")
 , useStriationTexture(false)
+, terrainType(TerrainType::Mossy)
 {
+    auto terrainDataStage = new TerrainDataStage();
     auto addChunksStage = new AddChunksStage();
     auto manageChunksStage = new ManageChunksStage();
     auto renderStage = new RenderStage();
+
+    terrainDataStage->terrainType = terrainType;
+    terrainDataStage->groundTextureFilePath = groundTextureFilePath;
+    terrainDataStage->striationTextureFilePath = striationTextureFilePath;
 
     addChunksStage->camera = camera;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
@@ -61,13 +68,14 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->resourceManager = resourceManager;
     renderStage->useShadow = useShadow;
     renderStage->useOcclusion = useOcclusion;
-    renderStage->groundTextureFilePath = groundTextureFilePath;
+    renderStage->groundTextureFilePath = terrainDataStage->baseTextureFilePath;
     renderStage->useGroundTexture = useGroundTexture;
-    renderStage->striationTextureFilePath = striationTextureFilePath;
+    renderStage->striationTextureFilePath = terrainDataStage->extraTextureFilePath;
     renderStage->useStriationTexture = useStriationTexture;
     renderStage->chunks = manageChunksStage->chunks;
 
     addStages(
+        std::move(terrainDataStage),
         std::move(addChunksStage),
         std::move(manageChunksStage),
 		std::move(renderStage)

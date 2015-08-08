@@ -267,7 +267,8 @@ void RenderStage::setupTextures()
 
 void RenderStage::setupGroundTexture()
 {
-    m_groundTexture = resourceManager.data()->load<Texture>(groundTextureFilePath->toString());
+    std::string filePath = groundTextureFilePath->toString().empty() ? "data/marchingcubes/ground.png" : groundTextureFilePath->toString();
+    m_groundTexture = resourceManager.data()->load<Texture>(filePath);
     if (!m_groundTexture)
     {
         loggingzeug::critical() << "Could not load Ground Texture";
@@ -280,6 +281,7 @@ void RenderStage::setupGroundTexture()
 
 void RenderStage::setupStriationTexture()
 {
+    std::string filePath = groundTextureFilePath->toString().empty() ? "data/marchingcubes/terrain_color.png" : groundTextureFilePath->toString();
     m_striationTexture = resourceManager.data()->load<Texture>(striationTextureFilePath->toString());
     if (!m_striationTexture)
     {
