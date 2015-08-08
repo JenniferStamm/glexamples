@@ -9,11 +9,17 @@ TerrainTypeStage::TerrainTypeStage()
     addInput("userExtraTextureFilePath", userExtraTextureFilePath);
     addInput("userFragmentShaderFilePath", userFragmentShaderFilePath);
     addInput("userDensityGenererationShaderFilePath", userDensityGenererationShaderFilePath);
+    addInput("userRotationVector1", userRotationVector1);
+    addInput("userRotationVector2", userRotationVector2);
+    addInput("userWarpFactor", userWarpFactor);
 
     addOutput("groundTextureFilePath", baseTextureFilePath);
     addOutput("striationTextureFilePath", extraTextureFilePath);
     addOutput("fragmentShaderTextureFilePath", fragmentShaderTextureFilePath);
-    addOutput("densityGenererationShaderFilePath", densityGenererationShaderFilePath);
+    addOutput("densityGenererationShaderFilePath", densityGenererationShaderFilePath); 
+    addOutput("rotationVector1", rotationVector1);
+    addOutput("rotationVector2", rotationVector2);
+    addOutput("warpFactor", warpFactor);
 }
 
 void TerrainTypeStage::initialize()
@@ -59,6 +65,18 @@ void TerrainTypeStage::process()
         {
             densityGenererationShaderFilePath.data() = userDensityGenererationShaderFilePath.data();
         }
+        if (userRotationVector1.hasChanged())
+        {
+            rotationVector1.data() = userRotationVector1.data();
+        }
+        if (userRotationVector2.hasChanged())
+        {
+            rotationVector2.data() = userRotationVector2.data();
+        }
+        if (userWarpFactor.hasChanged())
+        {
+            warpFactor.data() = userWarpFactor.data();
+        }
     }
         
 
@@ -72,6 +90,9 @@ void TerrainTypeStage::changeToMossy()
     extraTextureFilePath.data() = "data/marchingcubes/terrain_color.jpg";
     fragmentShaderTextureFilePath.data() = "data/marchingcubes/marchingcubes.frag";
     densityGenererationShaderFilePath.data() = "data/marchingcubes/densitygeneration.vert";
+    rotationVector1.data() = glm::vec3(1, 0.3, 0.5);
+    rotationVector2.data() = glm::vec3(0.1, 0.5, 0.3);
+    warpFactor.data() = 3.4f;
 }
 
 void TerrainTypeStage::changeToMoon()
@@ -80,6 +101,9 @@ void TerrainTypeStage::changeToMoon()
     extraTextureFilePath.data() = "data/marchingcubes/moon_color.jpg";
     fragmentShaderTextureFilePath.data() = "data/marchingcubes/marchingcubes.frag";
     densityGenererationShaderFilePath.data() = "data/marchingcubes/moondensitygeneration.vert";
+    rotationVector1.data() = glm::vec3(1, 0.3, 0.5);
+    rotationVector2.data() = glm::vec3(0.1, 0.5, 0.3);
+    warpFactor.data() = 3.4f;
 }
 
 void TerrainTypeStage::changeToUserDefined()
@@ -88,4 +112,7 @@ void TerrainTypeStage::changeToUserDefined()
     extraTextureFilePath.data() = userExtraTextureFilePath.data();
     fragmentShaderTextureFilePath.data() = userFragmentShaderFilePath.data();
     densityGenererationShaderFilePath.data() = userDensityGenererationShaderFilePath.data();
+    rotationVector1.data() = userRotationVector1.data();
+    rotationVector2.data() = userRotationVector2.data();
+    warpFactor.data() = userWarpFactor.data();
 }

@@ -24,9 +24,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , freezeChunkLoading(false)
 , modificationRadius(0.25f)
 , useMipMap(false)
-, rotationVector1(glm::vec3(1, 0.3, 0.5))
-, rotationVector2(glm::vec3(0.1, 0.5, 0.3))
-, warpFactor(3.4f)
+, userRotationVector1(glm::vec3(1, 0.3, 0.5))
+, userRotationVector2(glm::vec3(0.1, 0.5, 0.3))
+, userWarpFactor(3.4f)
 , removeFloaters(false)
 , targetFBO(nullptr)
 , renderTargets(nullptr)
@@ -51,6 +51,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     terrainTypeStage->userExtraTextureFilePath = userExtraTextureFilePath;
     terrainTypeStage->userFragmentShaderFilePath = userFragmentShaderFilePath;
     terrainTypeStage->userDensityGenererationShaderFilePath = userDensityGenererationShaderFilePath;
+    terrainTypeStage->userRotationVector1 = userRotationVector1;
+    terrainTypeStage->userRotationVector2 = userRotationVector2;
+    terrainTypeStage->userWarpFactor = userWarpFactor;
 
     addChunksStage->camera = camera;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
@@ -62,9 +65,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     manageChunksStage->addPosition = terrainModificationStage->addPosition;
     manageChunksStage->removePosition = terrainModificationStage->removePosition;
     manageChunksStage->chunksToAdd = addChunksStage->chunksToAdd;
-    manageChunksStage->rotationVector1 = rotationVector1;
-    manageChunksStage->rotationVector2 = rotationVector2;
-    manageChunksStage->warpFactor = warpFactor;
+    manageChunksStage->rotationVector1 = terrainTypeStage->rotationVector1;
+    manageChunksStage->rotationVector2 = terrainTypeStage->rotationVector2;
+    manageChunksStage->warpFactor = terrainTypeStage->warpFactor;
     manageChunksStage->removeFloaters = removeFloaters;
     manageChunksStage->freezeChunkLoading = freezeChunkLoading;
     manageChunksStage->modificationRadius = modificationRadius;

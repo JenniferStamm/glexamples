@@ -44,9 +44,9 @@ public:
     gloperate::Data<float> modificationRadius;
 
     gloperate::Data<bool> useMipMap;
-    gloperate::Data<glm::vec3> rotationVector1;
-    gloperate::Data<glm::vec3> rotationVector2;
-    gloperate::Data<float> warpFactor;
+    gloperate::Data<glm::vec3> userRotationVector1;
+    gloperate::Data<glm::vec3> userRotationVector2;
+    gloperate::Data<float> userWarpFactor;
     gloperate::Data<bool> removeFloaters;
     gloperate::Data<bool> useShadow;
     gloperate::Data<bool> useOcclusion;
