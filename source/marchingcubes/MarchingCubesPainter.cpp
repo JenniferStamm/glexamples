@@ -58,6 +58,7 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     //m_cameraCapability->changed.connect([this]() { this->onTargetFramebufferChanged(); });
 
     auto debugGroup = addGroup("Debugging");
+    debugGroup->addProperty(createProperty("Show Grid", m_pipeline.showGrid));
     debugGroup->addProperty(createProperty("Show Wireframe", m_pipeline.showWireframe));
     debugGroup->addProperty(createProperty("Freeze Chunk Loading", m_pipeline.freezeChunkLoading));
 
