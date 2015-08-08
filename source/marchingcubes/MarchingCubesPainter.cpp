@@ -67,7 +67,6 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     terrainGroup->addProperty(createProperty("Warp Factor", m_pipeline.warpFactor));
     terrainGroup->addProperty(createProperty("Remove Floaters", m_pipeline.removeFloaters));
 
-
     auto prettyTerrainGroup = addGroup("Pretty Terrain");
     prettyTerrainGroup->addProperty(createProperty("Light", m_pipeline.useShadow));
     prettyTerrainGroup->addProperty(createProperty("Occlusion", m_pipeline.useOcclusion));
@@ -76,6 +75,15 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     prettyTerrainGroup->addProperty(createProperty("Mip Mapping", m_pipeline.useMipMap));
     prettyTerrainGroup->addProperty(createProperty("Striation Texture", m_pipeline.striationTextureFilePath));
     prettyTerrainGroup->addProperty(createProperty("Use Striation Texture", m_pipeline.useStriationTexture));
+
+    auto terrainModificationGroup = addGroup("Terrain Modification");
+    auto radiusProperty = createProperty("Modification Radius", m_pipeline.modificationRadius);
+    radiusProperty->setOptions({
+        { "minimum", reflectionzeug::Variant(0.05f) },
+        { "maximum", reflectionzeug::Variant(1.0f) },
+        { "step", reflectionzeug::Variant(0.05f) }
+    });
+    terrainModificationGroup->addProperty(radiusProperty);
 }
 
 MarchingCubes::~MarchingCubes() = default;

@@ -60,6 +60,16 @@ void Chunk::setupRendering()
     m_vao->enable(1);
 }
 
+std::vector<glm::vec3> Chunk::addingTerrainPositions() const
+{
+    return m_addingTerrainPositions;
+}
+
+std::vector<glm::vec3> Chunk::removingTerrainPositions() const
+{
+    return m_removingTerrainPositions;
+}
+
 void Chunk::setTriangleCount(unsigned triangleCount)
 {
     m_triangleCount = triangleCount;
@@ -135,6 +145,12 @@ void Chunk::teardownMeshGeneration()
 
 void Chunk::addTerrainPosition(glm::vec3 terrainPosition)
 {
-    m_terrainPositions.push_back(terrainPosition);
+    m_addingTerrainPositions.push_back(terrainPosition);
+    m_isValid = false;
+}
+
+void Chunk::removeTerrainPosition(glm::vec3 terrainPosition)
+{
+    m_removingTerrainPositions.push_back(terrainPosition);
     m_isValid = false;
 }

@@ -205,8 +205,10 @@ void ChunkFactory::generateDensities(Chunk * chunk)
     m_noiseTexture4->bindActive(GL_TEXTURE4);
     m_densityGenerationTransformFeedback->bind();
 
-    m_densityGenerationProgram->setUniform("a_terrainPositions", chunk->terrainPositions());
-    m_densityGenerationProgram->setUniform("a_terrainPositionCount", int(chunk->terrainPositions().size()));
+    m_densityGenerationProgram->setUniform("a_addingTerrainPositions", chunk->addingTerrainPositions());
+    m_densityGenerationProgram->setUniform("a_addingTerrainPositionCount", int(chunk->addingTerrainPositions().size()));
+    m_densityGenerationProgram->setUniform("a_removingTerrainPositions", chunk->removingTerrainPositions());
+    m_densityGenerationProgram->setUniform("a_removingTerrainPositionCount", int(chunk->removingTerrainPositions().size()));
     
     m_densityGenerationProgram->setUniform("a_offset", chunk->offset());
     m_densityGenerationProgram->setUniform("noiseTexture1", 1);

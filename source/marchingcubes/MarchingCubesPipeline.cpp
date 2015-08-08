@@ -13,6 +13,7 @@
 #include "AddChunksStage.h"
 #include "ManageChunksStage.h"
 #include "RenderStage.h"
+#include "TerrainModificationStage.h"
 
 
 MarchingCubesPipeline::MarchingCubesPipeline()
@@ -20,6 +21,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , viewport(nullptr)
 , showWireframe(false)
 , freezeChunkLoading(false)
+, modificationRadius(0.25f)
 , useMipMap(false)
 , rotationVector1(glm::vec3(1, 0.3, 0.5))
 , rotationVector2(glm::vec3(0.1, 0.5, 0.3))
@@ -35,21 +37,26 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useStriationTexture(false)
 {
     auto addChunksStage = new AddChunksStage();
+    auto terrainModificationStage = new TerrainModificationStage();
     auto manageChunksStage = new ManageChunksStage();
     auto renderStage = new RenderStage();
 
     addChunksStage->camera = camera;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
 
+    terrainModificationStage->input = input;
+
     manageChunksStage->camera = camera;
-    manageChunksStage->input = input;
     manageChunksStage->coordinateProvider = coordinateProvider;
+    manageChunksStage->addPosition = terrainModificationStage->addPosition;
+    manageChunksStage->removePosition = terrainModificationStage->removePosition;
     manageChunksStage->chunksToAdd = addChunksStage->chunksToAdd;
     manageChunksStage->rotationVector1 = rotationVector1;
     manageChunksStage->rotationVector2 = rotationVector2;
     manageChunksStage->warpFactor = warpFactor;
     manageChunksStage->removeFloaters = removeFloaters;
     manageChunksStage->freezeChunkLoading = freezeChunkLoading;
+    manageChunksStage->modificationRadius = modificationRadius;
 
     renderStage->viewport = viewport;
     renderStage->camera = camera;
@@ -69,6 +76,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 
     addStages(
         std::move(addChunksStage),
+        std::move(terrainModificationStage),
         std::move(manageChunksStage),
 		std::move(renderStage)
 	);

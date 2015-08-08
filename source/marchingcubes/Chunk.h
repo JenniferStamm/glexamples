@@ -42,6 +42,7 @@ public:
     void teardownMeshGeneration();
 
     void addTerrainPosition(glm::vec3 terrainPosition);
+    void removeTerrainPosition(glm::vec3 terrainPosition);
 
 protected:
     void setupRendering();
@@ -56,13 +57,12 @@ protected:
 
     glm::vec3 m_offset;
 
-    std::vector<glm::vec3> m_terrainPositions;
+    std::vector<glm::vec3> m_addingTerrainPositions;
+    std::vector<glm::vec3> m_removingTerrainPositions;
 
 public:
-    std::vector<glm::vec3> terrainPositions() const
-    {
-        return m_terrainPositions;
-    }
+    std::vector<glm::vec3> addingTerrainPositions() const;
+    std::vector<glm::vec3> removingTerrainPositions() const;
 
 protected:
     unsigned int m_triangleCount;
