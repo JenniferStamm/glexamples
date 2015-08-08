@@ -21,9 +21,11 @@ public:
     gloperate::InputSlot<TerrainType> terrainType;
     gloperate::InputSlot<reflectionzeug::FilePath> userBaseTextureFilePath;
     gloperate::InputSlot<reflectionzeug::FilePath> userExtraTextureFilePath;
+    gloperate::InputSlot<reflectionzeug::FilePath> userFragmentShaderFilePath;
 
     gloperate::Data<reflectionzeug::FilePath> baseTextureFilePath;
     gloperate::Data<reflectionzeug::FilePath> extraTextureFilePath;
+    gloperate::Data<reflectionzeug::FilePath> fragmentShaderTextureFilePath;
 
 protected:
     virtual void process() override;

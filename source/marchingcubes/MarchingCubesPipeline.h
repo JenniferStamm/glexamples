@@ -61,5 +61,6 @@ public:
     gloperate::Data<gloperate::CoordinateProvider *> coordinateProvider;
 
     gloperate::Data<TerrainType> terrainType;
+    gloperate::Data<reflectionzeug::FilePath> userFragmentShaderFilePath;
 
 };

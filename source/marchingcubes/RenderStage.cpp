@@ -50,7 +50,7 @@ RenderStage::RenderStage()
     addInput("useShadow", useShadow);
     addInput("extraTextureFilePath", extraTextureFilePath);
     addInput("useExtraTexture", useExtraTexture);
-
+    addInput("fragmentShaderFilePath", fragmentShaderFilePath);
 
     addInput("chunks", chunks);
 
@@ -298,7 +298,7 @@ void RenderStage::setupProgram()
     m_renderProgram = new Program{};
     m_renderProgram->attach(
         Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
-        Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/marchingcubes.frag")
+        Shader::fromFile(GL_FRAGMENT_SHADER, fragmentShaderFilePath->toString())
         );
 
     m_transformLocation = m_renderProgram->getUniformLocation("transform");

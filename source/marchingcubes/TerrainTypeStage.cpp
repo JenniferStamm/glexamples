@@ -44,6 +44,10 @@ void TerrainTypeStage::process()
         {
             extraTextureFilePath.data() = userExtraTextureFilePath.data();
         }
+        if (userFragmentShaderFilePath.hasChanged())
+        {
+            fragmentShaderTextureFilePath.data() = userFragmentShaderFilePath.data();
+        }
     }
         
 
@@ -55,10 +59,12 @@ void TerrainTypeStage::changeToMossy()
 {
     baseTextureFilePath.data() = "data/marchingcubes/ground.png";
     extraTextureFilePath.data() = "data/marchingcubes/terrain_color.jpg";
+    fragmentShaderTextureFilePath.data() = "data/marchingcubes/marchingcubes.frag";
 }
 
 void TerrainTypeStage::changeToUserDefined()
 {
     baseTextureFilePath.data() = userBaseTextureFilePath.data();
     extraTextureFilePath.data() = userExtraTextureFilePath.data();
+    fragmentShaderTextureFilePath.data() = userFragmentShaderFilePath.data();
 }

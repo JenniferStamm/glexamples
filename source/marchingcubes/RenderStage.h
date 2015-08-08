@@ -59,6 +59,7 @@ public:
     gloperate::InputSlot<bool> useBaseTexture;
     gloperate::InputSlot<reflectionzeug::FilePath> extraTextureFilePath;
     gloperate::InputSlot<bool> useExtraTexture;
+    gloperate::InputSlot<reflectionzeug::FilePath> fragmentShaderFilePath;
     
     gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
