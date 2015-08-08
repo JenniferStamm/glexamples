@@ -6,6 +6,7 @@
 enum class TerrainType : unsigned int
 {
     Mossy,
+    Moon,
     UserDefined
 };
 
@@ -19,6 +20,7 @@ namespace reflectionzeug
         {
             return{
                     { TerrainType::Mossy, "Mossy" },
+                    { TerrainType::Moon, "Moon" },
                     { TerrainType::UserDefined, "User Defined" }
             };
         }

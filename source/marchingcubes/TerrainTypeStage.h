@@ -33,5 +33,6 @@ protected:
     virtual void process() override;
 
     void changeToMossy();
+    void changeToMoon();
     void changeToUserDefined();
 };

@@ -30,6 +30,9 @@ void TerrainTypeStage::process()
         case TerrainType::Mossy:
             changeToMossy();
             break;
+        case TerrainType::Moon:
+            changeToMoon();
+            break;
         case TerrainType::UserDefined:
             changeToUserDefined();
             break;
@@ -69,6 +72,14 @@ void TerrainTypeStage::changeToMossy()
     extraTextureFilePath.data() = "data/marchingcubes/terrain_color.jpg";
     fragmentShaderTextureFilePath.data() = "data/marchingcubes/marchingcubes.frag";
     densityGenererationShaderFilePath.data() = "data/marchingcubes/densitygeneration.vert";
+}
+
+void TerrainTypeStage::changeToMoon()
+{
+    baseTextureFilePath.data() = "data/marchingcubes/moon.png";
+    extraTextureFilePath.data() = "data/marchingcubes/moon_color.jpg";
+    fragmentShaderTextureFilePath.data() = "data/marchingcubes/marchingcubes.frag";
+    densityGenererationShaderFilePath.data() = "data/marchingcubes/moondensitygeneration.vert";
 }
 
 void TerrainTypeStage::changeToUserDefined()
