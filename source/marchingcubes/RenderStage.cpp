@@ -95,6 +95,12 @@ void RenderStage::process()
         rerender = true;
     }
 
+    if (fragmentShaderFilePath.hasChanged())
+    {
+        setupProgram();
+        rerender = true;
+    }
+
     if (viewport.hasChanged())
     {
         glViewport(
@@ -295,6 +301,11 @@ void RenderStage::setupExtraTexture()
 
 void RenderStage::setupProgram()
 {
+    if (m_renderProgram)
+    {
+        m_renderProgram->destroy();
+    }
+
     m_renderProgram = new Program{};
     m_renderProgram->attach(
         Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
