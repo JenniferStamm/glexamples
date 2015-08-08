@@ -7,10 +7,11 @@
 
 #include <globjects/base/ref_ptr.h>
 
-
 #include <gloperate/pipeline/AbstractStage.h>
 #include <gloperate/pipeline/Data.h>
 #include <gloperate/pipeline/InputSlot.h>
+
+#include <reflectionzeug/base/FilePath.h>
 
 
 namespace gloperate
@@ -44,6 +45,7 @@ public:
     gloperate::InputSlot<bool> removeFloaters;
     gloperate::InputSlot<bool> freezeChunkLoading;
     gloperate::InputSlot<float> modificationRadius;
+    gloperate::InputSlot<reflectionzeug::FilePath> densityGenererationShaderFilePath;
 
     gloperate::Data<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 

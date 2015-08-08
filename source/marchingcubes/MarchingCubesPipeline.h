@@ -62,5 +62,6 @@ public:
 
     gloperate::Data<TerrainType> terrainType;
     gloperate::Data<reflectionzeug::FilePath> userFragmentShaderFilePath;
+    gloperate::Data<reflectionzeug::FilePath> userDensityGenererationShaderFilePath;
 
 };

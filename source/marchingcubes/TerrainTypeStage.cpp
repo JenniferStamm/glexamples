@@ -7,9 +7,13 @@ TerrainTypeStage::TerrainTypeStage()
     addInput("terrainType", terrainType);
     addInput("userBaseTextureFilePath", userBaseTextureFilePath);
     addInput("userExtraTextureFilePath", userExtraTextureFilePath);
+    addInput("userFragmentShaderFilePath", userFragmentShaderFilePath);
+    addInput("userDensityGenererationShaderFilePath", userDensityGenererationShaderFilePath);
 
     addOutput("groundTextureFilePath", baseTextureFilePath);
     addOutput("striationTextureFilePath", extraTextureFilePath);
+    addOutput("fragmentShaderTextureFilePath", fragmentShaderTextureFilePath);
+    addOutput("densityGenererationShaderFilePath", densityGenererationShaderFilePath);
 }
 
 void TerrainTypeStage::initialize()
@@ -48,6 +52,10 @@ void TerrainTypeStage::process()
         {
             fragmentShaderTextureFilePath.data() = userFragmentShaderFilePath.data();
         }
+        if (userDensityGenererationShaderFilePath.hasChanged())
+        {
+            densityGenererationShaderFilePath.data() = userDensityGenererationShaderFilePath.data();
+        }
     }
         
 
@@ -60,6 +68,7 @@ void TerrainTypeStage::changeToMossy()
     baseTextureFilePath.data() = "data/marchingcubes/ground.png";
     extraTextureFilePath.data() = "data/marchingcubes/terrain_color.jpg";
     fragmentShaderTextureFilePath.data() = "data/marchingcubes/marchingcubes.frag";
+    densityGenererationShaderFilePath.data() = "data/marchingcubes/densitygeneration.vert";
 }
 
 void TerrainTypeStage::changeToUserDefined()
@@ -67,4 +76,5 @@ void TerrainTypeStage::changeToUserDefined()
     baseTextureFilePath.data() = userBaseTextureFilePath.data();
     extraTextureFilePath.data() = userExtraTextureFilePath.data();
     fragmentShaderTextureFilePath.data() = userFragmentShaderFilePath.data();
+    densityGenererationShaderFilePath.data() = userDensityGenererationShaderFilePath.data();
 }

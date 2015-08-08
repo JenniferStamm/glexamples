@@ -22,10 +22,12 @@ public:
     gloperate::InputSlot<reflectionzeug::FilePath> userBaseTextureFilePath;
     gloperate::InputSlot<reflectionzeug::FilePath> userExtraTextureFilePath;
     gloperate::InputSlot<reflectionzeug::FilePath> userFragmentShaderFilePath;
+    gloperate::InputSlot<reflectionzeug::FilePath> userDensityGenererationShaderFilePath;
 
     gloperate::Data<reflectionzeug::FilePath> baseTextureFilePath;
     gloperate::Data<reflectionzeug::FilePath> extraTextureFilePath;
     gloperate::Data<reflectionzeug::FilePath> fragmentShaderTextureFilePath;
+    gloperate::Data<reflectionzeug::FilePath> densityGenererationShaderFilePath;
 
 protected:
     virtual void process() override;

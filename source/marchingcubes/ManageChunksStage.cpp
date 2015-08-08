@@ -28,6 +28,7 @@ ManageChunksStage::ManageChunksStage()
     addInput("removeFloaters", removeFloaters);
     addInput("freezeChunkLoading", freezeChunkLoading);
     addInput("modificationRadius", modificationRadius);
+    addInput("densityGenererationShaderFilePath", densityGenererationShaderFilePath);
 
     addOutput("chunks", chunks);
 
@@ -41,8 +42,8 @@ ManageChunksStage::~ManageChunksStage()
 
 void ManageChunksStage::initialize()
 {
-    m_chunkFactory = new ChunkFactory();
-    
+    auto filePath = densityGenererationShaderFilePath->toString().empty() ? reflectionzeug::FilePath("data/marchingcubes/densitygeneration.vert") : densityGenererationShaderFilePath.data();
+    m_chunkFactory = new ChunkFactory(filePath);
 }
 
 void ManageChunksStage::addTerrainAt(glm::vec3 worldPosition)
@@ -141,6 +142,12 @@ void ManageChunksStage::process()
     if (removeFloaters.hasChanged())
     {
         m_chunkFactory->setRemoveFloaters(removeFloaters.data());
+        regenerate = true;
+    }
+
+    if (densityGenererationShaderFilePath.hasChanged())
+    {
+        m_chunkFactory->updateDensityGenerationShaderFilePath(densityGenererationShaderFilePath.data());
         regenerate = true;
     }
 

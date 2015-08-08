@@ -23,12 +23,14 @@ using namespace globjects;
 const ivec3 dimensions(32, 32, 32);
 const int margin(5);
 
-ChunkFactory::ChunkFactory()
+ChunkFactory::ChunkFactory(reflectionzeug::FilePath densityGenerationShaderFilePath)
     : m_densityPositions()
     , m_edgeConnectList()
     , m_positions()
+    , m_densityGenerationShaderFilePath(densityGenerationShaderFilePath)
 {
     setupNoiseTextures();
+    setupPositionBuffer();
     setupDensityGeneration();
     setupListGeneration();
     setupMeshGeneration();
@@ -36,22 +38,8 @@ ChunkFactory::ChunkFactory()
 
 ChunkFactory::~ChunkFactory() = default;
 
-
-void ChunkFactory::setupDensityGeneration()
+void ChunkFactory::setupPositionBuffer()
 {
-    // Setup the program
-
-    m_densityGenerationProgram = new Program();
-    m_densityGenerationProgram->attach(Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/densitygeneration.vert"));
-    m_densityGenerationProgram->link();
-
-    // Setup the transform feedback itself
-
-    m_densityGenerationTransformFeedback = new TransformFeedback();
-    m_densityGenerationTransformFeedback->setVaryings(m_densityGenerationProgram, { "out_density" }, GL_INTERLEAVED_ATTRIBS);
-
-    // Fill positions buffer (with border!)
-
     std::vector<vec3> densityPositions;
     for (int z = -margin; z < dimensions.z + margin + 1; ++z)
     {
@@ -68,9 +56,8 @@ void ChunkFactory::setupDensityGeneration()
 
     m_densityPositions = new Buffer();
     m_densityPositions->setData(densityPositions, GL_STATIC_DRAW);
-    
-    // Setup positions binding
 
+    // Setup positions binding
     m_densityPositionVao = new VertexArray();
 
     auto densityPositionsBinding = m_densityPositionVao->binding(0);
@@ -78,6 +65,18 @@ void ChunkFactory::setupDensityGeneration()
     densityPositionsBinding->setBuffer(m_densityPositions, 0, sizeof(vec3));
     densityPositionsBinding->setFormat(3, GL_FLOAT);
     m_densityPositionVao->enable(0);
+}
+
+void ChunkFactory::setupDensityGeneration()
+{
+    // Setup the program
+    m_densityGenerationProgram = new Program();    
+    m_densityGenerationProgram->attach(Shader::fromFile(GL_VERTEX_SHADER, m_densityGenerationShaderFilePath.toString()));
+    m_densityGenerationProgram->link();
+
+    // Setup the transform feedback itself
+    m_densityGenerationTransformFeedback = new TransformFeedback();
+    m_densityGenerationTransformFeedback->setVaryings(m_densityGenerationProgram, { "out_density" }, GL_INTERLEAVED_ATTRIBS);
 }
 
 void ChunkFactory::setupListGeneration()
@@ -324,6 +323,16 @@ void ChunkFactory::generateMesh(Chunk* chunk)
 void ChunkFactory::setRemoveFloaters(bool removeFloaters)
 {
     m_listGenerationProgram->setUniform("removeFloaters", removeFloaters);
+}
+
+void ChunkFactory::updateDensityGenerationShaderFilePath(reflectionzeug::FilePath densityGenerationShaderFilePath)
+{
+    m_densityGenerationShaderFilePath = densityGenerationShaderFilePath;
+    for (auto shader : m_densityGenerationProgram->shaders())
+    {
+        m_densityGenerationProgram->detach(shader);
+    }
+    m_densityGenerationProgram->attach(Shader::fromFile(GL_VERTEX_SHADER, m_densityGenerationShaderFilePath.toString()));
 }
 
 globjects::Program* ChunkFactory::densityGenerationProgram() const

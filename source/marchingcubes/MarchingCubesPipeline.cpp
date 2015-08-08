@@ -38,6 +38,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useStriationTexture(false)
 , terrainType(TerrainType::Mossy)
 , userFragmentShaderFilePath("data/marchingcubes/marchingcubes.frag")
+, userDensityGenererationShaderFilePath("data/marchingcubes/densitygeneration.vert")
 {
     auto terrainTypeStage = new TerrainTypeStage();
     auto addChunksStage = new AddChunksStage();
@@ -49,6 +50,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     terrainTypeStage->userBaseTextureFilePath = userBaseTextureFilePath;
     terrainTypeStage->userExtraTextureFilePath = userExtraTextureFilePath;
     terrainTypeStage->userFragmentShaderFilePath = userFragmentShaderFilePath;
+    terrainTypeStage->userDensityGenererationShaderFilePath = userDensityGenererationShaderFilePath;
 
     addChunksStage->camera = camera;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
@@ -66,6 +68,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     manageChunksStage->removeFloaters = removeFloaters;
     manageChunksStage->freezeChunkLoading = freezeChunkLoading;
     manageChunksStage->modificationRadius = modificationRadius;
+    manageChunksStage->densityGenererationShaderFilePath = terrainTypeStage->densityGenererationShaderFilePath;
 
     renderStage->viewport = viewport;
     renderStage->camera = camera;
