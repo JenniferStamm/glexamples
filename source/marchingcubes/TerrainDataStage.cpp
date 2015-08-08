@@ -5,8 +5,8 @@ TerrainDataStage::TerrainDataStage()
     : AbstractStage("Terrain Data")
 {
     addInput("terrainType", terrainType);
-    addInput("groundTextureFilePath", groundTextureFilePath);
-    addInput("striationTextureFilePath", striationTextureFilePath);
+    addInput("userBaseTextureFilePath", userBaseTextureFilePath);
+    addInput("userExtraTextureFilePath", userExtraTextureFilePath);
 
     addOutput("groundTextureFilePath", baseTextureFilePath);
     addOutput("striationTextureFilePath", extraTextureFilePath);
@@ -36,13 +36,13 @@ void TerrainDataStage::process()
 
     if (terrainType.data() == TerrainType::UserDefined)
     {
-        if (groundTextureFilePath.hasChanged())
+        if (userBaseTextureFilePath.hasChanged())
         {
-            baseTextureFilePath.data() = groundTextureFilePath.data();
+            baseTextureFilePath.data() = userBaseTextureFilePath.data();
         }
-        if (striationTextureFilePath.hasChanged())
+        if (userExtraTextureFilePath.hasChanged())
         {
-            extraTextureFilePath.data() = striationTextureFilePath.data();
+            extraTextureFilePath.data() = userExtraTextureFilePath.data();
         }
     }
         
@@ -59,6 +59,6 @@ void TerrainDataStage::changeToMossy()
 
 void TerrainDataStage::changeToUserDefined()
 {
-    baseTextureFilePath.data() = groundTextureFilePath.data();
-    extraTextureFilePath.data() = striationTextureFilePath.data();
+    baseTextureFilePath.data() = userBaseTextureFilePath.data();
+    extraTextureFilePath.data() = userExtraTextureFilePath.data();
 }

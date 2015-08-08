@@ -19,8 +19,8 @@ public:
 
 public:
     gloperate::InputSlot<TerrainType> terrainType;
-    gloperate::InputSlot<reflectionzeug::FilePath> groundTextureFilePath;
-    gloperate::InputSlot<reflectionzeug::FilePath> striationTextureFilePath;
+    gloperate::InputSlot<reflectionzeug::FilePath> userBaseTextureFilePath;
+    gloperate::InputSlot<reflectionzeug::FilePath> userExtraTextureFilePath;
 
     gloperate::Data<reflectionzeug::FilePath> baseTextureFilePath;
     gloperate::Data<reflectionzeug::FilePath> extraTextureFilePath;

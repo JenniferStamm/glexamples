@@ -55,10 +55,10 @@ public:
     gloperate::InputSlot<bool> useMipMap;
     gloperate::InputSlot<bool> useShadow;
     gloperate::InputSlot<bool> useOcclusion;
-    gloperate::InputSlot<reflectionzeug::FilePath> groundTextureFilePath;
-    gloperate::InputSlot<bool> useGroundTexture;
-    gloperate::InputSlot<reflectionzeug::FilePath> striationTextureFilePath;
-    gloperate::InputSlot<bool> useStriationTexture;
+    gloperate::InputSlot<reflectionzeug::FilePath> baseTextureFilePath;
+    gloperate::InputSlot<bool> useBaseTexture;
+    gloperate::InputSlot<reflectionzeug::FilePath> extraTextureFilePath;
+    gloperate::InputSlot<bool> useExtraTexture;
     
     gloperate::InputSlot<std::unordered_map<glm::vec3, globjects::ref_ptr<Chunk>>> chunks;
 
@@ -76,8 +76,8 @@ protected:
     void setupOpenGLState();
     void setupFbo();
     void setupTextures();
-    void setupGroundTexture();
-    void setupStriationTexture();
+    void setupBaseTexture();
+    void setupExtraTexture();
     void setupProgram();
     void setupRendering();
 
@@ -92,8 +92,8 @@ protected:
     globjects::ref_ptr<globjects::Texture> m_colorTexture;
     globjects::ref_ptr<globjects::Texture> m_depthTexture;
 
-    globjects::ref_ptr<globjects::Texture> m_striationTexture;
-    globjects::ref_ptr<globjects::Texture> m_groundTexture;
+    globjects::ref_ptr<globjects::Texture> m_extraTexture;
+    globjects::ref_ptr<globjects::Texture> m_baseTexture;
 
     globjects::ref_ptr<globjects::Program> m_renderProgram;
 

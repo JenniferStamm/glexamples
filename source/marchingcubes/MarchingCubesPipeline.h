@@ -50,9 +50,9 @@ public:
     gloperate::Data<bool> removeFloaters;
     gloperate::Data<bool> useShadow;
     gloperate::Data<bool> useOcclusion;
-    gloperate::Data<reflectionzeug::FilePath> groundTextureFilePath;
+    gloperate::Data<reflectionzeug::FilePath> userBaseTextureFilePath;
     gloperate::Data<bool> useGroundTexture;
-    gloperate::Data<reflectionzeug::FilePath> striationTextureFilePath;
+    gloperate::Data<reflectionzeug::FilePath> userExtraTextureFilePath;
     gloperate::Data<bool> useStriationTexture;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;

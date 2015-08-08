@@ -1,12 +1,12 @@
 #version 150 core
 
-uniform sampler2D ground;
+uniform sampler2D base;
 uniform sampler2D striation;
 
 uniform vec4 a_cubeColor;
 uniform bool useShadow;
 uniform bool useOcclusion;
-uniform bool useGroundTexture;
+uniform bool useBaseTexture;
 uniform bool useStriationTexture;
 
 in vec3 v_normal;
@@ -36,9 +36,9 @@ void main()
     vec2 coord2 = v_position.zx * tex_scale;  
     vec2 coord3 = v_position.xy * tex_scale;
     
-    vec4 xColor = texture(ground, coord1);
-    vec4 yColor = texture(ground, coord2);
-    vec4 zColor = texture(ground, coord3);
+    vec4 xColor = texture(base, coord1);
+    vec4 yColor = texture(base, coord2);
+    vec4 zColor = texture(base, coord3);
     
      // Finally, blend the results of the 3 planar projections.  
     vec4 blended_color = 
@@ -53,5 +53,5 @@ void main()
         
     float shadow = dot(v_normal, lightDirection);
     
-    fragColor = vec4(mix(v_normal, blended_color.xyz, float(useGroundTexture))* mix(1.0, v_occlusion, float(useOcclusion)) * mix(1.0, smoothstep(-0.2, 0.6, shadow), float(useShadow)), 1.0);
+    fragColor = vec4(mix(v_normal, blended_color.xyz, float(useBaseTexture))* mix(1.0, v_occlusion, float(useOcclusion)) * mix(1.0, smoothstep(-0.2, 0.6, shadow), float(useShadow)), 1.0);
 }

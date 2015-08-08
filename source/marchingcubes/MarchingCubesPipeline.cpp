@@ -32,9 +32,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , renderTargets(nullptr)
 , useShadow(false)
 , useOcclusion(false)
-, groundTextureFilePath("data/marchingcubes/ground.png")
+, userBaseTextureFilePath("data/marchingcubes/ground.png")
 , useGroundTexture(false)
-, striationTextureFilePath("data/marchingcubes/terrain_color.jpg")
+, userExtraTextureFilePath("data/marchingcubes/terrain_color.jpg")
 , useStriationTexture(false)
 , terrainType(TerrainType::Mossy)
 {
@@ -45,8 +45,8 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     auto renderStage = new RenderStage();
 
     terrainDataStage->terrainType = terrainType;
-    terrainDataStage->groundTextureFilePath = groundTextureFilePath;
-    terrainDataStage->striationTextureFilePath = striationTextureFilePath;
+    terrainDataStage->userBaseTextureFilePath = userBaseTextureFilePath;
+    terrainDataStage->userExtraTextureFilePath = userExtraTextureFilePath;
 
     addChunksStage->camera = camera;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
@@ -75,10 +75,10 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->resourceManager = resourceManager;
     renderStage->useShadow = useShadow;
     renderStage->useOcclusion = useOcclusion;
-    renderStage->groundTextureFilePath = terrainDataStage->baseTextureFilePath;
-    renderStage->useGroundTexture = useGroundTexture;
-    renderStage->striationTextureFilePath = terrainDataStage->extraTextureFilePath;
-    renderStage->useStriationTexture = useStriationTexture;
+    renderStage->baseTextureFilePath = terrainDataStage->baseTextureFilePath;
+    renderStage->useBaseTexture = useGroundTexture;
+    renderStage->extraTextureFilePath = terrainDataStage->extraTextureFilePath;
+    renderStage->useExtraTexture = useStriationTexture;
     renderStage->chunks = manageChunksStage->chunks;
 
     addStages(
