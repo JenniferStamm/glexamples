@@ -8,12 +8,12 @@
 
 #include <reflectionzeug/base/FilePath.h>
 
-#include "TerrainData.h"
+#include "TerrainType.h"
 
-class TerrainDataStage : public gloperate::AbstractStage
+class TerrainTypeStage : public gloperate::AbstractStage
 {
 public:
-    TerrainDataStage();
+    TerrainTypeStage();
 
     virtual void initialize() override;
 

@@ -7,7 +7,7 @@
 
 #include <glm/vec3.hpp>
 
-#include "TerrainData.h"
+#include "TerrainType.h"
 
 namespace gloperate
 {

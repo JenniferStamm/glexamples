@@ -1,7 +1,7 @@
-#include "TerrainDataStage.h"
+#include "TerrainTypeStage.h"
 
 
-TerrainDataStage::TerrainDataStage()
+TerrainTypeStage::TerrainTypeStage()
     : AbstractStage("Terrain Data")
 {
     addInput("terrainType", terrainType);
@@ -12,12 +12,12 @@ TerrainDataStage::TerrainDataStage()
     addOutput("striationTextureFilePath", extraTextureFilePath);
 }
 
-void TerrainDataStage::initialize()
+void TerrainTypeStage::initialize()
 {
     changeToMossy();
 }
 
-void TerrainDataStage::process()
+void TerrainTypeStage::process()
 {
     if (terrainType.hasChanged())
     {
@@ -51,13 +51,13 @@ void TerrainDataStage::process()
     invalidateOutputs();
 }
 
-void TerrainDataStage::changeToMossy()
+void TerrainTypeStage::changeToMossy()
 {
     baseTextureFilePath.data() = "data/marchingcubes/ground.png";
     extraTextureFilePath.data() = "data/marchingcubes/terrain_color.jpg";
 }
 
-void TerrainDataStage::changeToUserDefined()
+void TerrainTypeStage::changeToUserDefined()
 {
     baseTextureFilePath.data() = userBaseTextureFilePath.data();
     extraTextureFilePath.data() = userExtraTextureFilePath.data();

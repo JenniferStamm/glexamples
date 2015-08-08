@@ -13,7 +13,7 @@
 #include "AddChunksStage.h"
 #include "ManageChunksStage.h"
 #include "RenderStage.h"
-#include "TerrainDataStage.h"
+#include "TerrainTypeStage.h"
 #include "TerrainModificationStage.h"
 
 
@@ -38,15 +38,15 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useStriationTexture(false)
 , terrainType(TerrainType::Mossy)
 {
-    auto terrainDataStage = new TerrainDataStage();
+    auto terrainTypeStage = new TerrainTypeStage();
     auto addChunksStage = new AddChunksStage();
     auto terrainModificationStage = new TerrainModificationStage();
     auto manageChunksStage = new ManageChunksStage();
     auto renderStage = new RenderStage();
 
-    terrainDataStage->terrainType = terrainType;
-    terrainDataStage->userBaseTextureFilePath = userBaseTextureFilePath;
-    terrainDataStage->userExtraTextureFilePath = userExtraTextureFilePath;
+    terrainTypeStage->terrainType = terrainType;
+    terrainTypeStage->userBaseTextureFilePath = userBaseTextureFilePath;
+    terrainTypeStage->userExtraTextureFilePath = userExtraTextureFilePath;
 
     addChunksStage->camera = camera;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
@@ -75,14 +75,14 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->resourceManager = resourceManager;
     renderStage->useShadow = useShadow;
     renderStage->useOcclusion = useOcclusion;
-    renderStage->baseTextureFilePath = terrainDataStage->baseTextureFilePath;
+    renderStage->baseTextureFilePath = terrainTypeStage->baseTextureFilePath;
     renderStage->useBaseTexture = useGroundTexture;
-    renderStage->extraTextureFilePath = terrainDataStage->extraTextureFilePath;
+    renderStage->extraTextureFilePath = terrainTypeStage->extraTextureFilePath;
     renderStage->useExtraTexture = useStriationTexture;
     renderStage->chunks = manageChunksStage->chunks;
 
     addStages(
-        std::move(terrainDataStage),
+        std::move(terrainTypeStage),
         std::move(addChunksStage),
         std::move(terrainModificationStage),
         std::move(manageChunksStage),
