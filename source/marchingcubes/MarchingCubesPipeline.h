@@ -41,6 +41,8 @@ public:
     gloperate::Data<bool> showWireframe;
     gloperate::Data<bool> freezeChunkLoading;
 
+    gloperate::Data<float> modificationRadius;
+
     gloperate::Data<bool> useMipMap;
     gloperate::Data<glm::vec3> rotationVector1;
     gloperate::Data<glm::vec3> rotationVector2;

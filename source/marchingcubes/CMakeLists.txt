@@ -45,6 +45,7 @@ set(sources
     ${source_path}/MarchingCubesPipeline.cpp
     ${source_path}/RenderStage.cpp
     ${source_path}/TerrainDataStage.cpp
+    ${source_path}/TerrainModificationStage.cpp
     ${source_path}/plugin.cpp
 )
 
@@ -59,6 +60,7 @@ set(api_includes
     ${include_path}/RenderStage.h
     ${include_path}/TerrainData.h
     ${include_path}/TerrainDataStage.h
+    ${include_path}/TerrainModificationStage.h
     ${include_path}/vec3_hash.h
 )
 

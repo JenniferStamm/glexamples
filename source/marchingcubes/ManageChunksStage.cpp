@@ -3,7 +3,6 @@
 #include <globjects/globjects.h>
 
 #include <gloperate/painter/AbstractCameraCapability.h>
-#include <gloperate/painter/InputCapability.h>
 #include <gloperate/navigation/CoordinateProvider.h>
 
 #include "Chunk.h"
@@ -16,19 +15,19 @@ using namespace globjects;
 ManageChunksStage::ManageChunksStage()
 :   AbstractStage("ManageChunks")
 , m_chunkFactory()
-, m_mouseMoved(false)
-, m_mousePressed(false)
 , m_allChunksGenerated(true)
 {
     addInput("camera", camera);
-    addInput("input", input);
     addInput("coordinateProvider", coordinateProvider);
+    addInput("addPosition", addPosition);
+    addInput("removePosition", removePosition);
     addInput("chunksToAdd", chunksToAdd);
     addInput("rotationVector1", rotationVector1);
     addInput("rotationVector2", rotationVector2);
     addInput("warpFactor", warpFactor);
     addInput("removeFloaters", removeFloaters);
     addInput("freezeChunkLoading", freezeChunkLoading);
+    addInput("modificationRadius", modificationRadius);
 
     addOutput("chunks", chunks);
 
@@ -37,10 +36,7 @@ ManageChunksStage::ManageChunksStage()
 
 ManageChunksStage::~ManageChunksStage()
 {
-    if (input.data())
-    {
-        input.data()->removeMouseHandler(this);
-    }
+    
 }
 
 void ManageChunksStage::initialize()
@@ -60,6 +56,21 @@ void ManageChunksStage::addTerrainAt(glm::vec3 worldPosition)
                 if (chunk != chunks->end())
                 {
                     chunk->second->addTerrainPosition(worldPosition);
+                }
+            }
+}
+
+void ManageChunksStage::removeTerrainAt(glm::vec3 worldPosition)
+{
+    vec3 chunkOffset = vec3(floor(worldPosition[0]), floor(worldPosition[1]), floor(worldPosition[2]));
+    for (int z = -1; z <= 1; ++z)
+        for (int y = -1; y <= 1; ++y)
+            for (int x = -1; x <= 1; ++x)
+            {
+                auto chunk = chunks->find(chunkOffset + vec3(x, y, z));
+                if (chunk != chunks->end())
+                {
+                    chunk->second->removeTerrainPosition(worldPosition);
                 }
             }
 }
@@ -86,22 +97,22 @@ void ManageChunksStage::removeChunks()
 
 void ManageChunksStage::process()
 {
-    if (input.hasChanged())
-    {
-        input.data()->addMouseHandler(this);
-    }
-
     auto regenerate = false;
     m_chunksChanged = false;
 
-    for (auto pos : m_mouseClicks)
+    if (addPosition.hasChanged())
     {
-        auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(pos);
+        auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(addPosition.data());
         addTerrainAt(worldPosition);
         m_chunksChanged = true;
     }
 
-    m_mouseClicks.clear();
+    if (removePosition.hasChanged())
+    {
+        auto worldPosition = coordinateProvider.data()->worldCoordinatesAt(removePosition.data());
+        removeTerrainAt(worldPosition);
+        m_chunksChanged = true;
+    }
 
     if (rotationVector1.hasChanged())
     {
@@ -118,6 +129,12 @@ void ManageChunksStage::process()
     if (warpFactor.hasChanged())
     {
         m_chunkFactory->densityGenerationProgram()->setUniform("warpFactor", warpFactor.data());
+        regenerate = true;
+    }
+    
+    if (modificationRadius.hasChanged())
+    {
+        m_chunkFactory->densityGenerationProgram()->setUniform("modificationRadius", modificationRadius.data());
         regenerate = true;
     }
 
@@ -150,27 +167,6 @@ void ManageChunksStage::process()
         regenerateChunks();
         invalidateOutputs();
     }
-}
-
-void ManageChunksStage::onMouseMove(int x, int y)
-{
-    m_mouseMoved = true;
-}
-
-void ManageChunksStage::onMouseRelease(int x, int y, gloperate::MouseButton button)
-{
-    if (m_mousePressed && !m_mouseMoved)
-    {
-        m_mouseClicks.push_back(ivec2(x, y));
-        scheduleProcess();
-    }
-    m_mousePressed = false;
-}
-
-void ManageChunksStage::onMousePress(int x, int y, gloperate::MouseButton button)
-{
-    m_mousePressed = true;
-    m_mouseMoved = false;
 }
 
 bool ManageChunksStage::shouldRemoveChunk(glm::vec3 chunkPosition) const

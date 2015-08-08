@@ -4,8 +4,10 @@
 
 uniform vec3 a_offset;
 
-uniform vec3 a_terrainPositions[64];
-uniform int a_terrainPositionCount;
+uniform vec3 a_addingTerrainPositions[64];
+uniform int a_addingTerrainPositionCount;
+uniform vec3 a_removingTerrainPositions[64];
+uniform int a_removingTerrainPositionCount;
 
 uniform sampler3D noiseTexture1;
 uniform sampler3D noiseTexture2;
@@ -15,6 +17,7 @@ uniform sampler3D noiseTexture4;
 uniform vec3 rotationVector1;
 uniform vec3 rotationVector2;
 uniform float warpFactor;
+uniform float modificationRadius;
 
 layout (location = 0) in vec3 in_position;
 
@@ -54,8 +57,31 @@ void main()
     out_density += texture(noiseTexture2, rotatedPosition2 * 1.8).r * 1.0;
     out_density += texture(noiseTexture3, rotatedPosition1 * 1.01).r * 1.5;
     
-    for (int i = 0; i < a_terrainPositionCount; i++) {
-        float dist = distance(realPosition,a_terrainPositions[i]);
-        out_density += 0.005 / (dist * dist);
+    
+    // Terrain Modification
+    
+    // Maximum influence at the clicked position
+    float maxInfluence = 0.5;
+    
+    for (int i = 0; i < a_addingTerrainPositionCount; i++) {
+        float dist = distance(realPosition, a_addingTerrainPositions[i]);
+        
+        // Clamp influence to the radius, invert it
+        float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
+        
+        // Scale to the maximum influence
+        additionalDensity *= maxInfluence / modificationRadius;
+        out_density += additionalDensity;
+    }
+    
+    for (int i = 0; i < a_removingTerrainPositionCount; i++) {
+        float dist = distance(realPosition, a_removingTerrainPositions[i]);
+        
+        // Clamp influence to the radius, invert it
+        float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
+        
+        // Scale to the maximum influence
+        additionalDensity *= maxInfluence / modificationRadius;
+        out_density -= additionalDensity;
     }
 }
