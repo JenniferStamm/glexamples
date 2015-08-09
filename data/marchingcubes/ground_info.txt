@@ -1,2 +1,0 @@
-Texture ground.png is taken from:
-http://www.spiralgraphics.biz/packs/terrain_rocky/index.htm?22#anchor
