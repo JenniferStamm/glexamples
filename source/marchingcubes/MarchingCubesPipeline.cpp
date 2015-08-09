@@ -20,6 +20,7 @@
 MarchingCubesPipeline::MarchingCubesPipeline()
 : AbstractPipeline("MarchingCubes")
 , viewport(nullptr)
+, showGrid(false)
 , showWireframe(false)
 , freezeChunkLoading(false)
 , modificationRadius(0.25f)
@@ -56,6 +57,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     terrainTypeStage->userWarpFactor = userWarpFactor;
 
     addChunksStage->camera = camera;
+    addChunksStage->projection = projection;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
 
     terrainModificationStage->input = input;
@@ -78,6 +80,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->projection = projection;
     renderStage->targetFBO = targetFBO;
     renderStage->renderTargets = renderTargets;
+    renderStage->showGrid = showGrid;
     renderStage->showWireframe = showWireframe;
     renderStage->useMipMap = useMipMap;
     renderStage->resourceManager = resourceManager;

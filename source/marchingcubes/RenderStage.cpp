@@ -42,6 +42,7 @@ RenderStage::RenderStage()
     addInput("targetFBO", targetFBO);
     addInput("renderTargets", renderTargets);
 
+    addInput("showGrid", showGrid);
     addInput("showWireframe", showWireframe);
     addInput("useMipMap", useMipMap);
     addInput("useOcclusion", useOcclusion);
@@ -121,6 +122,11 @@ void RenderStage::process()
     }
 
     if (camera.hasChanged() || projection.hasChanged() || targetFBO.hasChanged())
+    {
+        rerender = true;
+    }
+
+    if (showGrid.hasChanged())
     {
         rerender = true;
     }
@@ -213,6 +219,7 @@ void RenderStage::render()
 {
     m_fbo->bind(GL_FRAMEBUFFER);
 
+    glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     const auto transform = projection.data()->projection() * camera.data()->view();
@@ -220,8 +227,13 @@ void RenderStage::render()
 
     drawChunks(eye, transform);
 	
-    m_grid->update(eye, transform);
-    m_grid->draw();
+    if (showGrid.data())
+    {
+        m_grid->update(eye, transform);
+        m_grid->draw();
+    }
+
+    glDisable(GL_DEPTH_TEST);
 
     m_fbo->unbind();
 }
@@ -234,7 +246,7 @@ void RenderStage::setupGrid()
 
 void RenderStage::setupProjection()
 {
-    static const auto zNear = 0.3f, zFar = 100.f, fovy = 50.f;
+    static const auto zNear = 0.3f, zFar = 10.f, fovy = 50.f;
 
     projection.data()->setZNear(zNear);
     projection.data()->setZFar(zFar);
