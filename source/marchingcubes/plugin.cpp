@@ -8,7 +8,7 @@ GLOPERATE_PLUGIN_LIBRARY
 
     GLOPERATE_PAINTER_PLUGIN(MarchingCubes
     , "MarchingCubes"
-    , "Copy to implement a new example"
+    , "Implementation of marching cubes algorithm for 3D terrain generation."
     , GLEXAMPLES_AUTHOR_ORGANIZATION
     , "v1.0.0" )
 
