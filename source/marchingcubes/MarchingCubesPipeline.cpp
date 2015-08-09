@@ -37,7 +37,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useGroundTexture(true)
 , userExtraTextureFilePath("data/marchingcubes/terrain_color.jpg")
 , useStriationTexture(true)
-, terrainType(TerrainType::Moon)
+, terrainType(TerrainType::Mossy)
 , userFragmentShaderFilePath("data/marchingcubes/marchingcubes.frag")
 , userDensityGenererationShaderFilePath("data/marchingcubes/densitygeneration.vert")
 {
