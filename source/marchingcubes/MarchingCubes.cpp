@@ -1,4 +1,4 @@
-#include "MarchingCubesPainter.h"
+#include "MarchingCubes.h"
 
 #include <reflectionzeug/property/extensions/GlmProperties.h>
 

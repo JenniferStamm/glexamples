@@ -189,11 +189,10 @@ void ManageChunksStage::regenerateChunks()
     {
         newOffset = localChunksToAdd.front();
         localChunksToAdd.pop();
-        // Break if it is a new chunk
+        // Add chunks if it is new
         if (!shouldRemoveChunk(newOffset) && chunks->find(newOffset) == chunks->end())
         {
-            auto newChunk = new Chunk(newOffset);
-            chunks.data()[newOffset] = newChunk;
+            chunks.data()[newOffset] = new Chunk(newOffset);
         }
     }
 
