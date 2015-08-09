@@ -34,9 +34,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , useShadow(true)
 , useOcclusion(true)
 , userBaseTextureFilePath("data/marchingcubes/ground.png")
-, useGroundTexture(true)
+, useBaseTexture(true)
 , userExtraTextureFilePath("data/marchingcubes/terrain_color.jpg")
-, useStriationTexture(true)
+, useExtraTexture(true)
 , terrainType(TerrainType::Mossy)
 , userFragmentShaderFilePath("data/marchingcubes/marchingcubes.frag")
 , userDensityGenererationShaderFilePath("data/marchingcubes/densitygeneration.vert")
@@ -87,9 +87,9 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->useShadow = useShadow;
     renderStage->useOcclusion = useOcclusion;
     renderStage->baseTextureFilePath = terrainTypeStage->baseTextureFilePath;
-    renderStage->useBaseTexture = useGroundTexture;
+    renderStage->useBaseTexture = useBaseTexture;
     renderStage->extraTextureFilePath = terrainTypeStage->extraTextureFilePath;
-    renderStage->useExtraTexture = useStriationTexture;
+    renderStage->useExtraTexture = useExtraTexture;
     renderStage->fragmentShaderFilePath = terrainTypeStage->fragmentShaderTextureFilePath;
     renderStage->chunks = manageChunksStage->chunks;
 

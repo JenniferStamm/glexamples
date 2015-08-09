@@ -76,9 +76,9 @@ MarchingCubes::MarchingCubes(gloperate::ResourceManager & resourceManager, const
     auto prettyTerrainGroup = addGroup("Pretty Terrain");
     prettyTerrainGroup->addProperty(createProperty("Light", m_pipeline.useShadow));
     prettyTerrainGroup->addProperty(createProperty("Occlusion", m_pipeline.useOcclusion));
-    prettyTerrainGroup->addProperty(createProperty("Use Ground Texture", m_pipeline.useGroundTexture));
+    prettyTerrainGroup->addProperty(createProperty("Use Base Texture", m_pipeline.useBaseTexture));
     prettyTerrainGroup->addProperty(createProperty("Mip Mapping", m_pipeline.useMipMap));
-    prettyTerrainGroup->addProperty(createProperty("Use Striation Texture", m_pipeline.useStriationTexture));
+    prettyTerrainGroup->addProperty(createProperty("Use Extra Texture", m_pipeline.useExtraTexture));
 
     auto terrainModificationGroup = addGroup("Terrain Modification");
     auto radiusProperty = createProperty("Modification Radius", m_pipeline.modificationRadius);

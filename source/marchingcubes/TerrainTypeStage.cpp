@@ -13,8 +13,8 @@ TerrainTypeStage::TerrainTypeStage()
     addInput("userRotationVector2", userRotationVector2);
     addInput("userWarpFactor", userWarpFactor);
 
-    addOutput("groundTextureFilePath", baseTextureFilePath);
-    addOutput("striationTextureFilePath", extraTextureFilePath);
+    addOutput("baseTextureFilePath", baseTextureFilePath);
+    addOutput("extraTextureFilePath", extraTextureFilePath);
     addOutput("fragmentShaderTextureFilePath", fragmentShaderTextureFilePath);
     addOutput("densityGenererationShaderFilePath", densityGenererationShaderFilePath); 
     addOutput("rotationVector1", rotationVector1);

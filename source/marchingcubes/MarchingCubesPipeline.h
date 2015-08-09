@@ -52,9 +52,9 @@ public:
     gloperate::Data<bool> useShadow;
     gloperate::Data<bool> useOcclusion;
     gloperate::Data<reflectionzeug::FilePath> userBaseTextureFilePath;
-    gloperate::Data<bool> useGroundTexture;
+    gloperate::Data<bool> useBaseTexture;
     gloperate::Data<reflectionzeug::FilePath> userExtraTextureFilePath;
-    gloperate::Data<bool> useStriationTexture;
+    gloperate::Data<bool> useExtraTexture;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
     gloperate::Data<gloperate::TypedRenderTargetCapability *> renderTargets;
