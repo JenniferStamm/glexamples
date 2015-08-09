@@ -233,7 +233,7 @@ void RenderStage::setupGrid()
 
 void RenderStage::setupProjection()
 {
-    static const auto zNear = 0.3f, zFar = 100.f, fovy = 50.f;
+    static const auto zNear = 0.3f, zFar = 10.f, fovy = 50.f;
 
     projection.data()->setZNear(zNear);
     projection.data()->setZFar(zFar);
