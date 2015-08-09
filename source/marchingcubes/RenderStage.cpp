@@ -280,7 +280,7 @@ void RenderStage::setupTextures()
 
 void RenderStage::setupBaseTexture()
 {
-    std::string filePath = baseTextureFilePath->toString().empty() ? "data/marchingcubes/Base.png" : baseTextureFilePath->toString();
+    std::string filePath = baseTextureFilePath->toString().empty() ? "data/marchingcubes/ground.png" : baseTextureFilePath->toString();
     m_baseTexture = resourceManager.data()->load<Texture>(filePath);
     if (!m_baseTexture)
     {
@@ -294,8 +294,8 @@ void RenderStage::setupBaseTexture()
 
 void RenderStage::setupExtraTexture()
 {
-    std::string filePath = baseTextureFilePath->toString().empty() ? "data/marchingcubes/terrain_color.png" : baseTextureFilePath->toString();
-    m_extraTexture = resourceManager.data()->load<Texture>(extraTextureFilePath->toString());
+    std::string filePath = baseTextureFilePath->toString().empty() ? "data/marchingcubes/terrain_color.jpg" : extraTextureFilePath->toString();
+    m_extraTexture = resourceManager.data()->load<Texture>(filePath);
     if (!m_extraTexture)
     {
         loggingzeug::critical() << "Could not load Extra Texture";
