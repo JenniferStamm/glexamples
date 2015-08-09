@@ -1,6 +1,6 @@
 #include <gloperate/plugin/plugin_api.h>
 
-#include "MarchingCubesPainter.h"
+#include "MarchingCubes.h"
 
 #include <glexamples-version.h>
 
