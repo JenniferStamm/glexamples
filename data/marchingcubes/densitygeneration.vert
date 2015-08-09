@@ -36,6 +36,16 @@ mat4 rotationMatrix(vec3 axis, float angle)
                 0.0,                                0.0,                                0.0,                                1.0);
 }
 
+float additionalDensity(vec3 realPosition, vec3 influencePosition, float radius, float maxInfluence) {
+    float dist = distance(realPosition, influencePosition);
+    
+    // Clamp influence to the radius, invert it
+    float additionalDensity = radius - clamp(dist, 0, radius);
+    
+    // Scale to the maximum influence
+    additionalDensity *= maxInfluence / radius;
+    return additionalDensity;
+}
 
 void main()
 {
@@ -64,24 +74,10 @@ void main()
     float maxInfluence = 0.5;
     
     for (int i = 0; i < a_addingTerrainPositionCount; i++) {
-        float dist = distance(realPosition, a_addingTerrainPositions[i]);
-        
-        // Clamp influence to the radius, invert it
-        float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
-        
-        // Scale to the maximum influence
-        additionalDensity *= maxInfluence / modificationRadius;
-        out_density += additionalDensity;
+        out_density += additionalDensity(realPosition, a_addingTerrainPositions[i], modificationRadius, maxInfluence);
     }
     
     for (int i = 0; i < a_removingTerrainPositionCount; i++) {
-        float dist = distance(realPosition, a_removingTerrainPositions[i]);
-        
-        // Clamp influence to the radius, invert it
-        float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
-        
-        // Scale to the maximum influence
-        additionalDensity *= maxInfluence / modificationRadius;
-        out_density -= additionalDensity;
+        out_density -= additionalDensity(realPosition, a_removingTerrainPositions[i], modificationRadius, maxInfluence);
     }
 }

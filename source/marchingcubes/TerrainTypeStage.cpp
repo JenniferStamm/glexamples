@@ -98,7 +98,7 @@ void TerrainTypeStage::changeToMossy()
 void TerrainTypeStage::changeToMoon()
 {
     baseTextureFilePath.data() = "data/marchingcubes/moon.png";
-    extraTextureFilePath.data() = "data/marchingcubes/moon_color.jpg";
+    extraTextureFilePath.data() = "data/marchingcubes/moon.png";
     fragmentShaderTextureFilePath.data() = "data/marchingcubes/moonmarchingcubes.frag";
     densityGenererationShaderFilePath.data() = "data/marchingcubes/moondensitygeneration.vert";
     rotationVector1.data() = glm::vec3(1, 0.3, 0.5);

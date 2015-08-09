@@ -15,9 +15,9 @@ in vec3 v_position;
 
 out vec4 fragColor;
 
-const vec3 lightDirection = vec3(0.0, 1.0, 0.0);
+const vec3 lightDirection = vec3(1.0, 1.0, 1.0);
 
-const float tex_scale = 1.0;
+const float tex_scale = 0.4;
 
 void main()
 {
@@ -46,12 +46,7 @@ void main()
         yColor * vec3(blend_weights.y) +  
         zColor * vec3(blend_weights.z);
         
-    // Add color from extra texture mainly dependent on height
-    vec2 colorCoord = vec2(mod(v_position.y, 0.25) * 4 + 0.5, v_position.x) * 2.0;
-    vec3 colorAddition = texture(extra, colorCoord).xyz;
-    blended_color = mix(blended_color, colorAddition, 0.2 * float(useExtraTexture));
-        
     float shadow = dot(v_normal, lightDirection);
     
-    fragColor = vec4(mix(v_normal, blended_color, float(useBaseTexture))* mix(1.0, v_occlusion, float(useOcclusion)) * mix(1.0, smoothstep(-0.2, 0.6, shadow), float(useShadow)), 1.0);
+    fragColor = vec4(mix(v_normal, blended_color, float(useBaseTexture))* mix(1.0, smoothstep(-0.15, 1.0, v_occlusion), float(useOcclusion)) * mix(1.0, smoothstep(-0.2, 0.6, shadow), float(useShadow)), 1.0);
 }

@@ -36,6 +36,19 @@ mat4 rotationMatrix(vec3 axis, float angle)
                 0.0,                                0.0,                                0.0,                                1.0);
 }
 
+const float moonRadius = 30;
+const vec3 moonCenter = vec3(0, -moonRadius, 0);
+
+float additionalDensity(vec3 realPosition, vec3 influencePosition, float radius, float maxInfluence) {
+    float dist = distance(realPosition, influencePosition);
+    
+    // Clamp influence to the radius, invert it
+    float additionalDensity = radius - clamp(dist, 0, radius);
+    
+    // Scale to the maximum influence
+    additionalDensity *= maxInfluence / radius;
+    return additionalDensity;
+}
 
 void main()
 {
@@ -51,11 +64,23 @@ void main()
     vec3 rotatedPosition1 = (rotate1 * vec4(realPosition, 1.0)).xyz;
     vec3 rotatedPosition2 = (rotate2 * vec4(realPosition, 1.0)).xyz;
     
-    out_density = -realPosition.y;
-    out_density += -warpedPosition.y;
-    //out_density += texture(noiseTexture1, warpedPosition * 3.23).r * 0.3;
-    out_density += texture(noiseTexture2, rotatedPosition2 * 1.8).r * 1.0;
-    //out_density += texture(noiseTexture3, rotatedPosition1 * 1.01).r * 1.5;
+    out_density = moonRadius - distance(realPosition, moonCenter);
+    out_density += texture(noiseTexture1, rotatedPosition1 * 3.23).r * 0.03;
+    out_density += texture(noiseTexture2, rotatedPosition2 * 2.8).r * 0.041;
+    out_density += texture(noiseTexture3, warpedPosition * 0.31).r * 0.2;
+    
+    // Crater adding
+    
+    // Choose a common chunk for neighboring chunks by rounding
+    ivec3 commonChunk = ivec3(floor(vec3(a_offset) / 4) * 4);
+    // Generate random crater position within neighborhood
+    vec3 craterPos = commonChunk + 2 + texture(noiseTexture4, commonChunk * 0.1).r;
+    // Random crater radius between 0.3 and 0.4
+    float craterRadius = max(0.3, 0.4 * abs(texture(noiseTexture4, commonChunk * 0.2).r));
+    
+    // Subtract crater, add a sphere with bigger radius for the border around the crater
+    out_density -= additionalDensity(realPosition, craterPos, craterRadius, 0.4);
+    out_density += additionalDensity(realPosition, craterPos, craterRadius * 1.2, 0.3);
     
     
     // Terrain Modification
@@ -64,24 +89,10 @@ void main()
     float maxInfluence = 0.5;
     
     for (int i = 0; i < a_addingTerrainPositionCount; i++) {
-        float dist = distance(realPosition, a_addingTerrainPositions[i]);
-        
-        // Clamp influence to the radius, invert it
-        float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
-        
-        // Scale to the maximum influence
-        additionalDensity *= maxInfluence / modificationRadius;
-        out_density += additionalDensity;
+        out_density += additionalDensity(realPosition, a_addingTerrainPositions[i], modificationRadius, maxInfluence);
     }
     
     for (int i = 0; i < a_removingTerrainPositionCount; i++) {
-        float dist = distance(realPosition, a_removingTerrainPositions[i]);
-        
-        // Clamp influence to the radius, invert it
-        float additionalDensity = modificationRadius - clamp(dist, 0, modificationRadius);
-        
-        // Scale to the maximum influence
-        additionalDensity *= maxInfluence / modificationRadius;
-        out_density -= additionalDensity;
+        out_density -= additionalDensity(realPosition, a_removingTerrainPositions[i], modificationRadius, maxInfluence);
     }
 }
