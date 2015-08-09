@@ -99,11 +99,11 @@ void TerrainTypeStage::changeToMoon()
 {
     baseTextureFilePath.data() = "data/marchingcubes/moon.png";
     extraTextureFilePath.data() = "data/marchingcubes/moon_color.jpg";
-    fragmentShaderTextureFilePath.data() = "data/marchingcubes/marchingcubes.frag";
+    fragmentShaderTextureFilePath.data() = "data/marchingcubes/moonmarchingcubes.frag";
     densityGenererationShaderFilePath.data() = "data/marchingcubes/moondensitygeneration.vert";
     rotationVector1.data() = glm::vec3(1, 0.3, 0.5);
-    rotationVector2.data() = glm::vec3(0.1, 0.5, 0.3);
-    warpFactor.data() = 3.4f;
+    rotationVector2.data() = glm::vec3(0.1, 0.1, 0.0);
+    warpFactor.data() = 1.4f;
 }
 
 void TerrainTypeStage::changeToUserDefined()
