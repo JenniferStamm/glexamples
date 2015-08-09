@@ -46,12 +46,12 @@ RenderStage::RenderStage()
     addInput("showWireframe", showWireframe);
     addInput("useMipMap", useMipMap);
     addInput("useOcclusion", useOcclusion);
-    addInput("groundTextureFilePath", groundTextureFilePath);
-    addInput("useGroundTexture", useGroundTexture);
+    addInput("baseTextureFilePath", baseTextureFilePath);
+    addInput("useBaseTexture", useBaseTexture);
     addInput("useShadow", useShadow);
-    addInput("striationTextureFilePath", striationTextureFilePath);
-    addInput("useStriationTexture", useStriationTexture);
-
+    addInput("extraTextureFilePath", extraTextureFilePath);
+    addInput("useExtraTexture", useExtraTexture);
+    addInput("fragmentShaderFilePath", fragmentShaderFilePath);
 
     addInput("chunks", chunks);
 
@@ -84,15 +84,28 @@ void RenderStage::process()
 {
     auto rerender = false;
 
-    if (groundTextureFilePath.hasChanged())
+    if (baseTextureFilePath.hasChanged())
     {
-        setupGroundTexture();
+        setupBaseTexture();
         rerender = true;
     }
 
-    if (striationTextureFilePath.hasChanged())
+    if (extraTextureFilePath.hasChanged())
     {
-        setupStriationTexture();
+        setupExtraTexture();
+        rerender = true;
+    }
+
+    if (fragmentShaderFilePath.hasChanged())
+    {
+        for (auto shader : m_renderProgram->shaders())
+        {
+            m_renderProgram->detach(shader);
+        }
+        m_renderProgram->attach(
+            Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
+            Shader::fromFile(GL_FRAGMENT_SHADER, fragmentShaderFilePath->toString())
+            );
         rerender = true;
     }
 
@@ -140,12 +153,12 @@ void RenderStage::process()
         rerender = true;
     }
 
-    if (useGroundTexture.hasChanged())
+    if (useBaseTexture.hasChanged())
     {
         rerender = true;
     }
 
-    if (useStriationTexture.hasChanged())
+    if (useExtraTexture.hasChanged())
     {
         rerender = true;
     }
@@ -180,15 +193,15 @@ void RenderStage::process()
 
 void RenderStage::drawChunks(const glm::vec3 & eye, const glm::mat4 & transform)
 {
-    m_groundTexture->bindActive(GL_TEXTURE0);
-    m_striationTexture->bindActive(GL_TEXTURE1);
+    m_baseTexture->bindActive(GL_TEXTURE0);
+    m_extraTexture->bindActive(GL_TEXTURE1);
 
     m_renderProgram->use();
     m_renderProgram->setUniform(m_transformLocation, transform);
     m_renderProgram->setUniform("useShadow", useShadow.data());
     m_renderProgram->setUniform("useOcclusion", useOcclusion.data());
-    m_renderProgram->setUniform("useGroundTexture", useGroundTexture.data());
-    m_renderProgram->setUniform("useStriationTexture", useStriationTexture.data());
+    m_renderProgram->setUniform("useBaseTexture", useBaseTexture.data());
+    m_renderProgram->setUniform("useExtraTexture", useExtraTexture.data());
 
 
     for (auto chunk : chunks.data())
@@ -198,8 +211,8 @@ void RenderStage::drawChunks(const glm::vec3 & eye, const glm::mat4 & transform)
     }
 
     m_renderProgram->release();
-    m_groundTexture->unbind();
-    m_striationTexture->unbind();
+    m_baseTexture->unbind();
+    m_extraTexture->unbind();
 }
 
 void RenderStage::render()
@@ -271,36 +284,38 @@ void RenderStage::setupTextures()
 {
     if (resourceManager.data())
     {
-        setupGroundTexture();
-        setupStriationTexture();
+        setupBaseTexture();
+        setupExtraTexture();
     }
 
 }
 
-void RenderStage::setupGroundTexture()
+void RenderStage::setupBaseTexture()
 {
-    m_groundTexture = resourceManager.data()->load<Texture>(groundTextureFilePath->toString());
-    if (!m_groundTexture)
+    std::string filePath = baseTextureFilePath->toString().empty() ? "data/marchingcubes/ground.png" : baseTextureFilePath->toString();
+    m_baseTexture = resourceManager.data()->load<Texture>(filePath);
+    if (!m_baseTexture)
     {
-        loggingzeug::critical() << "Could not load Ground Texture";
+        loggingzeug::critical() << "Could not load Base Texture";
     }
 
-    m_groundTexture->setName("GroundTexture");
-    m_groundTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    m_groundTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    m_baseTexture->setName("BaseTexture");
+    m_baseTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    m_baseTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-void RenderStage::setupStriationTexture()
+void RenderStage::setupExtraTexture()
 {
-    m_striationTexture = resourceManager.data()->load<Texture>(striationTextureFilePath->toString());
-    if (!m_striationTexture)
+    std::string filePath = baseTextureFilePath->toString().empty() ? "data/marchingcubes/terrain_color.jpg" : extraTextureFilePath->toString();
+    m_extraTexture = resourceManager.data()->load<Texture>(filePath);
+    if (!m_extraTexture)
     {
-        loggingzeug::critical() << "Could not load Striation Texture";
+        loggingzeug::critical() << "Could not load Extra Texture";
     }
 
-    m_striationTexture->setName("StriationTexture");
-    m_striationTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    m_striationTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    m_extraTexture->setName("ExtraTexture");
+    m_extraTexture->setParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    m_extraTexture->setParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 void RenderStage::setupProgram()
@@ -308,7 +323,7 @@ void RenderStage::setupProgram()
     m_renderProgram = new Program{};
     m_renderProgram->attach(
         Shader::fromFile(GL_VERTEX_SHADER, "data/marchingcubes/marchingcubes.vert"),
-        Shader::fromFile(GL_FRAGMENT_SHADER, "data/marchingcubes/marchingcubes.frag")
+        Shader::fromFile(GL_FRAGMENT_SHADER, fragmentShaderFilePath->toString())
         );
 
     m_transformLocation = m_renderProgram->getUniformLocation("transform");
@@ -317,8 +332,8 @@ void RenderStage::setupProgram()
 
 void RenderStage::setupRendering()
 {
-    m_renderProgram->setUniform("ground", 0);
-    m_renderProgram->setUniform("striation", 1);
+    m_renderProgram->setUniform("base", 0);
+    m_renderProgram->setUniform("extra", 1);
 }
 
 void RenderStage::resizeFbo(int width, int height)
@@ -333,17 +348,17 @@ void RenderStage::updateTexture()
 {
     if (useMipMap.data())
     {
-        m_groundTexture->generateMipmap();
-        m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        m_striationTexture->generateMipmap();
-        m_striationTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        m_baseTexture->generateMipmap();
+        m_baseTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        m_extraTexture->generateMipmap();
+        m_extraTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     }
     else
     {
-        m_groundTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        m_striationTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        m_baseTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        m_extraTexture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
 
-    m_groundTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    m_striationTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    m_baseTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    m_extraTexture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }

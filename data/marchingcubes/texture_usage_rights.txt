@@ -1,0 +1,7 @@
+Texture ground.png is taken from:
+http://www.spiralgraphics.biz/packs/terrain_rocky/index.htm?22#anchor
+Texture moon.png is taken from:
+http://www.spiralgraphics.biz/packs/terrain_desert_barren/index.htm?17#anchor
+
+Please take further information about the usage rights from:
+http://www.spiralgraphics.biz/packs/usage_rights.htm

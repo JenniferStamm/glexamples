@@ -13,6 +13,7 @@
 #include "AddChunksStage.h"
 #include "ManageChunksStage.h"
 #include "RenderStage.h"
+#include "TerrainTypeStage.h"
 #include "TerrainModificationStage.h"
 
 
@@ -23,24 +24,37 @@ MarchingCubesPipeline::MarchingCubesPipeline()
 , showWireframe(false)
 , freezeChunkLoading(false)
 , modificationRadius(0.25f)
-, useMipMap(false)
-, rotationVector1(glm::vec3(1, 0.3, 0.5))
-, rotationVector2(glm::vec3(0.1, 0.5, 0.3))
-, warpFactor(3.4f)
+, useMipMap(true)
+, userRotationVector1(glm::vec3(1, 0.3, 0.5))
+, userRotationVector2(glm::vec3(0.1, 0.5, 0.3))
+, userWarpFactor(3.4f)
 , removeFloaters(false)
 , targetFBO(nullptr)
 , renderTargets(nullptr)
-, useShadow(false)
-, useOcclusion(false)
-, groundTextureFilePath("data/marchingcubes/ground.png")
-, useGroundTexture(false)
-, striationTextureFilePath("data/marchingcubes/terrain_color.jpg")
-, useStriationTexture(false)
+, useShadow(true)
+, useOcclusion(true)
+, userBaseTextureFilePath("data/marchingcubes/ground.png")
+, useBaseTexture(true)
+, userExtraTextureFilePath("data/marchingcubes/terrain_color.jpg")
+, useExtraTexture(true)
+, terrainType(TerrainType::Mossy)
+, userFragmentShaderFilePath("data/marchingcubes/marchingcubes.frag")
+, userDensityGenererationShaderFilePath("data/marchingcubes/densitygeneration.vert")
 {
+    auto terrainTypeStage = new TerrainTypeStage();
     auto addChunksStage = new AddChunksStage();
     auto terrainModificationStage = new TerrainModificationStage();
     auto manageChunksStage = new ManageChunksStage();
     auto renderStage = new RenderStage();
+
+    terrainTypeStage->terrainType = terrainType;
+    terrainTypeStage->userBaseTextureFilePath = userBaseTextureFilePath;
+    terrainTypeStage->userExtraTextureFilePath = userExtraTextureFilePath;
+    terrainTypeStage->userFragmentShaderFilePath = userFragmentShaderFilePath;
+    terrainTypeStage->userDensityGenererationShaderFilePath = userDensityGenererationShaderFilePath;
+    terrainTypeStage->userRotationVector1 = userRotationVector1;
+    terrainTypeStage->userRotationVector2 = userRotationVector2;
+    terrainTypeStage->userWarpFactor = userWarpFactor;
 
     addChunksStage->camera = camera;
     addChunksStage->projection = projection;
@@ -53,12 +67,13 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     manageChunksStage->addPosition = terrainModificationStage->addPosition;
     manageChunksStage->removePosition = terrainModificationStage->removePosition;
     manageChunksStage->chunksToAdd = addChunksStage->chunksToAdd;
-    manageChunksStage->rotationVector1 = rotationVector1;
-    manageChunksStage->rotationVector2 = rotationVector2;
-    manageChunksStage->warpFactor = warpFactor;
+    manageChunksStage->rotationVector1 = terrainTypeStage->rotationVector1;
+    manageChunksStage->rotationVector2 = terrainTypeStage->rotationVector2;
+    manageChunksStage->warpFactor = terrainTypeStage->warpFactor;
     manageChunksStage->removeFloaters = removeFloaters;
     manageChunksStage->freezeChunkLoading = freezeChunkLoading;
     manageChunksStage->modificationRadius = modificationRadius;
+    manageChunksStage->densityGenererationShaderFilePath = terrainTypeStage->densityGenererationShaderFilePath;
 
     renderStage->viewport = viewport;
     renderStage->camera = camera;
@@ -71,13 +86,15 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     renderStage->resourceManager = resourceManager;
     renderStage->useShadow = useShadow;
     renderStage->useOcclusion = useOcclusion;
-    renderStage->groundTextureFilePath = groundTextureFilePath;
-    renderStage->useGroundTexture = useGroundTexture;
-    renderStage->striationTextureFilePath = striationTextureFilePath;
-    renderStage->useStriationTexture = useStriationTexture;
+    renderStage->baseTextureFilePath = terrainTypeStage->baseTextureFilePath;
+    renderStage->useBaseTexture = useBaseTexture;
+    renderStage->extraTextureFilePath = terrainTypeStage->extraTextureFilePath;
+    renderStage->useExtraTexture = useExtraTexture;
+    renderStage->fragmentShaderFilePath = terrainTypeStage->fragmentShaderTextureFilePath;
     renderStage->chunks = manageChunksStage->chunks;
 
     addStages(
+        std::move(terrainTypeStage),
         std::move(addChunksStage),
         std::move(terrainModificationStage),
         std::move(manageChunksStage),

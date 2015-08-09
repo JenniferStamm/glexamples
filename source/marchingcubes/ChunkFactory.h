@@ -6,6 +6,8 @@
 
 #include <globjects/base/ref_ptr.h>
 
+#include <reflectionzeug/base/FilePath.h>
+
 class Chunk;
 
 namespace globjects
@@ -21,7 +23,7 @@ class ChunkFactory : public globjects::Referenced
 {
 
 public:
-    ChunkFactory();
+    ChunkFactory(reflectionzeug::FilePath densityGenerationShaderFilePath);
     ~ChunkFactory();
 
     void generateDensities(Chunk * chunk);
@@ -29,6 +31,7 @@ public:
     void generateMesh(Chunk * chunk);
 
     void setRemoveFloaters(bool removeFloaters);
+    void updateDensityGenerationShaderFilePath(reflectionzeug::FilePath densityGenerationShaderFilePath);
     globjects::Program * densityGenerationProgram() const;
 
 protected:
@@ -37,6 +40,7 @@ protected:
     void setupMeshGeneration();
     void setupNoiseTextures();
     globjects::ref_ptr<globjects::Texture> setupNoiseTexture(glm::vec3 offset);
+    void setupPositionBuffer();
 
 protected:
     globjects::ref_ptr<globjects::Buffer> m_positions;
@@ -67,4 +71,6 @@ protected:
     globjects::ref_ptr<globjects::Texture> m_noiseTexture2;
     globjects::ref_ptr<globjects::Texture> m_noiseTexture3;
     globjects::ref_ptr<globjects::Texture> m_noiseTexture4;
+
+    reflectionzeug::FilePath m_densityGenerationShaderFilePath;
 };

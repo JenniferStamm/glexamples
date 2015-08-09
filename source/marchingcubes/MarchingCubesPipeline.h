@@ -7,6 +7,8 @@
 
 #include <glm/vec3.hpp>
 
+#include "TerrainType.h"
+
 namespace gloperate
 {
 
@@ -43,20 +45,24 @@ public:
     gloperate::Data<float> modificationRadius;
 
     gloperate::Data<bool> useMipMap;
-    gloperate::Data<glm::vec3> rotationVector1;
-    gloperate::Data<glm::vec3> rotationVector2;
-    gloperate::Data<float> warpFactor;
+    gloperate::Data<glm::vec3> userRotationVector1;
+    gloperate::Data<glm::vec3> userRotationVector2;
+    gloperate::Data<float> userWarpFactor;
     gloperate::Data<bool> removeFloaters;
     gloperate::Data<bool> useShadow;
     gloperate::Data<bool> useOcclusion;
-    gloperate::Data<reflectionzeug::FilePath> groundTextureFilePath;
-    gloperate::Data<bool> useGroundTexture;
-    gloperate::Data<reflectionzeug::FilePath> striationTextureFilePath;
-    gloperate::Data<bool> useStriationTexture;
+    gloperate::Data<reflectionzeug::FilePath> userBaseTextureFilePath;
+    gloperate::Data<bool> useBaseTexture;
+    gloperate::Data<reflectionzeug::FilePath> userExtraTextureFilePath;
+    gloperate::Data<bool> useExtraTexture;
 
     gloperate::Data<gloperate::AbstractTargetFramebufferCapability *> targetFBO;
     gloperate::Data<gloperate::TypedRenderTargetCapability *> renderTargets;
     gloperate::Data<gloperate::InputCapability *> input;
     gloperate::Data<gloperate::CoordinateProvider *> coordinateProvider;
+
+    gloperate::Data<TerrainType> terrainType;
+    gloperate::Data<reflectionzeug::FilePath> userFragmentShaderFilePath;
+    gloperate::Data<reflectionzeug::FilePath> userDensityGenererationShaderFilePath;
 
 };
