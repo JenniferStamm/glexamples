@@ -12,6 +12,7 @@
 namespace gloperate
 {
     class AbstractCameraCapability;
+    class PerspectiveProjectionCapability;
 }
 
 class Chunk;
@@ -25,6 +26,7 @@ public:
 
 public:
     gloperate::InputSlot<gloperate::AbstractCameraCapability *> camera;
+    gloperate::InputSlot<gloperate::PerspectiveProjectionCapability *> projection;
     gloperate::InputSlot<bool> freezeChunkLoading;
 
     gloperate::Data<std::queue<glm::vec3>> chunksToAdd;

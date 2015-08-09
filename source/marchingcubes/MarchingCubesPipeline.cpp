@@ -42,6 +42,7 @@ MarchingCubesPipeline::MarchingCubesPipeline()
     auto renderStage = new RenderStage();
 
     addChunksStage->camera = camera;
+    addChunksStage->projection = projection;
     addChunksStage->freezeChunkLoading = freezeChunkLoading;
 
     terrainModificationStage->input = input;
